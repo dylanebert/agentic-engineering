@@ -7,13 +7,20 @@
   // drag handler computes it from the pointer.
   let root: HTMLElement;
   let track: HTMLElement;
+  let pos = $state(0.5);
   let ariaNow = $state(50);
+
+  // Single code path for both pointer and keyboard: clamp a normalized 0-1 value, write --pos,
+  // keep aria-valuenow truthful.
+  function setPos(p: number): void {
+    pos = Math.max(0, Math.min(1, p));
+    root.style.setProperty("--pos", pos.toFixed(4));
+    ariaNow = Math.round(pos * 100);
+  }
 
   function update(clientX: number): void {
     const rect = track.getBoundingClientRect();
-    const p = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    root.style.setProperty("--pos", p.toFixed(4));
-    ariaNow = Math.round(p * 100);
+    setPos((clientX - rect.left) / rect.width);
   }
 
   function onPointerDown(e: PointerEvent): void {
@@ -26,6 +33,33 @@
     if (!(e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) return;
     update(e.clientX);
   }
+
+  // Keyboard step matches the variance gate's six positions (0, 0.2, 0.4, 0.6, 0.8, 1.0) so
+  // Left/Right walks the same points the gate tests.
+  const STEP = 1 / 5;
+
+  function onKeyDown(e: KeyboardEvent): void {
+    switch (e.key) {
+      case "ArrowLeft":
+      case "ArrowDown":
+        setPos(pos - STEP);
+        e.preventDefault();
+        break;
+      case "ArrowRight":
+      case "ArrowUp":
+        setPos(pos + STEP);
+        e.preventDefault();
+        break;
+      case "Home":
+        setPos(0);
+        e.preventDefault();
+        break;
+      case "End":
+        setPos(1);
+        e.preventDefault();
+        break;
+    }
+  }
 </script>
 
 <div class="spectrum" bind:this={root} style="--pos: 0.5">
@@ -33,7 +67,13 @@
     <span>vibe coding</span>
     <span>organic human code</span>
   </div>
-  <div class="track" bind:this={track}>
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="track"
+    bind:this={track}
+    onpointerdown={onPointerDown}
+    onpointermove={onPointerMove}
+  >
     <div class="fill"></div>
     <div
       class="handle"
@@ -43,8 +83,7 @@
       aria-valuemax="100"
       aria-valuenow={ariaNow}
       tabindex="0"
-      onpointerdown={onPointerDown}
-      onpointermove={onPointerMove}
+      onkeydown={onKeyDown}
     ></div>
   </div>
   <p class="caption">vibe coding to organic human code</p>
@@ -71,6 +110,8 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    cursor: ew-resize;
+    touch-action: none;
   }
 
   .fill {
@@ -88,10 +129,8 @@
     left: calc(var(--pos) * 100%);
     transform: translateX(-50%);
     width: 28px;
-    cursor: ew-resize;
     background: var(--ink);
     border-radius: var(--radius);
-    touch-action: none;
     transition: scale 0.1s var(--ease-out);
   }
 

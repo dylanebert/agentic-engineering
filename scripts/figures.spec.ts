@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { assertVaries, type AxisDriver } from "./variance";
 import { assertReducedMotion } from "./reduced";
+import { perceptualDelta } from "./png";
 
 // Figure gate for stage D. Serves the built dist over a local origin, navigates to the page, and
 // drives each figure across its claimed axis with assertVaries (oracle 5) and asserts the
@@ -69,8 +70,6 @@ const spectrumDriver: AxisDriver = async (page, step) => {
 
 // Verification: --pos (0-1) drives the highlight along the cost-reach diagonal.
 // Three steps at the three point positions: machine (0.2), agent (0.5), human (0.8).
-// Verification: --pos (0-1) drives the highlight along the cost-reach diagonal.
-// Three steps at the three point positions: machine (0.2), agent (0.5), human (0.8).
 const verificationDriver: AxisDriver = async (page, step) => {
   const positions = [0.2, 0.5, 0.8];
   await page
@@ -112,4 +111,52 @@ test("verification: reduced-motion resting state", async ({ page }) => {
   for (const f of result.failures) console.log(`  ${f.reason}`);
   expect(result.failures).toEqual([]);
   expect(result.pass).toBe(true);
+});
+
+// Structural admissibility: the --pos driver moves the highlight but not the static content
+// carrying the claim. These assertions read the rendered geometry / pixels directly so a
+// collapsed claim (all points at one coordinate, or fill the same color as the track) reds
+// regardless of what --pos does.
+
+test("verification: three points strictly ordered along both axes", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const centers = await page
+    .locator(".verification .point")
+    .evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      }),
+    );
+  expect(centers).toHaveLength(3);
+  // cost ascending left-to-right: x strictly increasing
+  expect(centers[1].x).toBeGreaterThan(centers[0].x);
+  expect(centers[2].x).toBeGreaterThan(centers[1].x);
+  // reach ascending bottom-to-top: y strictly decreasing (higher reach = smaller y from top)
+  expect(centers[1].y).toBeLessThan(centers[0].y);
+  expect(centers[2].y).toBeLessThan(centers[1].y);
+});
+
+test("spectrum: fill is perceptually distinguishable from the track", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const spectrum = page.locator(".spectrum");
+  const track = page.locator(".spectrum .track");
+  // Hide the handle so the screenshot isolates fill-vs-track color, not handle position.
+  await page.locator(".spectrum .handle").evaluate((el) => (el.style.visibility = "hidden"));
+  // pos=0: track entirely unfilled (shows --surface-2)
+  await spectrum.evaluate((el) => el.style.setProperty("--pos", "0"));
+  await page.waitForTimeout(50);
+  const unfilled = await track.screenshot();
+  // pos=1: track entirely filled (shows --accent)
+  await spectrum.evaluate((el) => el.style.setProperty("--pos", "1"));
+  await page.waitForTimeout(50);
+  const filled = await track.screenshot();
+  // Reuse the JND-grounded delta from png.ts (JND=3 for 8-bit sRGB). If the fill were the same
+  // color as the track, meanDelta would be 0 (only border-radius anti-aliasing differs a few
+  // edge pixels, which maxDelta would catch falsely). We require the mean per-pixel delta to
+  // exceed the JND so the fill is perceptually distinguishable across the whole element.
+  const delta = perceptualDelta(unfilled, filled);
+  console.log(`spectrum fill-vs-track: meanDelta=${delta.meanDelta.toFixed(2)} maxDelta=${delta.maxDelta} extent=${delta.extent.toFixed(4)}`);
+  expect(delta.meanDelta).toBeGreaterThan(3);
 });

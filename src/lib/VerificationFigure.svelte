@@ -8,6 +8,7 @@
   // resting state: all three points visible, highlight at the midpoint (agent).
   let root: HTMLElement;
   let track: HTMLElement;
+  let pos = $state(0.5);
   let ariaNow = $state(50);
 
   const types = [
@@ -16,11 +17,17 @@
     { name: "human", cost: 0.8, reach: 0.85 },
   ];
 
-  function update(clientX: number): void {
-    const rect = track.getBoundingClientRect();
-    const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+  // Single code path for both pointer and keyboard: clamp a normalized 0-1 value, write --pos,
+  // keep aria-valuenow truthful.
+  function setPos(p: number): void {
+    pos = Math.max(0, Math.min(1, p));
     root.style.setProperty("--pos", pos.toFixed(4));
     ariaNow = Math.round(pos * 100);
+  }
+
+  function update(clientX: number): void {
+    const rect = track.getBoundingClientRect();
+    setPos((clientX - rect.left) / rect.width);
   }
 
   function onPointerDown(e: PointerEvent): void {
@@ -32,6 +39,39 @@
   function onPointerMove(e: PointerEvent): void {
     if (!(e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) return;
     update(e.clientX);
+  }
+
+  // Keyboard snaps to the three named points (machine 0.2, agent 0.5, human 0.8) rather than
+  // walking a fine grain — the figure's claim is three discrete types priced by cost against
+  // reach, not a continuum, so snapping to the points the claim names is more faithful than a
+  // sub-point step.
+  const POINTS = [0.2, 0.5, 0.8];
+
+  function onKeyDown(e: KeyboardEvent): void {
+    const idx = POINTS.reduce(
+      (best, p, i) => (Math.abs(p - pos) < Math.abs(POINTS[best] - pos) ? i : best),
+      0,
+    );
+    switch (e.key) {
+      case "ArrowLeft":
+      case "ArrowDown":
+        setPos(POINTS[Math.max(0, idx - 1)]);
+        e.preventDefault();
+        break;
+      case "ArrowRight":
+      case "ArrowUp":
+        setPos(POINTS[Math.min(POINTS.length - 1, idx + 1)]);
+        e.preventDefault();
+        break;
+      case "Home":
+        setPos(POINTS[0]);
+        e.preventDefault();
+        break;
+      case "End":
+        setPos(POINTS[POINTS.length - 1]);
+        e.preventDefault();
+        break;
+    }
   }
 </script>
 
@@ -50,7 +90,13 @@
     <span class="axis-y">reach</span>
     <span class="axis-x">cost</span>
   </div>
-  <div class="track" bind:this={track}>
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="track"
+    bind:this={track}
+    onpointerdown={onPointerDown}
+    onpointermove={onPointerMove}
+  >
     <div
       class="handle"
       role="slider"
@@ -59,8 +105,7 @@
       aria-valuemax="100"
       aria-valuenow={ariaNow}
       tabindex="0"
-      onpointerdown={onPointerDown}
-      onpointermove={onPointerMove}
+      onkeydown={onKeyDown}
     ></div>
   </div>
   <p class="caption">cost against reach</p>
@@ -150,6 +195,8 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    cursor: ew-resize;
+    touch-action: none;
   }
 
   .handle {
@@ -159,10 +206,8 @@
     left: calc(var(--pos) * 100%);
     transform: translateX(-50%);
     width: 24px;
-    cursor: ew-resize;
     background: var(--ink);
     border-radius: var(--radius);
-    touch-action: none;
     transition: scale 0.1s var(--ease-out);
   }
 
