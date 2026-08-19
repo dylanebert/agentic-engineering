@@ -10,7 +10,8 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json",
     "shot": "bun run scripts/shot.ts",
     "instrument": "bun run scripts/instrument.ts",
-    "figures": "bun run scripts/figures.ts"
+    "figures": "bun run scripts/figures.ts",
+    "oracle-text": "bun run scripts/oracle-text.ts"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^7.1.2",

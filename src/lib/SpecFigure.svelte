@@ -1,32 +1,45 @@
 <script lang="ts">
-  // The example spec's sections, walked as the loop advances. Three cards — Goal, Stages,
-  // Validation — drawn from the committed todo-spec.md, with a highlight on the section the loop's
-  // current stage reads from: spec reads Goal, stage reads Stages, verify reads Validation. --pos
-  // (0/0.5/1) drives the highlight, the same axis the loop figure uses, so the two figures are one
-  // mechanism seen twice. The figure is mostly static — its claim is the section walk, not the
-  // motion — so it is scrub-driven only (no auto-advance) and the gate holds a structural assertion
-  // beside the variance read: the cards are strictly ordered, and the highlighted card is
-  // perceptually distinguishable from the unhighlighted ones.
+  // The example spec's sections, walked as the loop advances. Three cards — Goal, Approach,
+  // Validation — drawn from the committed todo-spec.md by parsing it at build time, with a
+  // highlight on the section the loop's current stage reads from: spec reads Goal, stage reads
+  // Approach, verify reads Validation. --pos (0/0.5/1) drives the highlight, the same axis the loop
+  // figure uses, so the two figures are one mechanism seen twice. The figure is mostly static — its
+  // claim is the section walk, not the motion — so it is scrub-driven only (no auto-advance) and
+  // the gate holds a structural assertion beside the variance read: the cards are strictly ordered,
+  // and the highlighted card is perceptually distinguishable from the unhighlighted ones.
+  // The excerpt for each card is the first sentence of that section in the file, so the figure
+  // cannot say anything the file does not — the gate asserts each rendered span is a verbatim
+  // substring of the source.
   import Scrub from "./Scrub.svelte";
+  import todoSpec from "./assets/todo-spec.md?raw";
 
   let root: HTMLElement;
   let pos = $state(0);
 
-  const sections = [
-    {
-      name: "Goal",
-      excerpt: "add, complete, edit, and delete items; the list persists across reloads",
-    },
-    {
-      name: "Stages",
-      excerpt:
-        "four stages, each small enough to verify on its own, each in a fresh conversation",
-    },
-    {
-      name: "Validation",
-      excerpt: "each stage ships with a test that fails first and passes when it lands",
-    },
-  ];
+  // Parse the spec file into sections by ## headings, then extract the first sentence of each
+  // target section's body as the card excerpt. The section name is the file's own heading, so the
+  // card labels and the spans both derive from the source of truth.
+  function parseSpec(text: string): { name: string; excerpt: string }[] {
+    const sectionNames = ["Goal", "Approach", "Validation"];
+    return sectionNames.map((name) => {
+      const heading = `## ${name}`;
+      const start = text.indexOf(heading);
+      if (start === -1) return { name, excerpt: "" };
+      const bodyStart = start + heading.length;
+      const nextHeading = text.indexOf("\n## ", bodyStart);
+      const body = (
+        nextHeading === -1 ? text.slice(bodyStart) : text.slice(bodyStart, nextHeading)
+      ).trim();
+      // First sentence: up to the first period followed by whitespace.
+      const sentenceMatch = body.match(/^(.+?\.)\s/);
+      const firstSentence = sentenceMatch ? sentenceMatch[1] : body;
+      // Strip the trailing period — the excerpt is a phrase, not a full sentence.
+      const excerpt = firstSentence.replace(/\.$/, "").trim();
+      return { name, excerpt };
+    });
+  }
+
+  const sections = parseSpec(todoSpec);
   const POINTS = [0, 0.5, 1];
 
   function setPos(p: number): void {
@@ -59,7 +72,7 @@
   .cards {
     position: relative;
     display: grid;
-    grid-template-rows: repeat(3, auto);
+    grid-template-rows: repeat(3, minmax(0, 1fr));
     gap: 4px;
     background: var(--surface-2);
     border: 1px solid var(--border);

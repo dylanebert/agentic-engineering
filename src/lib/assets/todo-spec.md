@@ -6,8 +6,7 @@ created: 2026-08-21
 
 ## Goal
 
-A todo list app: add, complete, edit, and delete items, with the list
-persisting across reloads. No accounts, no backend — open the file and use it.
+A todo list app: add, complete, edit, and delete items, with the list persisting across reloads. No accounts, no backend — open the file and use it.
 
 ## Locked decision
 
@@ -24,8 +23,7 @@ task model; the rest is a later unit.
 
 ## Approach
 
-Four stages, each small enough to verify on its own, each shipped in a fresh
-conversation.
+Four stages, each small enough to verify on its own, each shipped in a fresh conversation.
 
 1. **Data model + storage.** Define the item shape — `{ id, text, done }` — and
    the read/write functions over `localStorage`. Verify: a round-trip test
