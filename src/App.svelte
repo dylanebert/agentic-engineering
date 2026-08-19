@@ -18,12 +18,14 @@
   <section class="section">
     <h2>agentic engineering</h2>
     <p>
-      Agentic engineering is the practice of directing agents to make software.
-      It's a practice you get better at.
+      Agentic engineering is the practice of directing agents to make software
+      and checking that what comes back is right. It's a practice you get better
+      at.
     </p>
     <p>
-      Everyone is still in the "just try things and see what happens" phase,
-      but I've tried enough to be sure of one part: the hard part moved.
+      Everyone is still in the "just try things and see what happens" phase, but
+      I've tried enough to be sure of one part: the hard part moved from writing
+      the code to checking it.
     </p>
   </section>
 
