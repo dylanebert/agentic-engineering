@@ -1,5 +1,5 @@
 import { createServer, type Server } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 
@@ -79,6 +79,12 @@ test("rendered text: voice ban list, em-dash cap, novelty grep", async ({ page }
   // are excluded. This captures the prose in App.svelte, every figure caption, and the spec
   // figure's rendered spans — everything a reader reads.
   const text = await page.evaluate(() => document.body.innerText ?? "");
+
+  // RENDERED_TEXT_OUT (absolute path) dumps that same text for the cold gates (criteria 8/9/10),
+  // so a fresh reader reads what a reader reads — the body prose plus every figure caption plus
+  // the spec figure's spans — rather than a source file carrying markup, CSS and mount points.
+  const out = process.env.RENDERED_TEXT_OUT;
+  if (out) await writeFile(out, text, "utf8");
 
   const banHits = [...text.matchAll(BAN_RE)].map((m) => m[0]);
   const emdashCount = (text.match(EMDASH_RE) ?? []).length;
