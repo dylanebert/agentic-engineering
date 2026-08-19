@@ -1,0 +1,50 @@
+import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+// Self-terminating instrument self-test. Stages the variance + reduced-motion specs and their
+// harness modules into a work dir with @playwright/test, runs playwright, exits. The synthetic
+// fixture is inline in the spec, so no build or dist is needed. Display-gated like shot.ts.
+
+const isWsl =
+  process.platform === "linux" && existsSync("/proc/sys/fs/binfmt_misc/WSLInterop");
+
+function detectDisplay(): boolean {
+  if (isWsl) return true;
+  if (process.platform !== "linux") return true;
+  return !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
+}
+
+if (!detectDisplay()) {
+  console.log("instrument: no display detected — skipping (exit 0)");
+  process.exit(0);
+}
+
+function run(cmd: string[], cwd: string): void {
+  const r = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
+  if (r.exitCode !== 0) {
+    console.error(`instrument: '${cmd.join(" ")}' failed (exit ${r.exitCode})`);
+    process.exit(1);
+  }
+}
+
+const pkg = JSON.stringify(
+  { name: "agentic-engineering-instrument", private: true, dependencies: { "@playwright/test": "^1.50.0" } },
+  null,
+  2,
+);
+
+const work = join(tmpdir(), "agentic-engineering-instrument");
+mkdirSync(work, { recursive: true });
+
+for (const f of ["instrument.spec.ts", "variance.ts", "reduced.ts", "playwright.config.ts"]) {
+  cpSync(join(import.meta.dir, f), join(work, f));
+}
+writeFileSync(join(work, "package.json"), pkg);
+
+console.log("instrument: running self-test…");
+run(["bun", "install", "--silent"], work);
+run(["bunx", "playwright", "install", "chromium"], work);
+run(["bunx", "playwright", "test", "--config", "playwright.config.ts"], work);
+
+console.log("instrument: self-test passed");
