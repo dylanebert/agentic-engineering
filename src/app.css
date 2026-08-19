@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Outfit:wght@500;600&display=swap');
+
+:root {
+  color-scheme: light;
+
+  /* monochrome cool-slate — one blue-gray hue at varied lightness, one reserved accent (no yellow) */
+  --bg: #fbfcfd;
+  --ink: #171c24;
+  --text-dim: #2c333d;
+  --text-muted: #626c78;
+  --border: #d7dce2;
+  --accent: #3a5a80;
+  --accent-strong: #294564;
+
+  --serif: 'Newsreader', Georgia, serif;
+  --display: 'Outfit', system-ui, sans-serif;
+
+  --measure: 760px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text-dim);
+  font-family: var(--serif);
+  font-size: 18px;
+  font-optical-sizing: auto;
+  line-height: 1.6;
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  transition: text-decoration-color 0.15s, color 0.15s;
+}
+
+a:hover {
+  color: var(--accent-strong);
+  text-decoration-color: var(--accent-strong);
+}
+
+strong {
+  font-weight: 600;
+  color: var(--ink);
+}

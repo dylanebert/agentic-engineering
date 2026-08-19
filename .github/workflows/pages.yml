@@ -1,0 +1,35 @@
+# GitHub Pages: builds the site at base `/agentic-engineering/` and deploys it. Runs on push to main.
+name: pages
+
+on:
+    push:
+        branches: [main]
+
+permissions:
+    contents: read
+    pages: write
+    id-token: write
+
+# One in-flight deploy at a time; don't cancel a running deploy (Pages dislikes half-writes).
+concurrency:
+    group: pages
+    cancel-in-progress: false
+
+jobs:
+    deploy:
+        environment:
+            name: github-pages
+            url: ${{ steps.deploy.outputs.page_url }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
+            - uses: oven-sh/setup-bun@v2
+            - run: bun install --frozen-lockfile
+            - name: Build
+              run: bun run build
+            - uses: actions/configure-pages@v6
+            - uses: actions/upload-pages-artifact@v5
+              with:
+                  path: dist
+            - id: deploy
+              uses: actions/deploy-pages@v5
