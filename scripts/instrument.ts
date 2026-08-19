@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -37,7 +37,7 @@ const pkg = JSON.stringify(
 const work = join(tmpdir(), "agentic-engineering-instrument");
 mkdirSync(work, { recursive: true });
 
-for (const f of ["instrument.spec.ts", "variance.ts", "reduced.ts", "playwright.config.ts"]) {
+for (const f of ["instrument.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
   cpSync(join(import.meta.dir, f), join(work, f));
 }
 writeFileSync(join(work, "package.json"), pkg);
