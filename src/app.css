@@ -12,6 +12,13 @@
   --accent: #3a5a80;
   --accent-strong: #294564;
 
+  --surface-1: color-mix(in srgb, var(--bg) 85%, var(--border));
+  --surface-2: color-mix(in srgb, var(--bg) 70%, var(--border));
+  --border-bright: color-mix(in srgb, var(--border) 55%, var(--text-muted));
+
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --radius: 4px;
+
   --serif: 'Newsreader', Georgia, serif;
   --display: 'Outfit', system-ui, sans-serif;
 

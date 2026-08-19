@@ -1,3 +1,8 @@
+<script lang="ts">
+  import SpectrumFigure from "./lib/SpectrumFigure.svelte";
+  import VerificationFigure from "./lib/VerificationFigure.svelte";
+</script>
+
 <article class="page">
   <header class="head">
     <div class="meta">
@@ -34,7 +39,7 @@
       between, where you stay in the loop, direct the work, and check each step,
       is where agentic engineering lives.
     </p>
-    <div class="fig"></div>
+    <SpectrumFigure />
   </section>
 
   <section class="section">
@@ -113,7 +118,8 @@
     <p>
       Agent verification: another agent reviews the code. A fresh agent has no
       stake in what it wrote and is built to hunt for what's wrong. It scales
-      with the diff in a way a person can't.
+      with the diff in a way a person can't, covering more than a test suite
+      but less than your own judgment.
     </p>
     <p>
       Human verification: your own feedback. The highest reach, how much of the
@@ -121,7 +127,7 @@
       what's good, lives here, because it has no cheaper proxy than you, and
       you can't sample a point of view in parallel.
     </p>
-    <div class="fig"></div>
+    <VerificationFigure />
     <p>
       The three are priced by cost against reach. You spend machine
       verification freely, agent verification where it earns its keep, and human
