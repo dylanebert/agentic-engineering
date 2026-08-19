@@ -291,6 +291,10 @@ test("spec: each rendered span is a verbatim substring of the source file", asyn
   expect(excerpts).toHaveLength(3);
   for (let i = 0; i < excerpts.length; i++) {
     const span = excerpts[i].trim();
+    // Non-empty guard: an empty span passes `fileText.includes("")` vacuously, so a parse
+    // failure (a renamed heading) would empty all three spans while 5c stays green. Require a
+    // non-empty span before the substring check so the guard reds on a missing heading.
+    expect(span.length).toBeGreaterThan(0);
     console.log(`spec 5c: card ${i} span="${span.slice(0, 60)}..." found=${fileText.includes(span)}`);
     expect(fileText.includes(span)).toBe(true);
   }
@@ -358,4 +362,28 @@ test("spec: labels bound to positions (Goal → Approach → Validation)", async
     els.map((el) => el.textContent?.trim() ?? ""),
   );
   expect(labels).toEqual(["Goal", "Approach", "Validation"]);
+});
+
+// D's two figures carry named positions with no label-to-index assertion. Permuting
+// VerificationFigure's three point names, or swapping SpectrumFigure's two end labels, inverts
+// each figure's claim with every existing assertion green. These mirror the loop/spec tests above.
+
+// Verification: the three point labels must read "machine", "agent", "human" in order —
+// cost-ascending left-to-right, which is the figure's claim.
+test("verification: labels bound to positions (machine → agent → human)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const labels = await page.locator(".verification .point-label").evaluateAll((els) =>
+    els.map((el) => el.textContent?.trim() ?? ""),
+  );
+  expect(labels).toEqual(["machine", "agent", "human"]);
+});
+
+// Spectrum: the two end labels must read "vibe coding", "organic human code" in order —
+// left-to-right, the axis the figure claims.
+test("spectrum: end labels bound to positions (vibe coding → organic human code)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const labels = await page.locator(".spectrum .axis-labels span").evaluateAll((els) =>
+    els.map((el) => el.textContent?.trim() ?? ""),
+  );
+  expect(labels).toEqual(["vibe coding", "organic human code"]);
 });

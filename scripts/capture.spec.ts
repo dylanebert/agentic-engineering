@@ -88,7 +88,7 @@ for (const view of views) {
     );
 
     // Oracle 7: no horizontal overflow at either viewport.
-    const scrollWidth = await page.evaluate(() => document.scrollWidth);
+    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
     if (scrollWidth > view.width) {
       throw new Error(
         `horizontal overflow at ${view.width}x${view.height}: scrollWidth=${scrollWidth} > ${view.width}`,

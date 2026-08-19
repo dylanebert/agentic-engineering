@@ -17,8 +17,9 @@
   let pos = $state(0);
 
   // Parse the spec file into sections by ## headings, then extract the first sentence of each
-  // target section's body as the card excerpt. The section name is the file's own heading, so the
-  // card labels and the spans both derive from the source of truth.
+  // target section's body as the card excerpt. The section names are a hardcoded list (Goal,
+  // Approach, Validation) — the figure walks those three by name, and the excerpts are parsed
+  // from the file, so the spans derive from the source of truth even though the names do not.
   function parseSpec(text: string): { name: string; excerpt: string }[] {
     const sectionNames = ["Goal", "Approach", "Validation"];
     return sectionNames.map((name) => {

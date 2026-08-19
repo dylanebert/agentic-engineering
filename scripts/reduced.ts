@@ -8,7 +8,8 @@ import type { AxisDriver } from "./variance";
 // has the bug this exists to catch (ui.md: a status view that can render "unknown" as "fine" has
 // the bug it exists to catch — the check is over the render's whole state set, not one frame).
 //
-// Like variance.ts, no figures exist yet; the self-test in instrument.spec.ts proves it works now.
+// Like variance.ts, all four figures now exist; the self-test in instrument.spec.ts proved it
+// works, and figures.spec.ts drives it against the real page.
 
 export interface ReducedMotionFailure {
   step: number;
@@ -49,7 +50,9 @@ async function isNonTrivial(page: Page, selector: string): Promise<boolean> {
     for (const n of all) {
       const cs = getComputedStyle(n);
       if (isOpaqueBg(cs.backgroundColor) || isOpaqueBg(cs.background)) return true;
-      const tag = n.tagName;
+      // tagName is lowercase for inline SVG (an XML element) but uppercase for HTML, so
+      // normalize to catch svg-only figures that would otherwise be flagged trivial.
+      const tag = n.tagName.toUpperCase();
       if (tag === "IMG" && (n as HTMLImageElement).currentSrc) return true;
       if (tag === "CANVAS" || tag === "SVG" || tag === "VIDEO") return true;
     }

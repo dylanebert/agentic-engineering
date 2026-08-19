@@ -6,9 +6,9 @@ import { assertReducedMotion } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Self-test for the figure instrument (variance + reduced-motion). Serves synthetic fixtures and
-// drives them through the reusable harnesses. No figures exist yet (they land in D and E); this
-// proves the instrument discriminates now, per oracle 5 / coding.md (a check is evidence only if
-// you have seen it fail).
+// drives them through the reusable harnesses. All four figures now exist (D and E landed); this
+// proved the instrument discriminates before they did, per oracle 5 / coding.md (a check is
+// evidence only if you have seen it fail).
 //
 // Fixtures:
 //   /hue            — a figure whose background hue rotates 90° per --step (the real shape).

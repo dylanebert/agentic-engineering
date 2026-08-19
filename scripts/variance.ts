@@ -6,9 +6,9 @@ import { perceptualDelta } from "./png";
 // recorded failures from taste.md (five color schemes over a near-zero signal, four inert
 // animation variants, four byte-identical panels) that all passed every other oracle.
 //
-// No figures exist yet (they land in D and E). The harness is callable with a figure selector +
-// axis driver supplied later; the self-test in instrument.spec.ts proves it works now against
-// synthetic fixtures.
+// All four figures now exist (D and E landed). The harness is called with a figure selector +
+// axis driver per figure; the self-test in instrument.spec.ts proves it works against synthetic
+// fixtures, and figures.spec.ts drives it against the real page.
 
 export type AxisDriver = (page: Page, step: number) => Promise<void>;
 
@@ -42,7 +42,6 @@ export interface VarianceResult {
 //
 // A state pair reds when EITHER floor is missed — it must differ both in magnitude and in
 // spatial extent to count as "varies".
-const JND = 3;
 const MEAN_FLOOR = 1;
 const EXTENT_FLOOR = 0.01;
 
