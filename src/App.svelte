@@ -1,6 +1,8 @@
 <script lang="ts">
   import SpectrumFigure from "./lib/SpectrumFigure.svelte";
   import VerificationFigure from "./lib/VerificationFigure.svelte";
+  import LoopFigure from "./lib/LoopFigure.svelte";
+  import SpecFigure from "./lib/SpecFigure.svelte";
 </script>
 
 <article class="page">
@@ -95,13 +97,13 @@
       opens, so errors stay in one stage rather than compounding across the
       whole build.
     </p>
-    <div class="fig"></div>
+    <LoopFigure />
     <p>
       The spec is what crosses between conversations. It holds the stages, what
       each one requires, and what done means, so a fresh conversation can pick
       up where the last left off.
     </p>
-    <div class="fig"></div>
+    <SpecFigure />
   </section>
 
   <section class="section">
@@ -221,25 +223,6 @@
   .aside {
     font-size: 0.9rem;
     color: var(--text-muted);
-  }
-
-  .fig {
-    min-height: 200px;
-    margin: 28px 0 0;
-    border: 1px dashed var(--border);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    font-family: var(--display);
-    font-size: 13px;
-  }
-
-  .fig::before {
-    content: "figure";
-    text-transform: lowercase;
-    letter-spacing: 0.04em;
   }
 
   @media (max-width: 560px) {

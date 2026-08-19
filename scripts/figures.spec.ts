@@ -77,6 +77,24 @@ const verificationDriver: AxisDriver = async (page, step) => {
     .evaluate((el, p) => el.style.setProperty("--pos", String(p)), positions[step]);
 };
 
+// Loop: --pos (0-1, snapped to 0 / 0.5 / 1 = spec / stage / verify) drives the highlight that
+// lands on the active stage chip. Three steps at the three stage positions.
+const loopDriver: AxisDriver = async (page, step) => {
+  const positions = [0, 0.5, 1];
+  await page
+    .locator(".loop")
+    .evaluate((el, p) => el.style.setProperty("--pos", String(p)), positions[step]);
+};
+
+// Spec: --pos (0-1, snapped to 0 / 0.5 / 1 = Goal / Stages / Validation) drives the highlight on
+// the section the loop's current stage reads from. Same axis as the loop figure.
+const specDriver: AxisDriver = async (page, step) => {
+  const positions = [0, 0.5, 1];
+  await page
+    .locator(".spec")
+    .evaluate((el, p) => el.style.setProperty("--pos", String(p)), positions[step]);
+};
+
 test("spectrum: varies across its axis", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const result = await assertVaries(page, ".spectrum", spectrumDriver, 6);
@@ -158,5 +176,95 @@ test("spectrum: fill is perceptually distinguishable from the track", async ({ p
   // exceed the JND so the fill is perceptually distinguishable across the whole element.
   const delta = perceptualDelta(unfilled, filled);
   console.log(`spectrum fill-vs-track: meanDelta=${delta.meanDelta.toFixed(2)} maxDelta=${delta.maxDelta} extent=${delta.extent.toFixed(4)}`);
+  expect(delta.meanDelta).toBeGreaterThan(3);
+});
+
+// --- Stage E: loop and example-spec figures ---
+
+test("loop: varies across its axis", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const result = await assertVaries(page, ".loop", loopDriver, 3);
+  console.log(`loop variance: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  for (const f of result.failures) console.log(`  ${f.reason}`);
+  expect(result.failures).toEqual([]);
+  expect(result.pass).toBe(true);
+});
+
+test("loop: reduced-motion resting state", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const result = await assertReducedMotion(page, ".loop", loopDriver, 3);
+  console.log(`loop reduced: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  for (const f of result.failures) console.log(`  ${f.reason}`);
+  expect(result.failures).toEqual([]);
+  expect(result.pass).toBe(true);
+});
+
+test("loop: three stage chips strictly ordered horizontally", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const centers = await page
+    .locator(".loop .chip")
+    .evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      }),
+    );
+  expect(centers).toHaveLength(3);
+  // spec → stage → verify is a left-to-right sequence: x strictly increasing
+  expect(centers[1].x).toBeGreaterThan(centers[0].x);
+  expect(centers[2].x).toBeGreaterThan(centers[1].x);
+});
+
+test("spec: varies across its axis", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const result = await assertVaries(page, ".spec", specDriver, 3);
+  console.log(`spec variance: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  for (const f of result.failures) console.log(`  ${f.reason}`);
+  expect(result.failures).toEqual([]);
+  expect(result.pass).toBe(true);
+});
+
+test("spec: reduced-motion resting state", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const result = await assertReducedMotion(page, ".spec", specDriver, 3);
+  console.log(`spec reduced: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  for (const f of result.failures) console.log(`  ${f.reason}`);
+  expect(result.failures).toEqual([]);
+  expect(result.pass).toBe(true);
+});
+
+test("spec: three section cards strictly ordered vertically", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const centers = await page
+    .locator(".spec .card")
+    .evaluateAll((els) =>
+      els.map((el) => {
+        const r = el.getBoundingClientRect();
+        return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+      }),
+    );
+  expect(centers).toHaveLength(3);
+  // Goal → Stages → Validation is a top-to-bottom walk: y strictly increasing
+  expect(centers[1].y).toBeGreaterThan(centers[0].y);
+  expect(centers[2].y).toBeGreaterThan(centers[1].y);
+});
+
+test("spec: highlighted card is perceptually distinguishable from an unhighlighted card", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const spec = page.locator(".spec");
+  const card = page.locator(".spec .card").first();
+  // Same card, two --pos states: pos=0 highlights card 0 (accent tint behind it), pos=0.5 moves the
+  // highlight off it (base surface behind). Same text in both, so the delta isolates the highlight
+  // color vs the base surface — the analog of the spectrum's fill-vs-track read. If the highlight
+  // were the same color as the base, meanDelta would be ~0 (only border anti-aliasing differs).
+  await spec.evaluate((el) => el.style.setProperty("--pos", "0"));
+  await page.waitForTimeout(50);
+  const highlighted = await card.screenshot();
+  await spec.evaluate((el) => el.style.setProperty("--pos", "0.5"));
+  await page.waitForTimeout(50);
+  const unhighlighted = await card.screenshot();
+  const delta = perceptualDelta(highlighted, unhighlighted);
+  console.log(`spec highlight-vs-base: meanDelta=${delta.meanDelta.toFixed(2)} maxDelta=${delta.maxDelta} extent=${delta.extent.toFixed(4)}`);
   expect(delta.meanDelta).toBeGreaterThan(3);
 });
