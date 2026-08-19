@@ -5,21 +5,18 @@
       <span class="sep">·</span> august 2026
     </div>
     <h1 class="title">agentic engineering</h1>
-    <p class="dek">the written version of the video script</p>
+    <p class="dek">for beginners</p>
   </header>
 
   <section class="section">
     <h2>agentic engineering</h2>
     <p>
       Agentic engineering is the practice of directing agents to make software.
-      The name covers how you work, not a tool you buy, and it's a practice you
-      get better at.
+      It's a practice you get better at.
     </p>
     <p>
-      We're still in the "just try things and see what happens" phase of this.
-      I've tried enough things to be sure of one part: the hard part moved.
-      Generating code is easy now. Knowing whether it's the code you want is
-      not, and the gap is where the work is.
+      Everyone is still in the "just try things and see what happens" phase,
+      but I've tried enough to be sure of one part: the hard part moved.
     </p>
   </section>
 
@@ -28,7 +25,8 @@
     <p>
       You may have heard of vibe coding. You tell an agent "make me some
       software," and software comes out. It might be good. It might be bad.
-      It's probably purple.
+      It's probably purple, the color a
+      model picks by default.
     </p>
     <p>
       That's one end of a spectrum. The other is 100% organic human code, every
@@ -42,22 +40,24 @@
   <section class="section">
     <h2>verifiability</h2>
     <p>
-      An agent wrote some code. That's the easy part now. Does it work? Is it
-      fast? Is it secure? Is it how you want it to be? Those questions are the
-      work.
+      The first principle is verifiability: how well you can tell whether code
+      does what you wanted. An agent wrote some code. Does it work? Is it fast?
+      Is it secure? Is it how you want it to be? Those questions are the work.
     </p>
     <p>
       How well you can answer them is the task's verifiability, and it's the
-      hard part. It's the first principle. Everything else exists to raise it.
-      A loop catches errors early. A spec says what done means. A fresh
+      hard part. Everything else exists to raise it or hold its cost down. A
+      loop catches errors early. A spec says what done means. A fresh
       conversation keeps the context clean.
     </p>
     <p>
       The
       <a href="/verifiability/">verifiability page</a>
       goes deeper on why checking is the bottleneck of development speed and
-      what makes a proxy worth trusting. The short version: you get two of
-      scalability, faithfulness, and robustness, never three.
+      what makes a proxy, a cheaper stand-in for a full review, worth trusting.
+      The short version: you get two of scalability (how widely you can check),
+      faithfulness (whether the check tracks what you want), and robustness
+      (whether it holds under change), never three.
     </p>
   </section>
 
@@ -85,15 +85,16 @@
     </p>
     <p>
       Then, in a new conversation, do the next stage of the spec. Verify the
-      stage. Repeat, in a loop, until the spec is done. Each pass is a clean
-      context and a single, checkable piece of work.
+      stage. If the check fails, fix it before moving on. Repeat, in a loop,
+      until the spec is done. Verification closes each stage before the next
+      opens, so errors stay in one stage rather than compounding across the
+      whole build.
     </p>
     <div class="fig"></div>
     <p>
-      Each stage is one task with bounded context. The spec carries what came
-      before, so the agent doesn't rebuild it from a thread that has drifted.
-      Verification closes each stage before the next one opens, so errors
-      compound across a stage instead of across the whole build.
+      The spec is what crosses between conversations. It holds the stages, what
+      each one requires, and what done means, so a fresh conversation can pick
+      up where the last left off.
     </p>
     <div class="fig"></div>
   </section>
@@ -101,9 +102,8 @@
   <section class="section">
     <h2>the three verification types</h2>
     <p>
-      The basics, then. The hard part is how exactly you verify, and the
-      answer: no single kind of verification is enough. Here it's a mix of
-      three.
+      So how exactly do you verify? No single kind of verification is enough;
+      here it's a mix of three.
     </p>
     <p>
       Machine verification: typechecking and test suites. Fast, cheap,
@@ -116,9 +116,10 @@
       with the diff in a way a person can't.
     </p>
     <p>
-      Human verification: your own feedback. The highest reach, and the most
-      expensive. Taste lives here, because taste has no cheaper proxy than the
-      person who holds it, and you can't sample a point of view in parallel.
+      Human verification: your own feedback. The highest reach, how much of the
+      system a check can cover, and the most expensive. Taste, your sense of
+      what's good, lives here, because it has no cheaper proxy than you, and
+      you can't sample a point of view in parallel.
     </p>
     <div class="fig"></div>
     <p>
@@ -132,18 +133,17 @@
   <section class="section">
     <h2>going further</h2>
     <p>
-      The application of these principles is agentic engineering. The practice
-      is young and the principles are still moving, but the shape holds: a loop,
-      a spec, and verification at every step. The rest is getting good at each
-      one.
+      The practice is young and the principles are still moving, but the shape
+      holds: a loop, a spec, and verification at every step. The rest is getting
+      good at each one.
     </p>
     <p>
       For more, the
       <a href="/verifiability/">verifiability page</a>
       goes deeper on the hard part.
       <a href="/taste-loops/">Taste-loops</a>
-      covers the part that isn't verifiable, where the only oracle is you and
-      the loop has to run at interaction speed.
+      covers the part that isn't verifiable, where the only oracle, the final
+      judge, is you and the loop has to run at interaction speed.
     </p>
     <p class="aside">
       check out the
