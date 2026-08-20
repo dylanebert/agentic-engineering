@@ -51,11 +51,16 @@
      from interpolating through a mid-gray where bg and ink converge and contrast collapses to
      ~1:1. The kex→win98 segment never dips (both ends share dark-on-light polarity), which is
      the proof that the first segment's polarity flip is the structural cause.
+     snap2 = clamp(0, (pos-0.75)*1000, 1): a step at pos 0.75 — 0 below (kex type), 1 above
+     (win98 type). Symmetric with snap1: snap1 sits at the midpoint of the first segment
+     (0.25 of 0 to 0.5), snap2 at the midpoint of the second (0.75 of 0.5 to 1). The class
+     toggle (html.win98) uses pos > 0.75 so class and token step together — at exactly 0.75
+     both are kex, above 0.75 both are win98, no single-point mixed state.
      glow-strength = (1-t1)*(1-t2): 1 at pos 0 (vibe), 0 from pos 0.5 on. */
   --t1: clamp(0, var(--pos) * 2, 1);
   --t2: clamp(0, (var(--pos) - 0.5) * 2, 1);
   --snap1: clamp(0, (var(--pos) - 0.25) * 1000, 1);
-  --snap2: clamp(0, (var(--pos) - 0.875) * 1000, 1);
+  --snap2: clamp(0, (var(--pos) - 0.75) * 1000, 1);
   --glow-strength: calc((1 - var(--t1)) * (1 - var(--t2)));
 
   /* Vibe endpoint (pos=0) — the glowing neon-purple dress a model picks by default. */
@@ -120,10 +125,12 @@
   --display: 'Outfit', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Type channel — driven by --snap2 (step at pos 0.875). The morph never carried type before
+  /* Type channel — driven by --snap2 (step at pos 0.75). The morph never carried type before
      stage J; win98's recognizability lives mostly in its type and chrome structure, so the
      pos=1 endpoint owes its vocabulary, not just its palette. At kex (snap2=0): IBM Plex Sans /
-     Outfit / JetBrains Mono at 16px. At win98 (snap2=1): Tahoma / Tahoma / Courier New at 11px. */
+     Outfit / JetBrains Mono at 16px. At win98 (snap2=1): Tahoma / Tahoma at 11px. The mono
+     token is not overridden — the page has no <code> element, so a mono swap would be dead
+     vocabulary (NOTE 7). */
   --body-font-size: calc((1 - var(--snap2)) * 16px + var(--snap2) * 11px);
   --body-font-weight: calc((1 - var(--snap2)) * 600 + var(--snap2) * 400);
   --body-line-height: calc((1 - var(--snap2)) * 1.55 + var(--snap2) * 1.4);
@@ -131,27 +138,39 @@
   --heading-font-size: calc((1 - var(--snap2)) * 15px + var(--snap2) * 11px);
   --heading-font-weight: calc((1 - var(--snap2)) * 600 + var(--snap2) * 700);
   --heading-color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--text-muted));
-  --heading-bg: linear-gradient(to bottom,
-    color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent),
-    color-mix(in srgb, #1084d0 calc(var(--snap2) * 100%), transparent));
+  --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: calc(var(--snap2) * 2px) calc(var(--snap2) * 4px);
   --heading-margin-bottom: calc((1 - var(--snap2)) * 10px + var(--snap2) * 6px);
   --heading-text-transform: lowercase;
   --link-decoration-opacity: calc(35% + var(--snap2) * 65%);
 
-  --measure: 680px;
+  --measure: calc((1 - var(--snap2)) * 680px + var(--snap2) * 480px);
+
+  /* Secondary type sizes — routed through --snap2 so the endpoint has one coherent hierarchy.
+     At kex (snap2=0): each size is the H-shipped value. At win98 (snap2=1): all shrink to 11px
+     (the win98 body size) so section headings are no longer the smallest text on the page. */
+  --meta-font-size: calc((1 - var(--snap2)) * 14px + var(--snap2) * 11px);
+  --dek-font-size: calc((1 - var(--snap2)) * 15px + var(--snap2) * 11px);
+  --label-font-size: calc((1 - var(--snap2)) * 13px + var(--snap2) * 11px);
+  --aside-font-size: calc((1 - var(--snap2)) * 14.4px + var(--snap2) * 11px);
+
+  /* Handle background — at kex the ink colour, at win98 the button-face colour (#c0c0c0) so
+     the slider thumb reads as a raised control, not a flat black bar. */
+  --handle-bg: color-mix(in srgb, #c0c0c0 calc(var(--snap2) * 100%), var(--ink));
 }
 
 /* Win98 vocabulary swap — font-family and text-transform can't be interpolated with calc or
    color-mix, so they snap via a class toggled by setPos (and mirrored by every gate driver)
-   when --pos crosses 0.875. The class overrides the kex font tokens with the win98 face stack
+   when --pos crosses 0.75. The class overrides the kex font tokens with the win98 face stack
    (Tahoma is the closest available relative of MS Sans Serif; on a macOS seat it resolves to
-   the system Tahoma, on a Windows seat to the native one). */
+   the system Tahoma, on a Windows seat to the native one). No mono override: the page has no
+   <code> element, so a mono swap would be dead vocabulary. heading-text-transform becomes
+   capitalize so the lowercase h2 source text reads as Title Case — win98 captions are Title
+   Case, and `none` was inert because the source is already lowercase. */
 html.win98 {
   --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
   --display: 'Tahoma', 'MS Sans Serif', sans-serif;
-  --mono: 'Courier New', monospace;
-  --heading-text-transform: none;
+  --heading-text-transform: capitalize;
 }
 
 * {

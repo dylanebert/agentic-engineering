@@ -7,14 +7,15 @@ import { assertReducedMotion } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// seven things — four about the spectrum figure, three about the page-wide morph it drives
-// (variance, reduced-motion, contrast sweep), plus the applied type read off the built page
-// (criterion 8). The morph arms (oracles 5, 5b, 6) read the rendered page at three sampled
-// positions (0 = vibe, 0.5 = kex, 1 = win98); the observation channel is a canvas/pixel read of
-// the rendered page (screenshot → perceptualDelta), never a CSS-variable read — a vacuous
-// observation channel is the failure H paid for. The contrast-sweep arm (criterion 12) sweeps
-// --pos in 0.05 steps and asserts WCAG body color-vs-bg contrast ≥ 4.5 — the only instrument
-// that samples interior positions. Runs in the work dir staged by figures.ts, next to a built dist/.
+// eight things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
+// reduced-motion, contrast sweep, font application). The morph arms (oracles 5, 5b, 6) read the
+// rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
+// channel is a canvas/pixel read of the rendered page (screenshot → perceptualDelta), never a
+// CSS-variable read — a vacuous observation channel is the failure H paid for. The contrast-sweep
+// arm (criterion 18) sweeps --pos in 0.05 steps and asserts WCAG contrast ≥ 4.5 across three
+// channels (text-dim, text-muted, heading-text) — the only instrument that samples interior
+// positions. Runs in the work dir staged by figures.ts, next to a built dist/.
 
 const root = __dirname;
 const dist = join(root, "dist");
@@ -68,7 +69,7 @@ test.afterAll(async () => {
 
 // Page-wide morph driver: sets --pos on :root (document.documentElement) so the entire page
 // restyles, mirrors color-scheme so UA surfaces match a real drag, and toggles the win98 class
-// so the type/chrome vocabulary snaps at pos=1 (font-family and text-transform can't be
+// so the type/chrome vocabulary snaps at pos > 0.75 (font-family and text-transform can't be
 // interpolated, so they swap via a class — the same class setPos toggles). Three sampled
 // positions: 0 = vibe, 0.5 = kex, 1 = win98.
 const morphDriver: AxisDriver = async (page, step) => {
@@ -76,7 +77,7 @@ const morphDriver: AxisDriver = async (page, step) => {
     const p = s / 2;
     document.documentElement.style.setProperty("--pos", String(p));
     document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
-    document.documentElement.classList.toggle("win98", p >= 0.875);
+    document.documentElement.classList.toggle("win98", p > 0.75);
   }, step);
 };
 
@@ -151,14 +152,19 @@ test("spectrum: end labels bound to positions (vibe coding → organic human cod
   expect(labels).toEqual(["vibe coding", "organic human code"]);
 });
 
-// --- Oracle: contrast sweep (criterion 12 / WCAG) ---
+// --- Oracle: contrast sweep (criterion 18 / WCAG) ---
 
 // The only instrument that samples interior positions. Sweeps --pos in 0.05 steps from 0 to 1
-// and asserts WCAG contrast(body color, body background-color) ≥ 4.5 at every step. The vibe→kex
-// segment interpolates a light-on-dark pair through a dark-on-light pair, so bg and ink converge
-// mid-segment without the snap fix — this arm reds at ~1:1 around pos 0.25 before the fix and
-// greens after. Mutation: replace snap1 with t1 in the --bg/--ink/--text-dim/--text-muted
-// definitions and watch this arm red at pos 0.25.
+// and asserts WCAG contrast ≥ 4.5 at every step across three channels: body text-dim vs body
+// bg, text-muted (.meta) vs body bg, and heading text vs heading bg (or body bg when the
+// heading bg is transparent). The vibe→kex segment interpolates a light-on-dark pair through
+// a dark-on-light pair, so bg and ink converge mid-segment without the snap fix — this arm
+// reds at ~1:1 around pos 0.25 before the fix and greens after. The heading channel catches
+// the win98 caption: white on solid #000080 is ~16:1, but the prior gradient's bottom stop
+// #1084d0 was 4.01:1 — under the floor and unseen because the sweep probed .meta, not the
+// heading. Mutation: replace snap1 with t1 in the --bg/--ink/--text-dim/--text-muted
+// definitions and watch this arm red at pos 0.25; or restore the gradient heading-bg and watch
+// the heading channel red at pos 1.
 
 test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
@@ -171,7 +177,7 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
     await page.evaluate((p) => {
       document.documentElement.style.setProperty("--pos", p.toFixed(4));
       document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
-      document.documentElement.classList.toggle("win98", p >= 0.875);
+      document.documentElement.classList.toggle("win98", p > 0.75);
     }, pos);
     await page.evaluate(
       () =>
@@ -235,6 +241,17 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
         const darker = Math.min(l1, l2);
         return (lighter + 0.05) / (darker + 0.05);
       }
+      // Parse the alpha from a color string to detect transparent backgrounds.
+      function parseAlpha(s: string): number {
+        let m = s.match(/rgba?\(([^)]+)\)/);
+        if (m) {
+          const parts = m[1].split(",").map((x) => parseFloat(x.trim()));
+          return parts.length === 4 ? parts[3] : 1;
+        }
+        m = s.match(/color\(srgb\s+[\d.]+\s+[\d.]+\s+[\d.]+(?:\s*\/\s*([\d.]+))?\)/);
+        if (m) return m[1] ? parseFloat(m[1]) : 1;
+        return 1;
+      }
       const bgColor = cs.backgroundColor;
       // text-dim: body color (the existing channel)
       const dimContrast = contrast(cs.color, bgColor);
@@ -242,15 +259,27 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
       // override (the section h2 heading-color overrides at win98, but .meta does not)
       const metaCs = getComputedStyle(document.querySelector(".meta")!);
       const mutedContrast = contrast(metaCs.color, bgColor);
-      return { dim: dimContrast, muted: mutedContrast };
+      // heading: the section h2's text color vs its background. At kex (snap2=0) the heading
+      // bg is transparent, so the effective bg is the page bg. At win98 (snap2=1) the heading
+      // bg is solid #000080. This channel catches the caption-text contrast the prior sweep
+      // missed (BLOCKER 2: white on #1084d0 was 4.01:1).
+      const headingEl = document.querySelector(".section h2")!;
+      const headingCs = getComputedStyle(headingEl);
+      const headingBg = headingCs.backgroundColor;
+      const headingBgEffective = parseAlpha(headingBg) < 0.01 ? bgColor : headingBg;
+      const headingContrast = contrast(headingCs.color, headingBgEffective);
+      return { dim: dimContrast, muted: mutedContrast, heading: headingContrast };
     });
 
-    console.log(`contrast sweep: pos=${pos.toFixed(2)} dim=${contrasts.dim.toFixed(2)} muted=${contrasts.muted.toFixed(2)}`);
+    console.log(`contrast sweep: pos=${pos.toFixed(2)} dim=${contrasts.dim.toFixed(2)} muted=${contrasts.muted.toFixed(2)} heading=${contrasts.heading.toFixed(2)}`);
     if (contrasts.dim < 4.5) {
       failures.push({ pos, contrast: contrasts.dim, channel: "text-dim" });
     }
     if (contrasts.muted < 4.5) {
       failures.push({ pos, contrast: contrasts.muted, channel: "text-muted" });
+    }
+    if (contrasts.heading < 4.5) {
+      failures.push({ pos, contrast: contrasts.heading, channel: "heading-text" });
     }
   }
 
@@ -317,7 +346,7 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
     await page.evaluate((pos) => {
       document.documentElement.style.setProperty("--pos", String(pos));
       document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
-      document.documentElement.classList.toggle("win98", pos >= 0.875);
+      document.documentElement.classList.toggle("win98", pos > 0.75);
     }, p);
     await page.evaluate(() => document.fonts.ready);
     await page.evaluate(
@@ -333,7 +362,7 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
     });
     console.log(`font application (pos=${p}): body fontFamily=${bodyFont.fontFamily} weight=${bodyFont.fontWeight}`);
 
-    if (p < 0.875) {
+    if (p < 0.75) {
       // Vibe and kex: IBM Plex Sans 600 body, Outfit headings
       expect(bodyFont.fontFamily.toLowerCase()).toContain("ibm plex sans");
       expect(bodyFont.fontWeight).toBe("600");
@@ -353,9 +382,17 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
       console.log(`font application (pos=${p}): Outfit rendered=${outfitRendered}`);
       expect(outfitRendered).toBe(true);
     } else {
-      // Win98: Tahoma body and headings (the type channel — the whole point of stage J)
+      // Win98: Tahoma body and headings (the type channel — the whole point of stage J).
+      // isFontRendered proves the face actually rendered, not just that CSS names it —
+      // getComputedStyle is vacuous here (H's lesson). On a seat without Tahoma (iOS, Android,
+      // most Linux CI) the arm reds, which is the correct signal: the intended face did not
+      // render. The platform gap is recorded in the stage report.
       expect(bodyFont.fontFamily.toLowerCase()).toContain("tahoma");
       expect(bodyFont.fontWeight).toBe("400");
+
+      const tahomaRendered = await isFontRendered(page, "Tahoma", "400");
+      console.log(`font application (pos=${p}): Tahoma rendered=${tahomaRendered}`);
+      expect(tahomaRendered).toBe(true);
 
       const headingFonts = await page.locator("h1, h2").evaluateAll((els) =>
         els.map((el) => getComputedStyle(el).fontFamily),
@@ -363,6 +400,10 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
       for (const ff of headingFonts) {
         expect(ff.toLowerCase()).toContain("tahoma");
       }
+
+      const headingTahomaRendered = await isFontRendered(page, "Tahoma", "700");
+      console.log(`font application (pos=${p}): Tahoma (heading weight) rendered=${headingTahomaRendered}`);
+      expect(headingTahomaRendered).toBe(true);
     }
   }
 });
@@ -410,6 +451,7 @@ test("referent vocabulary: pos=1 body and heading faces differ from pos=0.5 (cri
     document.documentElement.style.colorScheme = "light";
     document.documentElement.classList.add("win98");
   });
+  // pos=1 > 0.75 so the class is on, matching snap2=1.
   await page.evaluate(() => document.fonts.ready);
   await page.evaluate(
     () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))),

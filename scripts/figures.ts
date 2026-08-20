@@ -9,8 +9,9 @@ import { join } from "node:path";
 // positions (0 = vibe, 0.5 = kex, 1 = win98), and assertVaries/assertReducedMotion read the
 // rendered page (body) via pixel screenshots — not CSS variables. Also binds the end descriptors
 // to their ends (oracle 5b, new at I) alongside the existing end-labels arm, sweeps --pos in 0.05
-// steps asserting WCAG contrast ≥ 4.5 for both text-dim and text-muted (criterion 12/18, the only
-// interior-sampling arm), and reads the applied type off the built page at all three positions
+// steps asserting WCAG contrast ≥ 4.5 across three channels: text-dim, text-muted, and
+// heading-text (criterion 18, the only interior-sampling arm), and reads the applied type off
+// the built page at all three positions
 // (criterion 8, widened at J). Stage J added the referent-vocabulary arm (criterion 17): at pos=1
 // the rendered body and heading faces must differ from their pos=0.5 resolution on the canvas
 // width-measurement channel. Eight arms total, by name: page-varies, page-reduced-motion,

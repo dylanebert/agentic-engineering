@@ -169,7 +169,7 @@
 
   .meta {
     font-family: var(--display);
-    font-size: 14px;
+    font-size: var(--meta-font-size);
     color: var(--text-muted);
     margin-bottom: 14px;
   }
@@ -197,13 +197,19 @@
 
   .dek {
     font-family: var(--display);
-    font-size: 15px;
+    font-size: var(--dek-font-size);
     color: var(--text-muted);
     margin-top: 10px;
   }
 
   .section {
     margin-top: 36px;
+    /* Win98 window frame: outset bevel + light client-area ground. At kex (snap2=0) the
+       bevel colours are transparent and the background is transparent, so no visual change.
+       At win98 (snap2=1) the section reads as a raised window with a navy title bar (the h2)
+       capping a white client area. */
+    background: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), transparent);
+    box-shadow: 2px 2px var(--bevel-light), -2px -2px var(--bevel-dark);
   }
 
   .section h2 {
@@ -223,7 +229,7 @@
   }
 
   .aside {
-    font-size: 0.9rem;
+    font-size: var(--aside-font-size);
     color: var(--text-muted);
   }
 
@@ -241,7 +247,7 @@
 
   .placeholder-label {
     font-family: var(--display);
-    font-size: 14px;
+    font-size: var(--meta-font-size);
     color: var(--text-muted);
     letter-spacing: 0.02em;
   }

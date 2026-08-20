@@ -20,9 +20,11 @@
     document.documentElement.style.setProperty("--pos", pos.toFixed(4));
     document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
     // Type/chrome vocabulary swap: font-family and text-transform can't be interpolated, so they
-    // snap via a class when --pos crosses 0.875 (the --snap2 threshold). Every gate driver mirrors
-    // this toggle so a driven pos=1 reaches the same win98 vocabulary a hand drag does.
-    document.documentElement.classList.toggle("win98", pos >= 0.875);
+    // snap via a class when --pos crosses 0.75 (the --snap2 threshold). Every gate driver mirrors
+    // this toggle so a driven pos=1 reaches the same win98 vocabulary a hand drag does. The
+    // class uses pos > 0.75 (strict) so class and token step together — at exactly 0.75 both
+    // are kex, above 0.75 both are win98, no single-point mixed state.
+    document.documentElement.classList.toggle("win98", pos > 0.75);
     ariaNow = Math.round(pos * 100);
   }
 
@@ -119,7 +121,7 @@
     justify-content: space-between;
     margin-bottom: 8px;
     font-family: var(--display);
-    font-size: 13px;
+    font-size: var(--label-font-size);
     color: var(--text-muted);
   }
 
@@ -135,11 +137,16 @@
 
   .fill {
     position: absolute;
-    inset: 0 auto 0 0;
-    width: calc(var(--pos) * 100%);
+    top: calc(var(--snap2) * 2px);
+    bottom: calc(var(--snap2) * 2px);
+    left: calc(var(--snap2) * 2px);
+    width: max(0px, calc(var(--pos) * 100% - var(--snap2) * 4px));
     background: var(--accent);
     border-radius: calc(var(--radius) - 1px);
-    box-shadow: var(--glow);
+    /* Outset bevel so the fill reads as a raised control at win98 (snap2=1). At kex/vibe
+       (snap2=0) the bevel colours are transparent so only the glow shows. The snap2-driven
+       inset prevents the fill from occluding the track's inset bevel at pos=1. */
+    box-shadow: var(--glow), 2px 2px var(--bevel-light), -2px -2px var(--bevel-dark);
   }
 
   .handle {
@@ -149,9 +156,11 @@
     left: calc(var(--pos) * 100%);
     transform: translateX(-50%);
     width: 28px;
-    background: var(--ink);
+    background: var(--handle-bg);
     border-radius: var(--radius);
-    box-shadow: var(--bevel);
+    /* Outset bevel so the thumb reads as a raised win98 button (snap2=1), not a flat black bar.
+       At kex/vibe (snap2=0) the bevel colours are transparent and the background is the ink. */
+    box-shadow: 2px 2px var(--bevel-light), -2px -2px var(--bevel-dark);
     cursor: grab;
     transition: scale 0.1s var(--ease-out);
   }
@@ -167,9 +176,10 @@
   .descriptors {
     display: flex;
     justify-content: space-between;
+    gap: 1em;
     margin-top: 10px;
     font-family: var(--sans);
-    font-size: 13px;
+    font-size: var(--label-font-size);
     color: var(--text-muted);
   }
 </style>
