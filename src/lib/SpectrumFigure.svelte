@@ -140,7 +140,7 @@
 
   .caption {
     margin-top: 10px;
-    font-family: var(--display);
+    font-family: var(--sans);
     font-size: 13px;
     color: var(--text-muted);
   }

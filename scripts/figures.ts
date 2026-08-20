@@ -2,10 +2,11 @@ import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-// Self-terminating figure gate (oracle 5 + 6). Builds the site, stages dist + the figure spec
-// and its harness modules into a work dir, runs playwright, exits. Serves the built dist over a
-// local origin (not a dev server), drives the spectrum figure across its claimed axis with assertVaries
-// and asserts the reduced-motion resting state with assertReducedMotion. Display-gated like
+// Self-terminating figure gate (oracles 5, 5b, 6 and 8). Builds the site, stages dist + the figure
+// spec and its harness modules into a work dir, runs playwright, exits. Serves the built dist over a
+// local origin (not a dev server), drives the spectrum figure across its claimed axis with assertVaries,
+// asserts the reduced-motion resting state with assertReducedMotion, binds the end labels to their
+// positions, and reads the applied type off the built page (criterion 8). Display-gated like
 // shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
 
 const repo = join(import.meta.dir, "..");

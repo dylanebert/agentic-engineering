@@ -197,13 +197,13 @@
 
   .dek {
     font-family: var(--display);
-    font-size: 16px;
+    font-size: 15px;
     color: var(--text-muted);
     margin-top: 10px;
   }
 
   .section {
-    margin-top: 40px;
+    margin-top: 36px;
   }
 
   .section h2 {
@@ -216,7 +216,7 @@
   }
 
   .section p {
-    margin-top: 14px;
+    margin-top: 12px;
     color: var(--text-dim);
   }
 
