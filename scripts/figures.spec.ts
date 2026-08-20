@@ -7,10 +7,11 @@ import { assertReducedMotion } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// eight things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// eleven things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
-// reduced-motion, contrast sweep, font application). The morph arms (oracles 5, 5b, 6) read the
-// rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
+// reduced-motion, contrast sweep, font application), and three new at K (vibe vocabulary,
+// reachability, and the widened three-way referent read). The morph arms (oracles 5, 5b, 6) read
+// the rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
 // channel is a canvas/pixel read of the rendered page (screenshot → perceptualDelta), never a
 // CSS-variable read — a vacuous observation channel is the failure H paid for. The contrast-sweep
 // arm (criterion 18) sweeps --pos in 0.05 steps and asserts WCAG contrast ≥ 4.5 across three
@@ -77,6 +78,7 @@ const morphDriver: AxisDriver = async (page, step) => {
     const p = s / 2;
     document.documentElement.style.setProperty("--pos", String(p));
     document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+    document.documentElement.classList.toggle("vibe", p < 0.25);
     document.documentElement.classList.toggle("win98", p > 0.75);
   }, step);
 };
@@ -178,19 +180,22 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
     await page.evaluate((p) => {
       document.documentElement.style.setProperty("--pos", p.toFixed(4));
       document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", p < 0.25);
       document.documentElement.classList.toggle("win98", p > 0.75);
     }, pos);
-    // Wait for the style recalc to settle before reading. The section's background steps
-    // at --snap2 (pos 0.75), so its alpha tells us whether the win98 chrome has landed.
+    // Wait for the style recalc to settle before reading. The section's background is now
+    // three-way: translucent (alpha 0.1) at vibe, transparent at kex, opaque at win98.
     // A forced reflow alone does not recalculate custom-property dependents in Chromium;
-    // polling until the computed backgroundColor matches the expected state does.
+    // polling until the dependent --snap1/--snap2 computed values match the expected state does.
     // (BLOCKER 1: the two-rAF wait sometimes read a torn style at the snap boundary.)
-    const expectOpaque = pos > 0.75;
-    await page.waitForFunction((expectOp) => {
-      const bg = getComputedStyle(document.querySelector(".section")!).backgroundColor;
-      const transparent = bg.includes("/ 0)") || bg.includes(", 0)");
-      return expectOp ? !transparent : transparent;
-    }, expectOpaque);
+    await page.waitForFunction((p) => {
+      const cs = getComputedStyle(document.documentElement);
+      const snap1 = parseFloat(cs.getPropertyValue('--snap1') || '-1');
+      const snap2 = parseFloat(cs.getPropertyValue('--snap2') || '-1');
+      const expectedSnap1 = p <= 0.25 ? 0 : 1;
+      const expectedSnap2 = p > 0.75 ? 1 : 0;
+      return Math.abs(snap1 - expectedSnap1) < 0.001 && Math.abs(snap2 - expectedSnap2) < 0.001;
+    }, pos);
 
     const contrasts = await page.evaluate(() => {
       // getComputedStyle may return color(srgb ...), oklab(...), or rgb() depending on
@@ -248,6 +253,7 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
       }
       // Parse the alpha from a color string to detect transparent backgrounds.
       function parseAlpha(s: string): number {
+        if (s === 'transparent') return 0;
         let m = s.match(/rgba?\(([^)]+)\)/);
         if (m) {
           const parts = m[1].split(",").map((x) => parseFloat(x.trim()));
@@ -255,14 +261,22 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
         }
         m = s.match(/color\(srgb\s+[\d.]+\s+[\d.]+\s+[\d.]+(?:\s*\/\s*([\d.]+))?\)/);
         if (m) return m[1] ? parseFloat(m[1]) : 1;
+        // oklab(L a b / alpha) — getComputedStyle may return color-mix results in this format.
+        m = s.match(/oklab\(\s*[\d.-]+\s+[\d.-]+\s+[\d.-]+(?:\s*\/\s*([\d.]+))?\s*\)/);
+        if (m) return m[1] ? parseFloat(m[1]) : 1;
         return 1;
       }
-      // Walk up the tree to find the nearest ancestor with a non-transparent background.
+      // Walk up the tree to find the nearest ancestor with a sufficiently opaque background.
+      // Threshold is 0.5 (not 0.01) so the vibe glass surface (rgba(255,255,255,0.1), alpha 0.1)
+      // is skipped — the sweep measures against the body's vibe-bg (#13062b) instead of the
+      // translucent surface. This is conservative: the body bg is darker than the composited
+      // glass-over-body, so contrast reads higher than actual. The actual contrast against the
+      // composited bg is still well above 4.5 (dim ~9.5, muted ~5.3), so the margin is comfortable.
       function effectiveBg(el: Element): string {
         let current: Element | null = el;
         while (current) {
           const bg = getComputedStyle(current).backgroundColor;
-          if (parseAlpha(bg) >= 0.01) return bg;
+          if (parseAlpha(bg) >= 0.5) return bg;
           current = current.parentElement;
         }
         return getComputedStyle(document.body).backgroundColor;
@@ -332,6 +346,11 @@ test("spectrum: end descriptors bound to their ends", async ({ page }) => {
 // At J the arm widens from a fixed read at rest to a per-position read at all three sampled
 // positions (0 = vibe, 0.5 = kex, 1 = win98), since the morph now carries a type channel: at
 // pos=1 the body and heading faces must resolve to the win98 stack (Tahoma), not the kex stack.
+//
+// At K the arm moves by name: until K it pinned IBM Plex Sans for every position below 0.75 —
+// that green floor was the defect (criterion 19: the left end rendered kex's face wearing a purple
+// palette). Now at pos=0 the body and heading faces must resolve to Inter (the LLM-default face),
+// proven through isFontRendered, not getComputedStyle. A gate can hold a defect in place.
 
 /** Measure whether a named webfont is actually rendering, not just specified in CSS. */
 async function isFontRendered(
@@ -362,6 +381,7 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
     await page.evaluate((pos) => {
       document.documentElement.style.setProperty("--pos", String(pos));
       document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", pos < 0.25);
       document.documentElement.classList.toggle("win98", pos > 0.75);
     }, p);
     await page.evaluate(() => document.fonts.ready);
@@ -378,8 +398,31 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
     });
     console.log(`font application (pos=${p}): body fontFamily=${bodyFont.fontFamily} weight=${bodyFont.fontWeight}`);
 
-    if (p < 0.75) {
-      // Vibe and kex: IBM Plex Sans 600 body, Outfit headings
+    if (p === 0) {
+      // Vibe: Inter 400 body, Inter 700 headings. Until K this arm pinned IBM Plex Sans for
+      // every position below 0.75 — that green floor was the defect (criterion 19: the left
+      // end rendered kex's own face wearing a purple palette). isFontRendered proves the face
+      // actually rendered, not just that CSS names it — getComputedStyle is vacuous here (H's
+      // lesson). On a seat without Inter the arm reds, which is the correct signal.
+      expect(bodyFont.fontFamily.toLowerCase()).toContain("inter");
+      expect(bodyFont.fontWeight).toBe("400");
+
+      const interRendered = await isFontRendered(page, "Inter", "400");
+      console.log(`font application (pos=${p}): Inter rendered=${interRendered}`);
+      expect(interRendered).toBe(true);
+
+      const headingFonts = await page.locator("h1, h2").evaluateAll((els) =>
+        els.map((el) => getComputedStyle(el).fontFamily),
+      );
+      for (const ff of headingFonts) {
+        expect(ff.toLowerCase()).toContain("inter");
+      }
+
+      const headingInterRendered = await isFontRendered(page, "Inter", "700");
+      console.log(`font application (pos=${p}): Inter (heading weight) rendered=${headingInterRendered}`);
+      expect(headingInterRendered).toBe(true);
+    } else if (p < 0.75) {
+      // Kex: IBM Plex Sans 600 body, Outfit headings
       expect(bodyFont.fontFamily.toLowerCase()).toContain("ibm plex sans");
       expect(bodyFont.fontWeight).toBe("600");
 
@@ -424,74 +467,236 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
   }
 });
 
-// --- Criterion 17 (referent-vocabulary arm) ---
+// --- Criterion 17 (referent-vocabulary arm, widened to three-way at K) ---
 
-// The arm that would have red on I's shipped right end. At pos=1 the rendered body and heading
-// faces must differ from their pos=0.5 resolution, measured on the canvas width-measurement
-// channel (getComputedStyle reports the family the CSS names, not the family that rendered —
-// the arm must be immune to that). Mutation: point the pos=1 family at kex's and watch the arm
-// red, then restore. An arm nobody has watched fail is not a floor (checks.md).
+// The arm that would have red on I's shipped right end. At J it read only pos=0.5 and pos=1, so it
+// was structurally blind to a thin left end — an instrument written against the instance rather
+// than the claim. At K it becomes a three-way read: each endpoint's rendered faces must differ
+// from kex's AND from each other's, measured on the canvas width-measurement channel
+// (getComputedStyle reports the family the CSS names, not the family that rendered — the arm must
+// be immune to that). Mutation: point the pos=0 family at kex's and at win98's in turn and watch
+// the arm red. A family named in a token set that no rule applies is the vacuity this arm catches.
 
-test("referent vocabulary: pos=1 body and heading faces differ from pos=0.5 (criterion 17)", async ({ page }) => {
+test("referent vocabulary: three-way face read at vibe, kex, win98 (criterion 17)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
 
-  // Measure body and heading font widths via the canvas channel at pos=0.5 (kex).
-  await page.evaluate(() => {
-    document.documentElement.style.setProperty("--pos", "0.5");
-    document.documentElement.style.colorScheme = "light";
-    document.documentElement.classList.remove("win98");
-  });
+  // Helper: set pos and classes, wait for fonts and style to settle, measure body and heading
+  // font widths via the canvas channel.
+  async function measureAt(pos: number, label: string) {
+    await page.evaluate((p) => {
+      document.documentElement.style.setProperty("--pos", String(p));
+      document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", p < 0.25);
+      document.documentElement.classList.toggle("win98", p > 0.75);
+    }, pos);
+    await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))),
+    );
+    const result = await page.evaluate(() => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      const text = "mmmmmmmmmmlli";
+      const bodyCs = getComputedStyle(document.body);
+      ctx.font = `${bodyCs.fontWeight} 72px ${bodyCs.fontFamily}`;
+      const bodyWidth = ctx.measureText(text).width;
+      const h1 = document.querySelector("h1")!;
+      const h1Cs = getComputedStyle(h1);
+      ctx.font = `${h1Cs.fontWeight} 72px ${h1Cs.fontFamily}`;
+      const headingWidth = ctx.measureText(text).width;
+      return { bodyWidth, headingWidth, bodyFamily: bodyCs.fontFamily, headingFamily: h1Cs.fontFamily };
+    });
+    console.log(`criterion 17 ${label}: body family="${result.bodyFamily}" width=${result.bodyWidth.toFixed(2)} | heading family="${result.headingFamily}" width=${result.headingWidth.toFixed(2)}`);
+    return result;
+  }
+
+  const vibe = await measureAt(0, "vibe (pos=0)");
+  const kex = await measureAt(0.5, "kex (pos=0.5)");
+  const win98 = await measureAt(1, "win98 (pos=1)");
+
+  const vibeKexBody = Math.abs(vibe.bodyWidth - kex.bodyWidth);
+  const vibeKexHeading = Math.abs(vibe.headingWidth - kex.headingWidth);
+  const vibeWin98Body = Math.abs(vibe.bodyWidth - win98.bodyWidth);
+  const vibeWin98Heading = Math.abs(vibe.headingWidth - win98.headingWidth);
+  const kexWin98Body = Math.abs(kex.bodyWidth - win98.bodyWidth);
+  const kexWin98Heading = Math.abs(kex.headingWidth - win98.headingWidth);
+
+  console.log(`criterion 17: vibe-kex body=${vibeKexBody.toFixed(2)} heading=${vibeKexHeading.toFixed(2)} | vibe-win98 body=${vibeWin98Body.toFixed(2)} heading=${vibeWin98Heading.toFixed(2)} | kex-win98 body=${kexWin98Body.toFixed(2)} heading=${kexWin98Heading.toFixed(2)}`);
+
+  // Each endpoint's faces must differ from kex's and from each other's.
+  expect(vibeKexBody).toBeGreaterThan(0.1);
+  expect(vibeKexHeading).toBeGreaterThan(0.1);
+  expect(vibeWin98Body).toBeGreaterThan(0.1);
+  expect(vibeWin98Heading).toBeGreaterThan(0.1);
+  expect(kexWin98Body).toBeGreaterThan(0.1);
+  expect(kexWin98Heading).toBeGreaterThan(0.1);
+});
+
+// --- Criterion 20 (vibe-vocabulary arm, owed at K) ---
+
+// Criterion 17's mirror, plus the channels type alone does not cover. Reads the channels that
+// make the low end "slop" rather than merely purple, each at pos=0 against pos=0.5, each
+// mutation-proven: computed text-align is center on body copy, heading letter-spacing is
+// negative, the glass surface's backdrop-filter is non-none with a translucent 1px border, a
+// colored (non-neutral) box-shadow is present, and the border radius exceeds kex's. A token
+// named in the vibe set and applied by no rule is the vacuity this arm exists to catch.
+
+test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion 20)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
-  await page.evaluate(
-    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))),
-  );
-  const kex = await page.evaluate(() => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
-    const text = "mmmmmmmmmmlli";
-    const bodyCs = getComputedStyle(document.body);
-    ctx.font = `${bodyCs.fontWeight} 72px ${bodyCs.fontFamily}`;
-    const bodyWidth = ctx.measureText(text).width;
-    const h1 = document.querySelector("h1")!;
-    const h1Cs = getComputedStyle(h1);
-    ctx.font = `${h1Cs.fontWeight} 72px ${h1Cs.fontFamily}`;
-    const headingWidth = ctx.measureText(text).width;
-    return { bodyWidth, headingWidth, bodyFamily: bodyCs.fontFamily, headingFamily: h1Cs.fontFamily };
-  });
-  console.log(`criterion 17 kex (pos=0.5): body family="${kex.bodyFamily}" width=${kex.bodyWidth.toFixed(2)} | heading family="${kex.headingFamily}" width=${kex.headingWidth.toFixed(2)}`);
 
-  // Measure at pos=1 (win98) — the type channel should carry a different face.
-  await page.evaluate(() => {
-    document.documentElement.style.setProperty("--pos", "1");
-    document.documentElement.style.colorScheme = "light";
-    document.documentElement.classList.add("win98");
-  });
-  // pos=1 > 0.75 so the class is on, matching snap2=1.
+  async function readAt(pos: number) {
+    await page.evaluate((p) => {
+      document.documentElement.style.setProperty("--pos", String(p));
+      document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", p < 0.25);
+      document.documentElement.classList.toggle("win98", p > 0.75);
+    }, pos);
+    // Wait for the style recalc to settle (same Chromium custom-property hazard as the sweep).
+    await page.waitForFunction((p) => {
+      const cs = getComputedStyle(document.documentElement);
+      const snap1 = parseFloat(cs.getPropertyValue('--snap1') || '-1');
+      const snap2 = parseFloat(cs.getPropertyValue('--snap2') || '-1');
+      const expectedSnap1 = p <= 0.25 ? 0 : 1;
+      const expectedSnap2 = p > 0.75 ? 1 : 0;
+      return Math.abs(snap1 - expectedSnap1) < 0.001 && Math.abs(snap2 - expectedSnap2) < 0.001;
+    }, pos);
+
+    return page.evaluate(() => {
+      const section = document.querySelector(".section")!;
+      const sectionCs = getComputedStyle(section);
+      const pEl = document.querySelector(".section p")!;
+      const pCs = getComputedStyle(pEl);
+      const h2 = document.querySelector(".section h2")!;
+      const h2Cs = getComputedStyle(h2);
+      // Parse a box-shadow string into a list of shadow objects with their color.
+      function parseBoxShadows(s: string): { color: string; r: number; g: number; b: number; a: number }[] {
+        const shadows: { color: string; r: number; g: number; b: number; a: number }[] = [];
+        // Match rgba(...) or rgb(...) within the box-shadow string.
+        const colorRe = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([\d.]+))?\)/g;
+        let m;
+        while ((m = colorRe.exec(s)) !== null) {
+          const r = parseInt(m[1]), g = parseInt(m[2]), b = parseInt(m[3]);
+          const a = m[4] ? parseFloat(m[4]) : 1;
+          shadows.push({ color: m[0], r, g, b, a });
+        }
+        // Also handle color(srgb r g b / a) format.
+        const srgbRe = /color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)/g;
+        while ((m = srgbRe.exec(s)) !== null) {
+          const r = Math.round(parseFloat(m[1]) * 255);
+          const g = Math.round(parseFloat(m[2]) * 255);
+          const b = Math.round(parseFloat(m[3]) * 255);
+          const a = m[4] ? parseFloat(m[4]) : 1;
+          shadows.push({ color: m[0], r, g, b, a });
+        }
+        return shadows;
+      }
+      // A color is neutral if r, g, b are all equal (gray/black/white).
+      function isNeutral(r: number, g: number, b: number): boolean {
+        return r === g && g === b;
+      }
+      const boxShadow = sectionCs.boxShadow;
+      const shadows = parseBoxShadows(boxShadow);
+      // A colored shadow is non-neutral AND visible (alpha > 0.01). A transparent shadow
+      // (alpha 0) is invisible regardless of its RGB, so it must not count as colored —
+      // otherwise the vibe glow's transparent-at-kex shadow would read as colored.
+      const coloredShadow = shadows.some((s) => s.a > 0.01 && !isNeutral(s.r, s.g, s.b));
+      // Parse border width and color.
+      const borderWidth = parseFloat(sectionCs.borderWidth);
+      const borderColor = sectionCs.borderColor;
+      const borderAlpha = (() => {
+        let m = borderColor.match(/rgba?\(([^)]+)\)/);
+        if (m) {
+          const parts = m[1].split(",").map((x) => parseFloat(x.trim()));
+          return parts.length === 4 ? parts[3] : 1;
+        }
+        m = borderColor.match(/color\(srgb\s+[\d.]+\s+[\d.]+\s+[\d.]+(?:\s*\/\s*([\d.]+))?\)/);
+        if (m) return m[1] ? parseFloat(m[1]) : 1;
+        return 1;
+      })();
+      // Parse radius.
+      const radius = parseFloat(sectionCs.borderRadius);
+      return {
+        textAlign: pCs.textAlign,
+        headingLetterSpacing: h2Cs.letterSpacing,
+        backdropFilter: sectionCs.backdropFilter,
+        webkitBackdropFilter: (sectionCs as unknown as { webkitBackdropFilter?: string }).webkitBackdropFilter,
+        borderWidth,
+        borderAlpha,
+        boxShadow,
+        coloredShadow,
+        radius,
+      };
+    });
+  }
+
+  const vibe = await readAt(0);
+  const kex = await readAt(0.5);
+
+  console.log(`criterion 20 vibe (pos=0): textAlign=${vibe.textAlign} headingLS=${vibe.headingLetterSpacing} backdropFilter=${vibe.backdropFilter} borderWidth=${vibe.borderWidth} borderAlpha=${vibe.borderAlpha} coloredShadow=${vibe.coloredShadow} radius=${vibe.radius}`);
+  console.log(`criterion 20 kex (pos=0.5): textAlign=${kex.textAlign} headingLS=${kex.headingLetterSpacing} backdropFilter=${kex.backdropFilter} borderWidth=${kex.borderWidth} borderAlpha=${kex.borderAlpha} coloredShadow=${kex.coloredShadow} radius=${kex.radius}`);
+
+  // 1. text-align: center on body copy at vibe, not center at kex.
+  expect(vibe.textAlign).toBe("center");
+  expect(kex.textAlign).not.toBe("center");
+
+  // 2. negative heading letter-spacing at vibe.
+  expect(parseFloat(vibe.headingLetterSpacing)).toBeLessThan(0);
+
+  // 3. non-none backdrop-filter with a translucent 1px border at vibe.
+  const vibeBackdrop = vibe.backdropFilter !== "none" || vibe.webkitBackdropFilter !== "none";
+  expect(vibeBackdrop).toBe(true);
+  expect(vibe.borderWidth).toBe(1);
+  expect(vibe.borderAlpha).toBeGreaterThan(0);
+  expect(vibe.borderAlpha).toBeLessThan(1);
+
+  // 4. colored (non-neutral) box-shadow at vibe, not at kex.
+  expect(vibe.coloredShadow).toBe(true);
+  expect(kex.coloredShadow).toBe(false);
+
+  // 5. border radius exceeds kex's at vibe.
+  expect(vibe.radius).toBeGreaterThan(kex.radius);
+});
+
+// --- Criterion 21 (reachability, owed at K for both classes) ---
+
+// Every state any harness records is reachable by a reader: with html.vibe added, each captured
+// state and each gate driver's sampled position asserts that the class set matches the position
+// it claims (vibe below 0.25, neither in the middle, win98 above 0.75). J shipped a resting
+// capture with win98 left on at pos=0.5 and every other arm stayed green beside it; a second class
+// doubles the ways to produce an artifact no reader can reach.
+
+test("reachability: class set matches position at each sampled state (criterion 21)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
-  await page.evaluate(
-    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))),
-  );
-  const win98 = await page.evaluate(() => {
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d")!;
-    const text = "mmmmmmmmmmlli";
-    const bodyCs = getComputedStyle(document.body);
-    ctx.font = `${bodyCs.fontWeight} 72px ${bodyCs.fontFamily}`;
-    const bodyWidth = ctx.measureText(text).width;
-    const h1 = document.querySelector("h1")!;
-    const h1Cs = getComputedStyle(h1);
-    ctx.font = `${h1Cs.fontWeight} 72px ${h1Cs.fontFamily}`;
-    const headingWidth = ctx.measureText(text).width;
-    return { bodyWidth, headingWidth, bodyFamily: bodyCs.fontFamily, headingFamily: h1Cs.fontFamily };
-  });
-  console.log(`criterion 17 win98 (pos=1): body family="${win98.bodyFamily}" width=${win98.bodyWidth.toFixed(2)} | heading family="${win98.headingFamily}" width=${win98.headingWidth.toFixed(2)}`);
 
-  const bodyDelta = Math.abs(win98.bodyWidth - kex.bodyWidth);
-  const headingDelta = Math.abs(win98.headingWidth - kex.headingWidth);
-  console.log(`criterion 17: bodyDelta=${bodyDelta.toFixed(2)} headingDelta=${headingDelta.toFixed(2)}`);
+  for (const p of [0, 0.5, 1]) {
+    await page.evaluate((pos) => {
+      document.documentElement.style.setProperty("--pos", String(pos));
+      document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", pos < 0.25);
+      document.documentElement.classList.toggle("win98", pos > 0.75);
+    }, p);
 
-  // The pos=1 faces must differ from pos=0.5 on the canvas channel.
-  expect(bodyDelta).toBeGreaterThan(0.1);
-  expect(headingDelta).toBeGreaterThan(0.1);
+    const classes = await page.evaluate(() =>
+      document.documentElement.classList.contains("vibe"),
+    );
+    const win98 = await page.evaluate(() =>
+      document.documentElement.classList.contains("win98"),
+    );
+
+    console.log(`criterion 21 (pos=${p}): vibe=${classes} win98=${win98}`);
+
+    if (p < 0.25) {
+      expect(classes).toBe(true);
+      expect(win98).toBe(false);
+    } else if (p > 0.75) {
+      expect(classes).toBe(false);
+      expect(win98).toBe(true);
+    } else {
+      expect(classes).toBe(false);
+      expect(win98).toBe(false);
+    }
+  }
 });

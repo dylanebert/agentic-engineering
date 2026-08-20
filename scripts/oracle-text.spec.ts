@@ -89,6 +89,7 @@ test("rendered text: voice ban list, em-dash cap, novelty grep", async ({ page }
     await page.evaluate((pos) => {
       document.documentElement.style.setProperty("--pos", String(pos));
       document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", pos < 0.25);
       document.documentElement.classList.toggle("win98", pos > 0.75);
     }, p);
     await page.evaluate(
@@ -97,6 +98,20 @@ test("rendered text: voice ban list, em-dash cap, novelty grep", async ({ page }
           requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
         ),
     );
+
+    // Criterion 21: reachability — the class set must match the position this oracle claims.
+    const hasVibe = await page.evaluate(() => document.documentElement.classList.contains("vibe"));
+    const hasWin98 = await page.evaluate(() => document.documentElement.classList.contains("win98"));
+    if (p < 0.25) {
+      expect(hasVibe).toBe(true);
+      expect(hasWin98).toBe(false);
+    } else if (p > 0.75) {
+      expect(hasVibe).toBe(false);
+      expect(hasWin98).toBe(true);
+    } else {
+      expect(hasVibe).toBe(false);
+      expect(hasWin98).toBe(false);
+    }
 
     // Extract all visible text. innerText respects CSS visibility/display, so hidden elements
     // are excluded. This captures the prose in App.svelte and every figure caption — everything
