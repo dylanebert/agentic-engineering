@@ -12,10 +12,13 @@
   let dragging = $state(false);
 
   // Single code path for both pointer and keyboard: clamp a normalized 0-1 value, write --pos on
-  // :root so the page-wide morph responds, keep aria-valuenow truthful.
+  // :root so the page-wide morph responds, keep aria-valuenow truthful. color-scheme mirrors the
+  // bg polarity: dark below pos 0.25 (vibe dress), light at or above (kex/win98 dress), so UA
+  // surfaces (scrollbar, overscroll) match the page a real drag produces.
   function setPos(p: number): void {
     pos = Math.max(0, Math.min(1, p));
     document.documentElement.style.setProperty("--pos", pos.toFixed(4));
+    document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
     ariaNow = Math.round(pos * 100);
   }
 
@@ -41,9 +44,9 @@
     dragging = false;
   }
 
-  // Keyboard step matches the variance gate's three sampled positions (0, 0.5, 1) so Left/Right
-  // walks the same points the gate tests.
-  const STEP = 1 / 2;
+  // Keyboard step fine enough to walk the interior — the figure's whole claim is the space
+  // between the endpoints, not just the three sampled positions the gates test.
+  const STEP = 0.05;
 
   function onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
@@ -122,6 +125,7 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
+    box-shadow: var(--bevel);
     touch-action: none;
   }
 
@@ -131,6 +135,7 @@
     width: calc(var(--pos) * 100%);
     background: var(--accent);
     border-radius: calc(var(--radius) - 1px);
+    box-shadow: var(--glow);
   }
 
   .handle {
@@ -142,6 +147,7 @@
     width: 28px;
     background: var(--ink);
     border-radius: var(--radius);
+    box-shadow: var(--bevel);
     cursor: grab;
     transition: scale 0.1s var(--ease-out);
   }

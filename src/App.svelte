@@ -231,6 +231,7 @@
     border: 1px dashed var(--border);
     border-radius: var(--radius);
     background: var(--surface-2);
+    box-shadow: var(--bevel);
     display: flex;
     align-items: center;
     justify-content: center;

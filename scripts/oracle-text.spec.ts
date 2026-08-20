@@ -88,6 +88,7 @@ test("rendered text: voice ban list, em-dash cap, novelty grep", async ({ page }
   for (const p of positions) {
     await page.evaluate((pos) => {
       document.documentElement.style.setProperty("--pos", String(pos));
+      document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
     }, p);
     await page.evaluate(
       () =>

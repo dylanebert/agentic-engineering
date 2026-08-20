@@ -17,6 +17,18 @@
   initial-value: 0;
 }
 
+@property --snap1 {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --glow-strength {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 :root {
   color-scheme: light;
 
@@ -26,10 +38,18 @@
   --pos: 0.5;
 
   /* Interpolation factors for the three-point morph (vibe → kex → win98).
-     t1 ramps 0→1 across pos 0→0.5 (vibe to kex); t2 ramps 0→1 across pos 0.5→1 (kex to win98).
-     The outer mix uses t2 so the second segment blends seg1 (=kex past the midpoint) toward win98. */
-  --t1: clamp(var(--pos) * 2, 0, 1);
-  --t2: clamp((var(--pos) - 0.5) * 2, 0, 1);
+     t1 = clamp(0, pos*2, 1): 0 at pos 0, 1 at pos 0.5, held at 1 past 0.5.
+     t2 = clamp(0, (pos-0.5)*2, 1): 0 at pos 0.5, 1 at pos 1, held at 0 below 0.5.
+     snap1 = clamp(0, (pos-0.25)*1000, 1): a step at pos 0.25 — 0 below (vibe dress),
+     1 above (kex dress). It prevents the polarity flip (light-ink-on-dark → dark-ink-on-light)
+     from interpolating through a mid-gray where bg and ink converge and contrast collapses to
+     ~1:1. The kex→win98 segment never dips (both ends share dark-on-light polarity), which is
+     the proof that the first segment's polarity flip is the structural cause.
+     glow-strength = (1-t1)*(1-t2): 1 at pos 0 (vibe), 0 from pos 0.5 on. */
+  --t1: clamp(0, var(--pos) * 2, 1);
+  --t2: clamp(0, (var(--pos) - 0.5) * 2, 1);
+  --snap1: clamp(0, (var(--pos) - 0.25) * 1000, 1);
+  --glow-strength: calc((1 - var(--t1)) * (1 - var(--t2)));
 
   /* Vibe endpoint (pos=0) — the glowing neon-purple dress a model picks by default. */
   --vibe-bg: #13062b;
@@ -40,6 +60,8 @@
   --vibe-accent: #b026ff;
   --vibe-accent-strong: #d54fff;
   --vibe-radius: 12px;
+  --vibe-bevel-light: transparent;
+  --vibe-bevel-dark: transparent;
 
   /* Kex endpoint (pos=0.5) — the page's own dress, H's shipped output. */
   --kex-bg: #fbfcfd;
@@ -50,6 +72,8 @@
   --kex-accent: #3a5a80;
   --kex-accent-strong: #294564;
   --kex-radius: 4px;
+  --kex-bevel-light: transparent;
+  --kex-bevel-dark: transparent;
 
   /* Windows 98 endpoint (pos=1) — hand-built, dated chrome. */
   --win-bg: #c0c0c0;
@@ -60,18 +84,26 @@
   --win-accent: #000080;
   --win-accent-strong: #0000a0;
   --win-radius: 0px;
+  --win-bevel-light: #ffffff;
+  --win-bevel-dark: #808080;
 
-  /* Current tokens — interpolated from the three endpoints by --pos. Colors use nested
-     color-mix (seg1 = vibe→kex by t1, then seg1→win98 by t2); radius uses the same
-     piecewise-linear formula in calc. */
-  --bg: color-mix(in srgb, color-mix(in srgb, var(--vibe-bg), var(--kex-bg) calc(var(--t1) * 100%)), var(--win-bg) calc(var(--t2) * 100%));
-  --ink: color-mix(in srgb, color-mix(in srgb, var(--vibe-ink), var(--kex-ink) calc(var(--t1) * 100%)), var(--win-ink) calc(var(--t2) * 100%));
-  --text-dim: color-mix(in srgb, color-mix(in srgb, var(--vibe-text-dim), var(--kex-text-dim) calc(var(--t1) * 100%)), var(--win-text-dim) calc(var(--t2) * 100%));
-  --text-muted: color-mix(in srgb, color-mix(in srgb, var(--vibe-text-muted), var(--kex-text-muted) calc(var(--t1) * 100%)), var(--win-text-muted) calc(var(--t2) * 100%));
+  /* Current tokens — interpolated from the three endpoints by --pos.
+     bg/ink/text-dim/text-muted use snap1 (step at pos 0.25) for the vibe→kex segment to avoid
+     the polarity-flip contrast collapse, then interpolate to win98 by t2 (both dark-on-light,
+     no flip). accent/border/radius/bevel interpolate continuously across the whole range —
+     only bg/ink/text carry the polarity, so only they need the snap. */
+  --bg: color-mix(in srgb, color-mix(in srgb, var(--vibe-bg), var(--kex-bg) calc(var(--snap1) * 100%)), var(--win-bg) calc(var(--t2) * 100%));
+  --ink: color-mix(in srgb, color-mix(in srgb, var(--vibe-ink), var(--kex-ink) calc(var(--snap1) * 100%)), var(--win-ink) calc(var(--t2) * 100%));
+  --text-dim: color-mix(in srgb, color-mix(in srgb, var(--vibe-text-dim), var(--kex-text-dim) calc(var(--snap1) * 100%)), var(--win-text-dim) calc(var(--t2) * 100%));
+  --text-muted: color-mix(in srgb, color-mix(in srgb, var(--vibe-text-muted), var(--kex-text-muted) calc(var(--snap1) * 100%)), var(--win-text-muted) calc(var(--t2) * 100%));
   --border: color-mix(in srgb, color-mix(in srgb, var(--vibe-border), var(--kex-border) calc(var(--t1) * 100%)), var(--win-border) calc(var(--t2) * 100%));
   --accent: color-mix(in srgb, color-mix(in srgb, var(--vibe-accent), var(--kex-accent) calc(var(--t1) * 100%)), var(--win-accent) calc(var(--t2) * 100%));
   --accent-strong: color-mix(in srgb, color-mix(in srgb, var(--vibe-accent-strong), var(--kex-accent-strong) calc(var(--t1) * 100%)), var(--win-accent-strong) calc(var(--t2) * 100%));
   --radius: calc((1 - var(--t2)) * ((1 - var(--t1)) * var(--vibe-radius) + var(--t1) * var(--kex-radius)) + var(--t2) * var(--win-radius));
+  --bevel-light: color-mix(in srgb, color-mix(in srgb, var(--vibe-bevel-light), var(--kex-bevel-light) calc(var(--t1) * 100%)), var(--win-bevel-light) calc(var(--t2) * 100%));
+  --bevel-dark: color-mix(in srgb, color-mix(in srgb, var(--vibe-bevel-dark), var(--kex-bevel-dark) calc(var(--t1) * 100%)), var(--win-bevel-dark) calc(var(--t2) * 100%));
+  --bevel: inset 2px 2px var(--bevel-light), inset -2px -2px var(--bevel-dark);
+  --glow: 0 0 12px color-mix(in srgb, var(--vibe-accent) calc(var(--glow-strength) * 60%), transparent);
 
   --surface-2: color-mix(in srgb, var(--bg) 70%, var(--border));
 
@@ -111,6 +143,7 @@ a {
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
   text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-shadow: var(--glow);
   transition: text-decoration-color 0.15s, color 0.15s;
 }
 
@@ -135,7 +168,8 @@ code {
   *,
   *::before,
   *::after {
-    transition: none !important;
-    animation: none !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

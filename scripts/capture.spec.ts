@@ -96,6 +96,7 @@ for (const view of views) {
     for (const p of morphPositions) {
       await page.evaluate((pos) => {
         document.documentElement.style.setProperty("--pos", String(pos));
+        document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
       }, p);
       await page.evaluate(
         () =>
