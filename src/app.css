@@ -23,6 +23,12 @@
   initial-value: 1;
 }
 
+@property --snap2 {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 @property --glow-strength {
   syntax: "<number>";
   inherits: true;
@@ -49,6 +55,7 @@
   --t1: clamp(0, var(--pos) * 2, 1);
   --t2: clamp(0, (var(--pos) - 0.5) * 2, 1);
   --snap1: clamp(0, (var(--pos) - 0.25) * 1000, 1);
+  --snap2: clamp(0, (var(--pos) - 0.875) * 1000, 1);
   --glow-strength: calc((1 - var(--t1)) * (1 - var(--t2)));
 
   /* Vibe endpoint (pos=0) — the glowing neon-purple dress a model picks by default. */
@@ -67,7 +74,7 @@
   --kex-bg: #fbfcfd;
   --kex-ink: #171c24;
   --kex-text-dim: #363c44;
-  --kex-text-muted: #6e7782;
+  --kex-text-muted: #69727f;
   --kex-border: #d7dce2;
   --kex-accent: #3a5a80;
   --kex-accent-strong: #294564;
@@ -113,7 +120,38 @@
   --display: 'Outfit', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
+  /* Type channel — driven by --snap2 (step at pos 0.875). The morph never carried type before
+     stage J; win98's recognizability lives mostly in its type and chrome structure, so the
+     pos=1 endpoint owes its vocabulary, not just its palette. At kex (snap2=0): IBM Plex Sans /
+     Outfit / JetBrains Mono at 16px. At win98 (snap2=1): Tahoma / Tahoma / Courier New at 11px. */
+  --body-font-size: calc((1 - var(--snap2)) * 16px + var(--snap2) * 11px);
+  --body-font-weight: calc((1 - var(--snap2)) * 600 + var(--snap2) * 400);
+  --body-line-height: calc((1 - var(--snap2)) * 1.55 + var(--snap2) * 1.4);
+  --title-font-size: calc((1 - var(--snap2)) * 34px + var(--snap2) * 20px);
+  --heading-font-size: calc((1 - var(--snap2)) * 15px + var(--snap2) * 11px);
+  --heading-font-weight: calc((1 - var(--snap2)) * 600 + var(--snap2) * 700);
+  --heading-color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--text-muted));
+  --heading-bg: linear-gradient(to bottom,
+    color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent),
+    color-mix(in srgb, #1084d0 calc(var(--snap2) * 100%), transparent));
+  --heading-padding: calc(var(--snap2) * 2px) calc(var(--snap2) * 4px);
+  --heading-margin-bottom: calc((1 - var(--snap2)) * 10px + var(--snap2) * 6px);
+  --heading-text-transform: lowercase;
+  --link-decoration-opacity: calc(35% + var(--snap2) * 65%);
+
   --measure: 680px;
+}
+
+/* Win98 vocabulary swap — font-family and text-transform can't be interpolated with calc or
+   color-mix, so they snap via a class toggled by setPos (and mirrored by every gate driver)
+   when --pos crosses 0.875. The class overrides the kex font tokens with the win98 face stack
+   (Tahoma is the closest available relative of MS Sans Serif; on a macOS seat it resolves to
+   the system Tahoma, on a Windows seat to the native one). */
+html.win98 {
+  --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
+  --display: 'Tahoma', 'MS Sans Serif', sans-serif;
+  --mono: 'Courier New', monospace;
+  --heading-text-transform: none;
 }
 
 * {
@@ -130,9 +168,9 @@ body {
   background: var(--bg);
   color: var(--text-dim);
   font-family: var(--sans);
-  font-size: 16px;
-  line-height: 1.55;
-  font-weight: 600;
+  font-size: var(--body-font-size);
+  line-height: var(--body-line-height);
+  font-weight: var(--body-font-weight);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
@@ -142,7 +180,7 @@ a {
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 2px;
-  text-decoration-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--accent) var(--link-decoration-opacity), transparent);
   text-shadow: var(--glow);
   transition: text-decoration-color 0.15s, color 0.15s;
 }
@@ -173,3 +211,4 @@ code {
     transition-duration: 0.01ms !important;
   }
 }
+

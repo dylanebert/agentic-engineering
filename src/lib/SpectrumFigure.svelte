@@ -19,6 +19,10 @@
     pos = Math.max(0, Math.min(1, p));
     document.documentElement.style.setProperty("--pos", pos.toFixed(4));
     document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+    // Type/chrome vocabulary swap: font-family and text-transform can't be interpolated, so they
+    // snap via a class when --pos crosses 0.875 (the --snap2 threshold). Every gate driver mirrors
+    // this toggle so a driven pos=1 reaches the same win98 vocabulary a hand drag does.
+    document.documentElement.classList.toggle("win98", pos >= 0.875);
     ariaNow = Math.round(pos * 100);
   }
 

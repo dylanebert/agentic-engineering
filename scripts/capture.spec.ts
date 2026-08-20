@@ -97,6 +97,7 @@ for (const view of views) {
       await page.evaluate((pos) => {
         document.documentElement.style.setProperty("--pos", String(pos));
         document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+        document.documentElement.classList.toggle("win98", pos >= 0.875);
       }, p);
       await page.evaluate(
         () =>

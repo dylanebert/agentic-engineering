@@ -189,7 +189,7 @@
 
   .title {
     font-family: var(--display);
-    font-size: 34px;
+    font-size: var(--title-font-size);
     font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--ink);
@@ -208,11 +208,13 @@
 
   .section h2 {
     font-family: var(--display);
-    font-size: 15px;
-    font-weight: 600;
-    text-transform: lowercase;
-    color: var(--text-muted);
-    margin-bottom: 10px;
+    font-size: var(--heading-font-size);
+    font-weight: var(--heading-font-weight);
+    text-transform: var(--heading-text-transform);
+    color: var(--heading-color);
+    background: var(--heading-bg);
+    padding: var(--heading-padding);
+    margin-bottom: var(--heading-margin-bottom);
   }
 
   .section p {
@@ -250,7 +252,7 @@
     }
 
     .title {
-      font-size: 28px;
+      font-size: calc((1 - var(--snap2)) * 28px + var(--snap2) * 18px);
     }
 
     .placeholder {

@@ -67,13 +67,16 @@ test.afterAll(async () => {
 });
 
 // Page-wide morph driver: sets --pos on :root (document.documentElement) so the entire page
-// restyles, and mirrors color-scheme so UA surfaces match a real drag. Three sampled positions:
-// 0 = vibe, 0.5 = kex, 1 = win98.
+// restyles, mirrors color-scheme so UA surfaces match a real drag, and toggles the win98 class
+// so the type/chrome vocabulary snaps at pos=1 (font-family and text-transform can't be
+// interpolated, so they swap via a class — the same class setPos toggles). Three sampled
+// positions: 0 = vibe, 0.5 = kex, 1 = win98.
 const morphDriver: AxisDriver = async (page, step) => {
   await page.evaluate((s) => {
     const p = s / 2;
     document.documentElement.style.setProperty("--pos", String(p));
     document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+    document.documentElement.classList.toggle("win98", p >= 0.875);
   }, step);
 };
 
@@ -161,13 +164,14 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
   await page.goto(url, { waitUntil: "networkidle" });
   await page.emulateMedia({ reducedMotion: "reduce" });
 
-  const failures: { pos: number; contrast: number }[] = [];
+  const failures: { pos: number; contrast: number; channel: string }[] = [];
 
   for (let i = 0; i <= 20; i++) {
     const pos = i / 20; // 0, 0.05, ..., 1.0
     await page.evaluate((p) => {
       document.documentElement.style.setProperty("--pos", p.toFixed(4));
       document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("win98", p >= 0.875);
     }, pos);
     await page.evaluate(
       () =>
@@ -176,7 +180,7 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
         ),
     );
 
-    const contrast = await page.evaluate(() => {
+    const contrasts = await page.evaluate(() => {
       const cs = getComputedStyle(document.body);
       // getComputedStyle may return color(srgb ...), oklab(...), or rgb() depending on
       // the browser's internal representation of the color-mix result. Handle all three.
@@ -222,22 +226,35 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
         }
         return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
       }
-      const [r1, g1, b1] = parseColor(cs.color);
-      const [r2, g2, b2] = parseColor(cs.backgroundColor);
-      const l1 = luminance(r1, g1, b1);
-      const l2 = luminance(r2, g2, b2);
-      const lighter = Math.max(l1, l2);
-      const darker = Math.min(l1, l2);
-      return (lighter + 0.05) / (darker + 0.05);
+      function contrast(fg: string, bg: string): number {
+        const [r1, g1, b1] = parseColor(fg);
+        const [r2, g2, b2] = parseColor(bg);
+        const l1 = luminance(r1, g1, b1);
+        const l2 = luminance(r2, g2, b2);
+        const lighter = Math.max(l1, l2);
+        const darker = Math.min(l1, l2);
+        return (lighter + 0.05) / (darker + 0.05);
+      }
+      const bgColor = cs.backgroundColor;
+      // text-dim: body color (the existing channel)
+      const dimContrast = contrast(cs.color, bgColor);
+      // text-muted: read off .meta which uses color: var(--text-muted) with no position-dependent
+      // override (the section h2 heading-color overrides at win98, but .meta does not)
+      const metaCs = getComputedStyle(document.querySelector(".meta")!);
+      const mutedContrast = contrast(metaCs.color, bgColor);
+      return { dim: dimContrast, muted: mutedContrast };
     });
 
-    console.log(`contrast sweep: pos=${pos.toFixed(2)} contrast=${contrast.toFixed(2)}`);
-    if (contrast < 4.5) {
-      failures.push({ pos, contrast });
+    console.log(`contrast sweep: pos=${pos.toFixed(2)} dim=${contrasts.dim.toFixed(2)} muted=${contrasts.muted.toFixed(2)}`);
+    if (contrasts.dim < 4.5) {
+      failures.push({ pos, contrast: contrasts.dim, channel: "text-dim" });
+    }
+    if (contrasts.muted < 4.5) {
+      failures.push({ pos, contrast: contrasts.muted, channel: "text-muted" });
     }
   }
 
-  for (const f of failures) console.log(`  contrast FAIL: pos=${f.pos.toFixed(2)} contrast=${f.contrast.toFixed(2)}`);
+  for (const f of failures) console.log(`  contrast FAIL: pos=${f.pos.toFixed(2)} channel=${f.channel} contrast=${f.contrast.toFixed(2)}`);
   expect(failures).toEqual([]);
 });
 
@@ -258,16 +275,18 @@ test("spectrum: end descriptors bound to their ends", async ({ page }) => {
   ]);
 });
 
-// --- Criterion 8 (font application) ---
+// --- Criterion 8 (font application, per-position) ---
 
 // Font application, shipped at H: the computed font-family on body resolves to IBM Plex Sans at
 // weight 600, and on h1/h2 to Outfit, read off the built page. A webfont that fails to load
 // renders the fallback stack silently and every other oracle stays green — this is the only
-// instrument that can see it. Mutation: point index.html's font <link> at a nonexistent family
-// and watch it red (H moved loading off CSS @import onto a preconnect + <link>, so the mutation
-// lives there). getComputedStyle alone cannot see this — the CSS still names the family after
-// the load fails, so the arm measures the family on a canvas against a sans-serif control:
-// identical widths mean the fallback rendered. Both directions observed at H.
+// instrument that can see it. getComputedStyle alone cannot see this — the CSS still names the
+// family after the load fails, so the arm measures the family on a canvas against a sans-serif
+// control: identical widths mean the fallback rendered. Both directions observed at H.
+//
+// At J the arm widens from a fixed read at rest to a per-position read at all three sampled
+// positions (0 = vibe, 0.5 = kex, 1 = win98), since the morph now carries a type channel: at
+// pos=1 the body and heading faces must resolve to the win98 stack (Tahoma), not the kex stack.
 
 /** Measure whether a named webfont is actually rendering, not just specified in CSS. */
 async function isFontRendered(
@@ -290,31 +309,131 @@ async function isFontRendered(
   );
 }
 
-test("font application: body IBM Plex Sans 600, headings Outfit (criterion 8)", async ({ page }) => {
+test("font application: per-position at vibe, kex, win98 (criterion 8)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
 
-  const bodyFont = await page.evaluate(() => {
-    const cs = getComputedStyle(document.body);
-    return { fontFamily: cs.fontFamily, fontWeight: cs.fontWeight };
-  });
-  console.log(`font application: body fontFamily=${bodyFont.fontFamily} weight=${bodyFont.fontWeight}`);
+  for (const p of [0, 0.5, 1]) {
+    await page.evaluate((pos) => {
+      document.documentElement.style.setProperty("--pos", String(pos));
+      document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("win98", pos >= 0.875);
+    }, p);
+    await page.evaluate(() => document.fonts.ready);
+    await page.evaluate(
+      () =>
+        new Promise((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
+        ),
+    );
 
-  expect(bodyFont.fontFamily.toLowerCase()).toContain("ibm plex sans");
-  expect(bodyFont.fontWeight).toBe("600");
+    const bodyFont = await page.evaluate(() => {
+      const cs = getComputedStyle(document.body);
+      return { fontFamily: cs.fontFamily, fontWeight: cs.fontWeight };
+    });
+    console.log(`font application (pos=${p}): body fontFamily=${bodyFont.fontFamily} weight=${bodyFont.fontWeight}`);
 
-  const plexRendered = await isFontRendered(page, "IBM Plex Sans", "600");
-  console.log(`font application: IBM Plex Sans rendered=${plexRendered}`);
-  expect(plexRendered).toBe(true);
+    if (p < 0.875) {
+      // Vibe and kex: IBM Plex Sans 600 body, Outfit headings
+      expect(bodyFont.fontFamily.toLowerCase()).toContain("ibm plex sans");
+      expect(bodyFont.fontWeight).toBe("600");
 
-  const headingFonts = await page.locator("h1, h2").evaluateAll((els) =>
-    els.map((el) => getComputedStyle(el).fontFamily),
-  );
-  for (const ff of headingFonts) {
-    expect(ff.toLowerCase()).toContain("outfit");
+      const plexRendered = await isFontRendered(page, "IBM Plex Sans", "600");
+      console.log(`font application (pos=${p}): IBM Plex Sans rendered=${plexRendered}`);
+      expect(plexRendered).toBe(true);
+
+      const headingFonts = await page.locator("h1, h2").evaluateAll((els) =>
+        els.map((el) => getComputedStyle(el).fontFamily),
+      );
+      for (const ff of headingFonts) {
+        expect(ff.toLowerCase()).toContain("outfit");
+      }
+
+      const outfitRendered = await isFontRendered(page, "Outfit", "600");
+      console.log(`font application (pos=${p}): Outfit rendered=${outfitRendered}`);
+      expect(outfitRendered).toBe(true);
+    } else {
+      // Win98: Tahoma body and headings (the type channel — the whole point of stage J)
+      expect(bodyFont.fontFamily.toLowerCase()).toContain("tahoma");
+      expect(bodyFont.fontWeight).toBe("400");
+
+      const headingFonts = await page.locator("h1, h2").evaluateAll((els) =>
+        els.map((el) => getComputedStyle(el).fontFamily),
+      );
+      for (const ff of headingFonts) {
+        expect(ff.toLowerCase()).toContain("tahoma");
+      }
+    }
   }
+});
 
-  const outfitRendered = await isFontRendered(page, "Outfit", "600");
-  console.log(`font application: Outfit rendered=${outfitRendered}`);
-  expect(outfitRendered).toBe(true);
+// --- Criterion 17 (referent-vocabulary arm) ---
+
+// The arm that would have red on I's shipped right end. At pos=1 the rendered body and heading
+// faces must differ from their pos=0.5 resolution, measured on the canvas width-measurement
+// channel (getComputedStyle reports the family the CSS names, not the family that rendered —
+// the arm must be immune to that). Mutation: point the pos=1 family at kex's and watch the arm
+// red, then restore. An arm nobody has watched fail is not a floor (checks.md).
+
+test("referent vocabulary: pos=1 body and heading faces differ from pos=0.5 (criterion 17)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+
+  // Measure body and heading font widths via the canvas channel at pos=0.5 (kex).
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty("--pos", "0.5");
+    document.documentElement.style.colorScheme = "light";
+    document.documentElement.classList.remove("win98");
+  });
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(
+    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))),
+  );
+  const kex = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    const text = "mmmmmmmmmmlli";
+    const bodyCs = getComputedStyle(document.body);
+    ctx.font = `${bodyCs.fontWeight} 72px ${bodyCs.fontFamily}`;
+    const bodyWidth = ctx.measureText(text).width;
+    const h1 = document.querySelector("h1")!;
+    const h1Cs = getComputedStyle(h1);
+    ctx.font = `${h1Cs.fontWeight} 72px ${h1Cs.fontFamily}`;
+    const headingWidth = ctx.measureText(text).width;
+    return { bodyWidth, headingWidth, bodyFamily: bodyCs.fontFamily, headingFamily: h1Cs.fontFamily };
+  });
+  console.log(`criterion 17 kex (pos=0.5): body family="${kex.bodyFamily}" width=${kex.bodyWidth.toFixed(2)} | heading family="${kex.headingFamily}" width=${kex.headingWidth.toFixed(2)}`);
+
+  // Measure at pos=1 (win98) — the type channel should carry a different face.
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty("--pos", "1");
+    document.documentElement.style.colorScheme = "light";
+    document.documentElement.classList.add("win98");
+  });
+  await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(
+    () => new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(null)))),
+  );
+  const win98 = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d")!;
+    const text = "mmmmmmmmmmlli";
+    const bodyCs = getComputedStyle(document.body);
+    ctx.font = `${bodyCs.fontWeight} 72px ${bodyCs.fontFamily}`;
+    const bodyWidth = ctx.measureText(text).width;
+    const h1 = document.querySelector("h1")!;
+    const h1Cs = getComputedStyle(h1);
+    ctx.font = `${h1Cs.fontWeight} 72px ${h1Cs.fontFamily}`;
+    const headingWidth = ctx.measureText(text).width;
+    return { bodyWidth, headingWidth, bodyFamily: bodyCs.fontFamily, headingFamily: h1Cs.fontFamily };
+  });
+  console.log(`criterion 17 win98 (pos=1): body family="${win98.bodyFamily}" width=${win98.bodyWidth.toFixed(2)} | heading family="${win98.headingFamily}" width=${win98.headingWidth.toFixed(2)}`);
+
+  const bodyDelta = Math.abs(win98.bodyWidth - kex.bodyWidth);
+  const headingDelta = Math.abs(win98.headingWidth - kex.headingWidth);
+  console.log(`criterion 17: bodyDelta=${bodyDelta.toFixed(2)} headingDelta=${headingDelta.toFixed(2)}`);
+
+  // The pos=1 faces must differ from pos=0.5 on the canvas channel.
+  expect(bodyDelta).toBeGreaterThan(0.1);
+  expect(headingDelta).toBeGreaterThan(0.1);
 });
