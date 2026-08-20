@@ -98,36 +98,64 @@ for (const view of views) {
     for (const p of morphPositions) {
       await page.evaluate((pos) => {
         document.documentElement.style.setProperty("--pos", String(pos));
-        document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+        document.documentElement.style.colorScheme = pos <= 0.25 ? "dark" : "light";
+        document.documentElement.classList.toggle("vibe", pos <= 0.25);
         document.documentElement.classList.toggle("win98", pos > 0.75);
       }, p);
-      const expectOpaque = p > 0.75;
-      await page.waitForFunction((expectOp) => {
-        const bg = getComputedStyle(document.querySelector(".section")!).backgroundColor;
-        const transparent = bg.includes("/ 0)") || bg.includes(", 0)");
-        return expectOp ? !transparent : transparent;
-      }, expectOpaque);
+      // Wait for the style recalc to settle — poll the dependent --snap1/--snap2 computed values
+      // rather than the section bg alpha (getComputedStyle may return 'transparent' as a keyword
+      // for color-mix results, which the alpha-parsing regex doesn't match). (BLOCKER 1.)
+      await page.waitForFunction((p) => {
+        const cs = getComputedStyle(document.documentElement);
+        const snap1 = parseFloat(cs.getPropertyValue('--snap1') || '-1');
+        const snap2 = parseFloat(cs.getPropertyValue('--snap2') || '-1');
+        const expectedSnap1 = p <= 0.25 ? 0 : 1;
+        const expectedSnap2 = p > 0.75 ? 1 : 0;
+        return Math.abs(snap1 - expectedSnap1) < 0.001 && Math.abs(snap2 - expectedSnap2) < 0.001;
+      }, p);
       const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
       if (scrollWidth > view.width) {
         throw new Error(
           `horizontal overflow at ${view.width}x${view.height} pos=${p}: scrollWidth=${scrollWidth} > ${view.width}`,
         );
       }
+      // Criterion 21: reachability — the class set must match the position this capture claims.
+      const hasVibe = await page.evaluate(() => document.documentElement.classList.contains("vibe"));
+      const hasWin98 = await page.evaluate(() => document.documentElement.classList.contains("win98"));
+      if (p <= 0.25) {
+        if (!hasVibe) throw new Error(`reachability: vibe class missing at pos=${p}`);
+        if (hasWin98) throw new Error(`reachability: win98 class present at pos=${p}`);
+      } else if (p > 0.75) {
+        if (hasVibe) throw new Error(`reachability: vibe class present at pos=${p}`);
+        if (!hasWin98) throw new Error(`reachability: win98 class missing at pos=${p}`);
+      } else {
+        if (hasVibe) throw new Error(`reachability: vibe class present at pos=${p}`);
+        if (hasWin98) throw new Error(`reachability: win98 class present at pos=${p}`);
+      }
     }
 
-    // Capture at the resting position (kex, 0.5) for the screenshot. Remove the win98
-    // class so the resting capture is a state a reader can reach — the overflow loop ends
-    // at p=1 with html.win98 on, and resetting --pos alone leaves the class (BLOCKER 2).
+    // Capture at the resting position (kex, 0.5) for the screenshot. Remove both classes
+    // so the resting capture is a state a reader can reach — the overflow loop ends at p=1
+    // with html.win98 on, and resetting --pos alone leaves the class (BLOCKER 2). With html.vibe
+    // added at K, the same hazard doubles: the loop starts at p=0 with html.vibe on.
     // Wait for the style recalc to settle (snap2=0 at pos=0.5, so section bg goes transparent).
     await page.evaluate(() => {
       document.documentElement.style.setProperty("--pos", "0.5");
       document.documentElement.style.colorScheme = "light";
+      document.documentElement.classList.remove("vibe");
       document.documentElement.classList.remove("win98");
     });
     await page.waitForFunction(() => {
-      const bg = getComputedStyle(document.querySelector(".section")!).backgroundColor;
-      return bg.includes("/ 0)") || bg.includes(", 0)");
+      const cs = getComputedStyle(document.documentElement);
+      const snap1 = parseFloat(cs.getPropertyValue('--snap1') || '-1');
+      const snap2 = parseFloat(cs.getPropertyValue('--snap2') || '-1');
+      return Math.abs(snap1 - 1) < 0.001 && Math.abs(snap2 - 0) < 0.001;
     });
+    // Criterion 21: resting capture reachability — neither class should be on at pos=0.5.
+    const restVibe = await page.evaluate(() => document.documentElement.classList.contains("vibe"));
+    const restWin98 = await page.evaluate(() => document.documentElement.classList.contains("win98"));
+    if (restVibe) throw new Error("reachability: vibe class left on at resting pos=0.5");
+    if (restWin98) throw new Error("reachability: win98 class left on at resting pos=0.5");
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: join(root, view.name), fullPage: true });
     await page.close();

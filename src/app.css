@@ -133,30 +133,45 @@
   --display: 'Outfit', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Type channel — driven by --snap2 (step at pos 0.75). The morph never carried type before
-     stage J; win98's recognizability lives mostly in its type and chrome structure, so the
-     pos=1 endpoint owes its vocabulary, not just its palette. At kex (snap2=0): IBM Plex Sans /
-     Outfit / JetBrains Mono at 16px. At win98 (snap2=1): Tahoma / Tahoma at 11px. The mono
-     token is not overridden — the page has no <code> element, so a mono swap would be dead
-     vocabulary (NOTE 7). */
+  /* Type channel — driven by --snap1 (step at pos 0.25, vibe→kex) and --snap2 (step at pos 0.75,
+     kex→win98), symmetric. At K the type/layout role --snap2 carried at 0.75 is owed at the low
+     end too (criterion 19: the morph perturbed layout toward win98 only), so --snap1 gains it.
+     Vibe (snap1=0): Inter 400, 1.78 leading, 48px title, 700 headings at -0.025em, 672px measure.
+     Kex (snap1=1, snap2=0): IBM Plex Sans 600 / Outfit at 16px, 1.55 leading, 34px title.
+     Win98 (snap1=1, snap2=1): Tahoma at 11px. font-family and text-transform can't be interpolated,
+     so they snap via the html.vibe / html.win98 classes (below). The mono token is not overridden
+     — the page has no <code> element, so a mono swap would be dead vocabulary. */
   --body-font-size: calc((1 - var(--snap2)) * 16px + var(--snap2) * 11px);
-  --body-font-weight: calc((1 - var(--snap2)) * 600 + var(--snap2) * 400);
-  --body-line-height: calc((1 - var(--snap2)) * 1.55 + var(--snap2) * 1.4);
-  --title-font-size: calc((1 - var(--snap2)) * 34px + var(--snap2) * 20px);
-  --heading-font-size: calc((1 - var(--snap2)) * 15px + var(--snap2) * 11px);
-  --heading-font-weight: calc((1 - var(--snap2)) * 600 + var(--snap2) * 700);
+  --body-font-weight: calc((1 - var(--snap1)) * 400 + var(--snap1) * ((1 - var(--snap2)) * 600 + var(--snap2) * 400));
+  --body-line-height: calc((1 - var(--snap1)) * 1.78 + var(--snap1) * ((1 - var(--snap2)) * 1.55 + var(--snap2) * 1.4));
+  --title-font-size: calc((1 - var(--snap1)) * 48px + var(--snap1) * ((1 - var(--snap2)) * 34px + var(--snap2) * 20px));
+  --heading-font-size: calc((1 - var(--snap1)) * 20px + var(--snap1) * ((1 - var(--snap2)) * 15px + var(--snap2) * 11px));
+  --heading-font-weight: calc((1 - var(--snap1)) * 700 + var(--snap1) * ((1 - var(--snap2)) * 600 + var(--snap2) * 700));
   --heading-color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--text-muted));
   --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: calc(var(--snap2) * 2px) calc(var(--snap2) * 4px);
-  --heading-margin-bottom: calc((1 - var(--snap2)) * 10px + var(--snap2) * 6px);
+  --heading-margin-bottom: calc((1 - var(--snap1)) * 12px + var(--snap1) * ((1 - var(--snap2)) * 10px + var(--snap2) * 6px));
   --heading-text-transform: lowercase;
+  --heading-letter-spacing: calc((1 - var(--snap1)) * -0.025em + var(--snap1) * (1 - var(--snap2)) * -0.02em);
   --link-decoration-opacity: calc(35% + var(--snap2) * 65%);
 
-  --measure: calc((1 - var(--snap2)) * 680px + var(--snap2) * 435px);
+  --measure: calc((1 - var(--snap1)) * 672px + var(--snap1) * ((1 - var(--snap2)) * 680px + var(--snap2) * 435px));
 
-  /* Section padding — snap2-driven so paragraphs sit off the window edge at pos=1 (a raised
-     window's client area has interior margins; at kex the section has no frame so no padding). */
-  --section-padding: calc(var(--snap2) * 8px);
+  /* Section padding — snap1 gives vibe glass surfaces interior margins (12px), snap2 gives win98
+     window client areas interior margins (8px); at kex (snap1=1, snap2=0) no padding. */
+  --section-padding: calc((1 - var(--snap1)) * 12px + var(--snap1) * var(--snap2) * 8px);
+
+  /* Section background — three-way: vibe glass surface (rgba(255,255,255,0.1) translucent so the
+     dark vibe bg shows through), kex transparent, win98 opaque white (#ffffff). The kex→win98 half
+     uses --snap2 (a step at pos 0.75), not --t2 (continuous from 0.5), so the section background is
+     transparent at kex and steps to opaque white at win98 — no partially transparent white between
+     0.5 and 0.75. The spec locks the midpoint as the page's own kex style and the polarity behavior
+     as a discrete swap, never a cross-fade. The vibe glass at the low end uses --snap1 (step at 0.25). */
+  --section-bg: color-mix(in srgb, color-mix(in srgb, rgba(255, 255, 255, 0.1), transparent calc(var(--snap1) * 100%)), #ffffff calc(var(--snap2) * 100%));
+
+  /* Vibe glow shadow — colored (purple) box-shadow present at vibe (snap1=0), transparent elsewhere.
+     The single most reproducible AI-slop tell after the color itself. */
+  --vibe-glow: 0 25px 50px -12px rgba(168, 85, 247, calc((1 - var(--snap1)) * 0.5));
 
   /* Secondary type sizes — routed through --snap2 so the endpoint has one coherent hierarchy.
      At kex (snap2=0): each size is the H-shipped value. At win98 (snap2=1): all shrink to 11px
@@ -169,6 +184,39 @@
   /* Handle background — at kex the ink colour, at win98 the button-face colour (#c0c0c0) so
      the slider thumb reads as a raised control, not a flat black bar. */
   --handle-bg: color-mix(in srgb, #c0c0c0 calc(var(--snap2) * 100%), var(--ink));
+}
+
+/* Vibe vocabulary swap — mirrors html.win98 from the opposite end (criterion 19: the layout
+   perturbation is accepted, so it is owed symmetrically). font-family, text-align, backdrop-filter
+   and the gradient clip can't be interpolated, so they snap via a class toggled by setPos (and
+   mirrored by every gate driver) when --pos crosses below 0.25 (the --snap1 threshold). Inter is
+   the Lovable/Bolt default face; text-align center is the strongest non-color layout tell; the
+   glass surface (backdrop-filter + translucent 1px border) is the single most reproducible chrome
+   tell; the gradient clip is confined to .title (the h1) only, not .section h2, so the contrast
+   sweep's heading channel reads the h2's own color, not a transparent gradient clip — the hazard
+   the spec pre-commits (gradient-clipped text renders color: transparent, which would make the
+   sweep's heading channel vacuous or spuriously red). */
+html.vibe {
+  --sans: 'Inter', system-ui, sans-serif;
+  --display: 'Inter', system-ui, sans-serif;
+}
+
+html.vibe .page {
+  text-align: center;
+}
+
+html.vibe .section,
+html.vibe .head {
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+html.vibe .title {
+  background: linear-gradient(135deg, var(--vibe-accent), var(--vibe-accent-strong));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
 }
 
 /* Win98 vocabulary swap — font-family and text-transform can't be interpolated with calc or
