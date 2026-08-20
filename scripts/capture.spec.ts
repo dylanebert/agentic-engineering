@@ -93,17 +93,20 @@ for (const view of views) {
     );
 
     // Oracle 7: no horizontal overflow at either viewport, at all three morph positions.
+    // Wait for the style recalc to settle before reading scrollWidth — the same
+    // custom-property-dependent style issue as the contrast sweep (BLOCKER 1).
     for (const p of morphPositions) {
       await page.evaluate((pos) => {
         document.documentElement.style.setProperty("--pos", String(pos));
         document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+        document.documentElement.classList.toggle("win98", pos > 0.75);
       }, p);
-      await page.evaluate(
-        () =>
-          new Promise((r) =>
-            requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
-          ),
-      );
+      const expectOpaque = p > 0.75;
+      await page.waitForFunction((expectOp) => {
+        const bg = getComputedStyle(document.querySelector(".section")!).backgroundColor;
+        const transparent = bg.includes("/ 0)") || bg.includes(", 0)");
+        return expectOp ? !transparent : transparent;
+      }, expectOpaque);
       const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
       if (scrollWidth > view.width) {
         throw new Error(
@@ -112,9 +115,18 @@ for (const view of views) {
       }
     }
 
-    // Capture at the resting position (kex, 0.5) for the screenshot.
+    // Capture at the resting position (kex, 0.5) for the screenshot. Remove the win98
+    // class so the resting capture is a state a reader can reach — the overflow loop ends
+    // at p=1 with html.win98 on, and resetting --pos alone leaves the class (BLOCKER 2).
+    // Wait for the style recalc to settle (snap2=0 at pos=0.5, so section bg goes transparent).
     await page.evaluate(() => {
       document.documentElement.style.setProperty("--pos", "0.5");
+      document.documentElement.style.colorScheme = "light";
+      document.documentElement.classList.remove("win98");
+    });
+    await page.waitForFunction(() => {
+      const bg = getComputedStyle(document.querySelector(".section")!).backgroundColor;
+      return bg.includes("/ 0)") || bg.includes(", 0)");
     });
     await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: join(root, view.name), fullPage: true });

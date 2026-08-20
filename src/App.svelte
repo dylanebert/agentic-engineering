@@ -167,9 +167,18 @@
     padding: 96px 24px 120px;
   }
 
+  /* Page header chrome — at kex (snap2=0) the header is bare (transparent bevel and
+     background, no padding). At win98 (snap2=1) it reads as a raised window: outset bevel,
+     white client-area ground, interior padding, and the h1 title bar with a control box. */
+  .head {
+    background: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), transparent);
+    box-shadow: var(--chrome-bevel);
+    padding: var(--section-padding);
+  }
+
   .meta {
     font-family: var(--display);
-    font-size: 14px;
+    font-size: var(--meta-font-size);
     color: var(--text-muted);
     margin-bottom: 14px;
   }
@@ -189,30 +198,58 @@
 
   .title {
     font-family: var(--display);
-    font-size: 34px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--ink);
+    font-size: var(--title-font-size);
+    font-weight: var(--heading-font-weight);
+    letter-spacing: calc((1 - var(--snap2)) * -0.02em);
+    text-transform: var(--heading-text-transform);
+    color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--ink));
+    background: var(--heading-bg);
+    padding: var(--heading-padding);
+    margin-bottom: var(--heading-margin-bottom);
   }
 
   .dek {
     font-family: var(--display);
-    font-size: 15px;
+    font-size: var(--dek-font-size);
     color: var(--text-muted);
     margin-top: 10px;
   }
 
   .section {
     margin-top: 36px;
+    /* Win98 window frame: outset bevel + light client-area ground. At kex (snap2=0) the
+       bevel colours and background are transparent, so no visual change. At win98 (snap2=1)
+       the section reads as a raised window: white (#ffffff) light on top-left, gray (#808080)
+       dark on bottom-right — the illuminated edges face the light source, the shadow edges
+       face away. The navy title bar (the h2) caps a white client area. */
+    background: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), transparent);
+    box-shadow: var(--chrome-bevel);
+    padding: var(--section-padding);
   }
 
   .section h2 {
     font-family: var(--display);
-    font-size: 15px;
-    font-weight: 600;
-    text-transform: lowercase;
-    color: var(--text-muted);
-    margin-bottom: 10px;
+    font-size: var(--heading-font-size);
+    font-weight: var(--heading-font-weight);
+    text-transform: var(--heading-text-transform);
+    color: var(--heading-color);
+    background: var(--heading-bg);
+    padding: var(--heading-padding);
+    margin-bottom: var(--heading-margin-bottom);
+  }
+
+  /* Win98 title-bar control box: the three right-side buttons (minimize, maximize, close)
+     that make a title bar read as a window. Only visible at snap2=1 (transparent at kex). */
+  .section h2::after,
+  .title::after {
+    content: "\2013  \25A1  \2715";
+    float: right;
+    margin-left: calc(var(--snap2) * 8px);
+    font-size: calc(var(--snap2) * 9px);
+    font-weight: 700;
+    letter-spacing: 2px;
+    opacity: var(--snap2);
+    line-height: 1;
   }
 
   .section p {
@@ -221,17 +258,23 @@
   }
 
   .aside {
-    font-size: 0.9rem;
+    font-size: var(--aside-font-size);
     color: var(--text-muted);
   }
 
   .placeholder {
     margin-top: 28px;
     height: 320px;
-    border: 1px dashed var(--border);
+    border: calc((1 - var(--snap2)) * 1px) dashed var(--border);
     border-radius: var(--radius);
-    background: var(--surface-2);
-    box-shadow: var(--bevel);
+    background: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--surface-2));
+    /* At kex (snap2=0): no bevel (chrome bevel tokens are transparent, so inert).
+       At win98 (snap2=1): sunken inset bevel — dark (#808080) on top-left, light (#ffffff)
+       on bottom-right — so the placeholder reads as a sunken field inside the window, not
+       a hole punched through it. Dashed border is suppressed (not a win98 idiom). */
+    box-shadow:
+      inset -2px -2px var(--chrome-bevel-dark),
+      inset 2px 2px var(--chrome-bevel-light);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -239,7 +282,7 @@
 
   .placeholder-label {
     font-family: var(--display);
-    font-size: 14px;
+    font-size: var(--meta-font-size);
     color: var(--text-muted);
     letter-spacing: 0.02em;
   }
@@ -250,7 +293,7 @@
     }
 
     .title {
-      font-size: 28px;
+      font-size: calc((1 - var(--snap2)) * 28px + var(--snap2) * 18px);
     }
 
     .placeholder {
