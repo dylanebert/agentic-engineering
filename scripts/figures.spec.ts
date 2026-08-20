@@ -6,10 +6,12 @@ import { assertVaries, type AxisDriver } from "./variance";
 import { assertReducedMotion } from "./reduced";
 import { perceptualDelta } from "./png";
 
-// Figure gate. Serves the built dist over a local origin, navigates to the page, and drives the
-// spectrum figure across its claimed axis with assertVaries (oracle 5) and asserts the
-// reduced-motion resting state with assertReducedMotion (oracle 6). Runs in the work dir staged
-// by figures.ts, next to a built dist/.
+// Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts four
+// things about the spectrum figure — variance across its claimed axis with assertVaries (oracle 5),
+// the reduced-motion resting state with assertReducedMotion (oracle 6), fill-vs-track perceptual
+// distinguishability, and the end labels bound to their positions (oracle 5b) — plus one thing about
+// the page itself: the applied type read off the built page (criterion 8, body IBM Plex Sans 600 /
+// headings Outfit). Runs in the work dir staged by figures.ts, next to a built dist/.
 
 const root = __dirname;
 const dist = join(root, "dist");

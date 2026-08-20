@@ -64,5 +64,7 @@ strong {
 
 code {
   font-family: var(--mono);
+  /* JetBrains Mono is loaded at 400 only; inheriting body's 600 would render faux-bold. */
+  font-weight: 400;
   font-size: 0.9em;
 }
