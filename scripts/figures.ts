@@ -45,12 +45,6 @@ function prepWork(workDir: string): void {
   for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
     cpSync(join(import.meta.dir, f), join(workDir, f));
   }
-  // Stage the spec source file so the 5c assertion can read it from disk.
-  mkdirSync(join(workDir, "src", "lib", "assets"), { recursive: true });
-  cpSync(
-    join(repo, "src", "lib", "assets", "todo-spec.md"),
-    join(workDir, "src", "lib", "assets", "todo-spec.md"),
-  );
   writeFileSync(join(workDir, "package.json"), pkg);
   rmSync(join(workDir, "dist"), { recursive: true, force: true });
   cpSync(join(repo, "dist"), join(workDir, "dist"), { recursive: true });

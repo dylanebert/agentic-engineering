@@ -1,8 +1,5 @@
 <script lang="ts">
   import SpectrumFigure from "./lib/SpectrumFigure.svelte";
-  import VerificationFigure from "./lib/VerificationFigure.svelte";
-  import LoopFigure from "./lib/LoopFigure.svelte";
-  import SpecFigure from "./lib/SpecFigure.svelte";
 </script>
 
 <article class="page">
@@ -99,13 +96,15 @@
       opens, so errors stay in one stage rather than compounding across the
       whole build.
     </p>
-    <LoopFigure />
     <p>
       The spec is what crosses between conversations. It holds the stages, what
       each one requires, and what done means, so a fresh conversation can pick
       up where the last left off.
     </p>
-    <SpecFigure />
+    <!-- Walkthrough figure placeholder — sized to hold the page's rhythm until the figure lands. -->
+    <div class="placeholder" aria-label="walkthrough figure, to come">
+      <span class="placeholder-label">walkthrough</span>
+    </div>
   </section>
 
   <section class="section">
@@ -131,7 +130,6 @@
       what's good, lives here, because it has no cheaper proxy than you, and
       you can't sample a point of view in parallel.
     </p>
-    <VerificationFigure />
     <p>
       The three are priced by cost against reach. You spend machine
       verification freely, agent verification where it earns its keep, and human
@@ -227,6 +225,24 @@
     color: var(--text-muted);
   }
 
+  .placeholder {
+    margin-top: 28px;
+    height: 320px;
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .placeholder-label {
+    font-family: var(--display);
+    font-size: 14px;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
+  }
+
   @media (max-width: 560px) {
     .page {
       padding: 56px 20px 80px;
@@ -234,6 +250,10 @@
 
     .title {
       font-size: 28px;
+    }
+
+    .placeholder {
+      height: 240px;
     }
   }
 </style>

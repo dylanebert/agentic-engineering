@@ -6,7 +6,7 @@ import { perceptualDelta } from "./png";
 // recorded failures from taste.md (five color schemes over a near-zero signal, four inert
 // animation variants, four byte-identical panels) that all passed every other oracle.
 //
-// All four figures now exist (D and E landed). The harness is called with a figure selector +
+// The harness is called with a figure selector +
 // axis driver per figure; the self-test in instrument.spec.ts proves it works against synthetic
 // fixtures, and figures.spec.ts drives it against the real page.
 
