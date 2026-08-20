@@ -256,7 +256,10 @@
     font-family: var(--display);
     font-size: var(--heading-font-size);
     font-weight: var(--heading-font-weight);
-    letter-spacing: var(--heading-letter-spacing);
+    /* Negative tracking at vibe only (snap1=0); 0 at kex and win98, matching 0eef6f6 where the
+       h2 had no letter-spacing. The .title (h1) keeps --heading-letter-spacing which resolves
+       to -0.02em at kex — that value was present in 0eef6f6's .title and is unchanged here. */
+    letter-spacing: calc((1 - var(--snap1)) * -0.025em);
     text-transform: var(--heading-text-transform);
     color: var(--heading-color);
     background: var(--heading-bg);

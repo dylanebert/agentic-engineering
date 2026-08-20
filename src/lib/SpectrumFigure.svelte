@@ -18,15 +18,16 @@
   function setPos(p: number): void {
     pos = Math.max(0, Math.min(1, p));
     document.documentElement.style.setProperty("--pos", pos.toFixed(4));
-    document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+    document.documentElement.style.colorScheme = pos <= 0.25 ? "dark" : "light";
     // Type/chrome vocabulary swap: font-family and text-transform can't be interpolated, so they
     // snap via classes when --pos crosses the snap thresholds. html.vibe mirrors at the low end
     // what html.win98 carries at the high end (criterion 19: layout perturbation owed symmetrically).
-    // vibe uses pos < 0.25 (strict) and win98 uses pos > 0.75 (strict) so class and token step
-    // together — at exactly 0.25 both are kex, at exactly 0.75 both are kex, no single-point
-    // mixed state. Every gate driver mirrors both toggles so a driven pos reaches the same
+    // vibe uses pos <= 0.25 so the class boundary coincides with the --snap1 token step: at exactly
+    // 0.25 snap1=0 (vibe tokens fully on) and the vibe class is on — no single-point mixed state.
+    // win98 uses pos > 0.75 (strict) so at exactly 0.75 snap2=0 (kex) and the win98 class is off —
+    // also consistent. Every gate driver mirrors both toggles so a driven pos reaches the same
     // vocabulary a hand drag does.
-    document.documentElement.classList.toggle("vibe", pos < 0.25);
+    document.documentElement.classList.toggle("vibe", pos <= 0.25);
     document.documentElement.classList.toggle("win98", pos > 0.75);
     ariaNow = Math.round(pos * 100);
   }

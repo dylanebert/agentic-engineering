@@ -7,10 +7,11 @@ import { assertReducedMotion } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// eleven things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// ten things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
-// reduced-motion, contrast sweep, font application), and three new at K (vibe vocabulary,
-// reachability, and the widened three-way referent read). The morph arms (oracles 5, 5b, 6) read
+// reduced-motion, contrast sweep, font application), and two new at K (vibe vocabulary and
+// reachability). The referent-vocabulary arm was widened to a three-way read at K but is the
+// same arm, not a new one. The morph arms (oracles 5, 5b, 6) read
 // the rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
 // channel is a canvas/pixel read of the rendered page (screenshot → perceptualDelta), never a
 // CSS-variable read — a vacuous observation channel is the failure H paid for. The contrast-sweep
@@ -77,8 +78,8 @@ const morphDriver: AxisDriver = async (page, step) => {
   await page.evaluate((s) => {
     const p = s / 2;
     document.documentElement.style.setProperty("--pos", String(p));
-    document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
-    document.documentElement.classList.toggle("vibe", p < 0.25);
+    document.documentElement.style.colorScheme = p <= 0.25 ? "dark" : "light";
+    document.documentElement.classList.toggle("vibe", p <= 0.25);
     document.documentElement.classList.toggle("win98", p > 0.75);
   }, step);
 };
@@ -179,22 +180,38 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
     const pos = i / 20; // 0, 0.05, ..., 1.0
     await page.evaluate((p) => {
       document.documentElement.style.setProperty("--pos", p.toFixed(4));
-      document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
-      document.documentElement.classList.toggle("vibe", p < 0.25);
+      document.documentElement.style.colorScheme = p <= 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", p <= 0.25);
       document.documentElement.classList.toggle("win98", p > 0.75);
     }, pos);
     // Wait for the style recalc to settle before reading. The section's background is now
     // three-way: translucent (alpha 0.1) at vibe, transparent at kex, opaque at win98.
     // A forced reflow alone does not recalculate custom-property dependents in Chromium;
-    // polling until the dependent --snap1/--snap2 computed values match the expected state does.
-    // (BLOCKER 1: the two-rAF wait sometimes read a torn style at the snap boundary.)
+    // polling a dependent color-mix result (the section's computed backgroundColor alpha)
+    // ensures the sweep samples the state it claims, not a lagged one. Polling the root
+    // --snap1/--snap2 @property values is insufficient — they are inputs, not dependents,
+    // and Chromium recalculates them before the color-mix results (J's lesson: snap1 is not
+    // the dependent). The expected section-bg alpha is 0.1 at pos <= 0.25 (vibe glass),
+    // 0 for 0.25 < pos <= 0.75 (kex transparent), 1 for pos > 0.75 (win98 opaque white).
     await page.waitForFunction((p) => {
-      const cs = getComputedStyle(document.documentElement);
-      const snap1 = parseFloat(cs.getPropertyValue('--snap1') || '-1');
-      const snap2 = parseFloat(cs.getPropertyValue('--snap2') || '-1');
-      const expectedSnap1 = p <= 0.25 ? 0 : 1;
-      const expectedSnap2 = p > 0.75 ? 1 : 0;
-      return Math.abs(snap1 - expectedSnap1) < 0.001 && Math.abs(snap2 - expectedSnap2) < 0.001;
+      const section = document.querySelector('.section');
+      if (!section) return false;
+      const bg = getComputedStyle(section).backgroundColor;
+      const expectedAlpha = p <= 0.25 ? 0.1 : p > 0.75 ? 1 : 0;
+      let actualAlpha: number;
+      if (bg === 'transparent' || bg === 'rgba(0, 0, 0, 0)') actualAlpha = 0;
+      else {
+        let m = bg.match(/rgba?\(([^)]+)\)/);
+        if (m) {
+          const parts = m[1].split(',').map((x: string) => parseFloat(x.trim()));
+          actualAlpha = parts.length === 4 ? parts[3] : 1;
+        } else {
+          m = bg.match(/color\(srgb\s+[\d.]+\s+[\d.]+\s+[\d.]+(?:\s*\/\s*([\d.]+))?\)/);
+          if (m) actualAlpha = m[1] ? parseFloat(m[1]) : 1;
+          else actualAlpha = -1;
+        }
+      }
+      return Math.abs(actualAlpha - expectedAlpha) < 0.02;
     }, pos);
 
     const contrasts = await page.evaluate(() => {
@@ -266,20 +283,46 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
         if (m) return m[1] ? parseFloat(m[1]) : 1;
         return 1;
       }
-      // Walk up the tree to find the nearest ancestor with a sufficiently opaque background.
-      // Threshold is 0.5 (not 0.01) so the vibe glass surface (rgba(255,255,255,0.1), alpha 0.1)
-      // is skipped — the sweep measures against the body's vibe-bg (#13062b) instead of the
-      // translucent surface. This is conservative: the body bg is darker than the composited
-      // glass-over-body, so contrast reads higher than actual. The actual contrast against the
-      // composited bg is still well above 4.5 (dim ~9.5, muted ~5.3), so the margin is comfortable.
+      // Walk up the tree alpha-compositing each layer's background over the accumulated
+      // result, terminating at an opaque ancestor (or falling back to the body/canvas).
+      // Translucent layers (e.g. the vibe glass surface at rgba(255,255,255,0.1)) are composited,
+      // not skipped — the sweep measures against the ground the text actually renders on, which
+      // is the composited stack, not the nearest opaque ancestor. Skipping the glass surface reads
+      // the body's darker --vibe-bg, inflating contrast above the composited truth.
       function effectiveBg(el: Element): string {
+        const layers: { r: number; g: number; b: number; a: number }[] = [];
         let current: Element | null = el;
         while (current) {
           const bg = getComputedStyle(current).backgroundColor;
-          if (parseAlpha(bg) >= 0.5) return bg;
+          const [r, g, b] = parseColor(bg);
+          const a = parseAlpha(bg);
+          layers.push({ r, g, b, a });
+          if (a >= 0.999) break;
           current = current.parentElement;
         }
-        return getComputedStyle(document.body).backgroundColor;
+        // Fall back to body, then canvas (white) if no opaque ancestor was found.
+        if (layers.length === 0 || layers[layers.length - 1].a < 0.999) {
+          const bodyBg = getComputedStyle(document.body).backgroundColor;
+          const [br, bg2, bb] = parseColor(bodyBg);
+          const ba = parseAlpha(bodyBg);
+          layers.push({ r: br, g: bg2, b: bb, a: ba });
+          if (ba < 0.999) {
+            layers.push({ r: 255, g: 255, b: 255, a: 1 });
+          }
+        }
+        // Composite from the bottom (farthest from viewer) upward.
+        let r = 0, g = 0, b = 0, a = 0;
+        for (let i = layers.length - 1; i >= 0; i--) {
+          const layer = layers[i];
+          const newA = layer.a + a * (1 - layer.a);
+          if (newA > 0) {
+            r = (layer.r * layer.a + r * a * (1 - layer.a)) / newA;
+            g = (layer.g * layer.a + g * a * (1 - layer.a)) / newA;
+            b = (layer.b * layer.a + b * a * (1 - layer.a)) / newA;
+          }
+          a = newA;
+        }
+        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
       }
       // text-dim: paragraph text colour vs the paragraph's effective background. Above the
       // snap, paragraphs render on .section's opaque white, not body's background — measuring
@@ -380,8 +423,8 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
   for (const p of [0, 0.5, 1]) {
     await page.evaluate((pos) => {
       document.documentElement.style.setProperty("--pos", String(pos));
-      document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
-      document.documentElement.classList.toggle("vibe", pos < 0.25);
+      document.documentElement.style.colorScheme = pos <= 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", pos <= 0.25);
       document.documentElement.classList.toggle("win98", pos > 0.75);
     }, p);
     await page.evaluate(() => document.fonts.ready);
@@ -486,8 +529,8 @@ test("referent vocabulary: three-way face read at vibe, kex, win98 (criterion 17
   async function measureAt(pos: number, label: string) {
     await page.evaluate((p) => {
       document.documentElement.style.setProperty("--pos", String(p));
-      document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
-      document.documentElement.classList.toggle("vibe", p < 0.25);
+      document.documentElement.style.colorScheme = p <= 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", p <= 0.25);
       document.documentElement.classList.toggle("win98", p > 0.75);
     }, pos);
     await page.evaluate(() => document.fonts.ready);
@@ -541,6 +584,12 @@ test("referent vocabulary: three-way face read at vibe, kex, win98 (criterion 17
 // negative, the glass surface's backdrop-filter is non-none with a translucent 1px border, a
 // colored (non-neutral) box-shadow is present, and the border radius exceeds kex's. A token
 // named in the vibe set and applied by no rule is the vacuity this arm exists to catch.
+// Mutations (one per channel, matching font-application's style):
+//   text-align: remove `text-align: center` from html.vibe .page → vibe.textAlign !== "center" reds;
+//   letter-spacing: set the h2's letter-spacing to 0 at vibe → parseFloat(headingLetterSpacing) >= 0 reds;
+//   backdrop-filter: remove `backdrop-filter: blur(10px)` from html.vibe .section → vibeBackdrop === false reds;
+//   box-shadow: set --vibe-glow to `0 25px 50px -12px transparent` → coloredShadow === false reds;
+//   radius: set --vibe-radius to 4px (kex's value) → radius <= kex.radius reds.
 
 test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion 20)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
@@ -549,18 +598,32 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
   async function readAt(pos: number) {
     await page.evaluate((p) => {
       document.documentElement.style.setProperty("--pos", String(p));
-      document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
-      document.documentElement.classList.toggle("vibe", p < 0.25);
+      document.documentElement.style.colorScheme = p <= 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", p <= 0.25);
       document.documentElement.classList.toggle("win98", p > 0.75);
     }, pos);
     // Wait for the style recalc to settle (same Chromium custom-property hazard as the sweep).
+    // Poll the section's computed backgroundColor alpha — a color-mix dependent — rather than
+    // the root --snap1/--snap2 values (J's lesson: snap1 is not the dependent).
     await page.waitForFunction((p) => {
-      const cs = getComputedStyle(document.documentElement);
-      const snap1 = parseFloat(cs.getPropertyValue('--snap1') || '-1');
-      const snap2 = parseFloat(cs.getPropertyValue('--snap2') || '-1');
-      const expectedSnap1 = p <= 0.25 ? 0 : 1;
-      const expectedSnap2 = p > 0.75 ? 1 : 0;
-      return Math.abs(snap1 - expectedSnap1) < 0.001 && Math.abs(snap2 - expectedSnap2) < 0.001;
+      const section = document.querySelector('.section');
+      if (!section) return false;
+      const bg = getComputedStyle(section).backgroundColor;
+      const expectedAlpha = p <= 0.25 ? 0.1 : p > 0.75 ? 1 : 0;
+      let actualAlpha: number;
+      if (bg === 'transparent' || bg === 'rgba(0, 0, 0, 0)') actualAlpha = 0;
+      else {
+        let m = bg.match(/rgba?\(([^)]+)\)/);
+        if (m) {
+          const parts = m[1].split(',').map((x: string) => parseFloat(x.trim()));
+          actualAlpha = parts.length === 4 ? parts[3] : 1;
+        } else {
+          m = bg.match(/color\(srgb\s+[\d.]+\s+[\d.]+\s+[\d.]+(?:\s*\/\s*([\d.]+))?\)/);
+          if (m) actualAlpha = m[1] ? parseFloat(m[1]) : 1;
+          else actualAlpha = -1;
+        }
+      }
+      return Math.abs(actualAlpha - expectedAlpha) < 0.02;
     }, pos);
 
     return page.evaluate(() => {
@@ -645,7 +708,8 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
   expect(parseFloat(vibe.headingLetterSpacing)).toBeLessThan(0);
 
   // 3. non-none backdrop-filter with a translucent 1px border at vibe.
-  const vibeBackdrop = vibe.backdropFilter !== "none" || vibe.webkitBackdropFilter !== "none";
+  const vibeBackdrop = vibe.backdropFilter !== "none" ||
+    (typeof vibe.webkitBackdropFilter === "string" && vibe.webkitBackdropFilter !== "none" && vibe.webkitBackdropFilter !== "");
   expect(vibeBackdrop).toBe(true);
   expect(vibe.borderWidth).toBe(1);
   expect(vibe.borderAlpha).toBeGreaterThan(0);
@@ -663,7 +727,10 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
 
 // Every state any harness records is reachable by a reader: with html.vibe added, each captured
 // state and each gate driver's sampled position asserts that the class set matches the position
-// it claims (vibe below 0.25, neither in the middle, win98 above 0.75). J shipped a resting
+// it claims (vibe at pos <= 0.25, neither in the middle, win98 at pos > 0.75). The boundary
+// positions 0.25 and 0.75 are tested explicitly because the class toggle must coincide with the
+// --snap1/--snap2 token step — at exactly 0.25 snap1=0 (vibe tokens on) so the vibe class must be
+// on, and at exactly 0.75 snap2=0 (kex tokens) so the win98 class must be off. J shipped a resting
 // capture with win98 left on at pos=0.5 and every other arm stayed green beside it; a second class
 // doubles the ways to produce an artifact no reader can reach.
 
@@ -671,11 +738,11 @@ test("reachability: class set matches position at each sampled state (criterion 
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
 
-  for (const p of [0, 0.5, 1]) {
+  for (const p of [0, 0.25, 0.5, 0.75, 1]) {
     await page.evaluate((pos) => {
       document.documentElement.style.setProperty("--pos", String(pos));
-      document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
-      document.documentElement.classList.toggle("vibe", pos < 0.25);
+      document.documentElement.style.colorScheme = pos <= 0.25 ? "dark" : "light";
+      document.documentElement.classList.toggle("vibe", pos <= 0.25);
       document.documentElement.classList.toggle("win98", pos > 0.75);
     }, p);
 
@@ -688,7 +755,7 @@ test("reachability: class set matches position at each sampled state (criterion 
 
     console.log(`criterion 21 (pos=${p}): vibe=${classes} win98=${win98}`);
 
-    if (p < 0.25) {
+    if (p <= 0.25) {
       expect(classes).toBe(true);
       expect(win98).toBe(false);
     } else if (p > 0.75) {

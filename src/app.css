@@ -162,9 +162,12 @@
   --section-padding: calc((1 - var(--snap1)) * 12px + var(--snap1) * var(--snap2) * 8px);
 
   /* Section background — three-way: vibe glass surface (rgba(255,255,255,0.1) translucent so the
-     dark vibe bg shows through), kex transparent, win98 opaque white (#ffffff). The backdrop-filter
-     (applied via html.vibe class) blurs what's behind the glass surface. */
-  --section-bg: color-mix(in srgb, color-mix(in srgb, rgba(255, 255, 255, 0.1), transparent calc(var(--snap1) * 100%)), #ffffff calc(var(--t2) * 100%));
+     dark vibe bg shows through), kex transparent, win98 opaque white (#ffffff). The kex→win98 half
+     uses --snap2 (a step at pos 0.75), not --t2 (continuous from 0.5), so the section background is
+     transparent at kex and steps to opaque white at win98 — no partially transparent white between
+     0.5 and 0.75. The spec locks the midpoint as the page's own kex style and the polarity behavior
+     as a discrete swap, never a cross-fade. The vibe glass at the low end uses --snap1 (step at 0.25). */
+  --section-bg: color-mix(in srgb, color-mix(in srgb, rgba(255, 255, 255, 0.1), transparent calc(var(--snap1) * 100%)), #ffffff calc(var(--snap2) * 100%));
 
   /* Vibe glow shadow — colored (purple) box-shadow present at vibe (snap1=0), transparent elsewhere.
      The single most reproducible AI-slop tell after the color itself. */
