@@ -117,6 +117,14 @@
   --bevel: inset 2px 2px var(--bevel-light), inset -2px -2px var(--bevel-dark);
   --glow: 0 0 12px color-mix(in srgb, var(--vibe-accent) calc(var(--glow-strength) * 60%), transparent);
 
+  /* Chrome bevel — snap2-stepped (not continuous via t2) so the section's frame steps
+     coherently with its background at pos 0.75. Vibe and kex bevels are transparent, so
+     the chrome bevel goes from invisible (below 0.75) to white/gray (above 0.75) in one
+     step — no half-visible outline at the snap boundary. */
+  --chrome-bevel-light: color-mix(in srgb, var(--win-bevel-light) calc(var(--snap2) * 100%), transparent);
+  --chrome-bevel-dark: color-mix(in srgb, var(--win-bevel-dark) calc(var(--snap2) * 100%), transparent);
+  --chrome-bevel: -2px -2px var(--chrome-bevel-light), 2px 2px var(--chrome-bevel-dark);
+
   --surface-2: color-mix(in srgb, var(--bg) 70%, var(--border));
 
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -144,7 +152,11 @@
   --heading-text-transform: lowercase;
   --link-decoration-opacity: calc(35% + var(--snap2) * 65%);
 
-  --measure: calc((1 - var(--snap2)) * 680px + var(--snap2) * 480px);
+  --measure: calc((1 - var(--snap2)) * 680px + var(--snap2) * 435px);
+
+  /* Section padding — snap2-driven so paragraphs sit off the window edge at pos=1 (a raised
+     window's client area has interior margins; at kex the section has no frame so no padding). */
+  --section-padding: calc(var(--snap2) * 8px);
 
   /* Secondary type sizes — routed through --snap2 so the endpoint has one coherent hierarchy.
      At kex (snap2=0): each size is the H-shipped value. At win98 (snap2=1): all shrink to 11px

@@ -155,9 +155,10 @@ test("spectrum: end labels bound to positions (vibe coding → organic human cod
 // --- Oracle: contrast sweep (criterion 18 / WCAG) ---
 
 // The only instrument that samples interior positions. Sweeps --pos in 0.05 steps from 0 to 1
-// and asserts WCAG contrast ≥ 4.5 at every step across three channels: body text-dim vs body
-// bg, text-muted (.meta) vs body bg, and heading text vs heading bg (or body bg when the
-// heading bg is transparent). The vibe→kex segment interpolates a light-on-dark pair through
+// and asserts WCAG contrast ≥ 4.5 at every step across three channels: body text-dim vs its
+// effective background (walking up the tree to the nearest opaque ancestor — paragraphs render
+// on .section's white, not body's bg), text-muted (.meta) vs its effective background, and
+// heading text vs its effective background. The vibe→kex segment interpolates a light-on-dark pair through
 // a dark-on-light pair, so bg and ink converge mid-segment without the snap fix — this arm
 // reds at ~1:1 around pos 0.25 before the fix and greens after. The heading channel catches
 // the win98 caption: white on solid #000080 is ~16:1, but the prior gradient's bottom stop
@@ -179,15 +180,19 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
       document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
       document.documentElement.classList.toggle("win98", p > 0.75);
     }, pos);
-    await page.evaluate(
-      () =>
-        new Promise((r) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
-        ),
-    );
+    // Wait for the style recalc to settle before reading. The section's background steps
+    // at --snap2 (pos 0.75), so its alpha tells us whether the win98 chrome has landed.
+    // A forced reflow alone does not recalculate custom-property dependents in Chromium;
+    // polling until the computed backgroundColor matches the expected state does.
+    // (BLOCKER 1: the two-rAF wait sometimes read a torn style at the snap boundary.)
+    const expectOpaque = pos > 0.75;
+    await page.waitForFunction((expectOp) => {
+      const bg = getComputedStyle(document.querySelector(".section")!).backgroundColor;
+      const transparent = bg.includes("/ 0)") || bg.includes(", 0)");
+      return expectOp ? !transparent : transparent;
+    }, expectOpaque);
 
     const contrasts = await page.evaluate(() => {
-      const cs = getComputedStyle(document.body);
       // getComputedStyle may return color(srgb ...), oklab(...), or rgb() depending on
       // the browser's internal representation of the color-mix result. Handle all three.
       function parseColor(s: string): [number, number, number] {
@@ -252,24 +257,35 @@ test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ 
         if (m) return m[1] ? parseFloat(m[1]) : 1;
         return 1;
       }
-      const bgColor = cs.backgroundColor;
-      // text-dim: body color (the existing channel)
-      const dimContrast = contrast(cs.color, bgColor);
-      // text-muted: read off .meta which uses color: var(--text-muted) with no position-dependent
-      // override (the section h2 heading-color overrides at win98, but .meta does not)
-      const metaCs = getComputedStyle(document.querySelector(".meta")!);
-      const mutedContrast = contrast(metaCs.color, bgColor);
-      // heading: the section h2's text color vs its background. At kex (snap2=0) the heading
-      // bg is transparent, so the effective bg is the page bg. At win98 (snap2=1) the heading
-      // bg is solid #000080. This channel catches the caption-text contrast the prior sweep
-      // missed (BLOCKER 2: white on #1084d0 was 4.01:1).
+      // Walk up the tree to find the nearest ancestor with a non-transparent background.
+      function effectiveBg(el: Element): string {
+        let current: Element | null = el;
+        while (current) {
+          const bg = getComputedStyle(current).backgroundColor;
+          if (parseAlpha(bg) >= 0.01) return bg;
+          current = current.parentElement;
+        }
+        return getComputedStyle(document.body).backgroundColor;
+      }
+      // text-dim: paragraph text colour vs the paragraph's effective background. Above the
+      // snap, paragraphs render on .section's opaque white, not body's background — measuring
+      // against body would pass vacuously if the client area went dark (SHOULD-FIX 5).
+      const pEl = document.querySelector(".section p")!;
+      const pCs = getComputedStyle(pEl);
+      const dimContrast = contrast(pCs.color, effectiveBg(pEl));
+      // text-muted: .meta text colour vs .meta's effective background.
+      const metaEl = document.querySelector(".meta")!;
+      const metaCs = getComputedStyle(metaEl);
+      const mutedContrast = contrast(metaCs.color, effectiveBg(metaEl));
+      // heading: the section h2's text colour vs its effective background. At kex (snap2=0)
+      // the heading bg is transparent, so the effective bg is the section or page bg. At
+      // win98 (snap2=1) the heading bg is solid #000080. This channel catches the caption
+      // contrast the prior sweep missed (white on #1084d0 was 4.01:1).
       const headingEl = document.querySelector(".section h2")!;
       const headingCs = getComputedStyle(headingEl);
-      const headingBg = headingCs.backgroundColor;
-      const headingBgEffective = parseAlpha(headingBg) < 0.01 ? bgColor : headingBg;
-      const headingContrast = contrast(headingCs.color, headingBgEffective);
+      const headingContrast = contrast(headingCs.color, effectiveBg(headingEl));
       return { dim: dimContrast, muted: mutedContrast, heading: headingContrast };
-    });
+    }, pos);
 
     console.log(`contrast sweep: pos=${pos.toFixed(2)} dim=${contrasts.dim.toFixed(2)} muted=${contrasts.muted.toFixed(2)} heading=${contrasts.heading.toFixed(2)}`);
     if (contrasts.dim < 4.5) {

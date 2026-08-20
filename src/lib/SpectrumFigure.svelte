@@ -30,7 +30,9 @@
 
   function update(clientX: number): void {
     const rect = track.getBoundingClientRect();
-    setPos((clientX - rect.left) / rect.width);
+    // Handle stays within the track (14px = half the 28px handle width), so the mapping
+    // accounts for the inset: pos 0 → handle left-aligned, pos 1 → handle right-aligned.
+    setPos((clientX - rect.left - 14) / (rect.width - 28));
   }
 
   function onPointerDown(e: PointerEvent): void {
@@ -137,30 +139,34 @@
 
   .fill {
     position: absolute;
-    top: calc(var(--snap2) * 2px);
-    bottom: calc(var(--snap2) * 2px);
-    left: calc(var(--snap2) * 2px);
-    width: max(0px, calc(var(--pos) * 100% - var(--snap2) * 4px));
+    top: calc(var(--snap2) * 4px);
+    bottom: calc(var(--snap2) * 4px);
+    left: calc(var(--snap2) * 4px);
+    width: max(0px, calc(var(--pos) * 100% - var(--snap2) * 8px));
     background: var(--accent);
     border-radius: calc(var(--radius) - 1px);
-    /* Outset bevel so the fill reads as a raised control at win98 (snap2=1). At kex/vibe
-       (snap2=0) the bevel colours are transparent so only the glow shows. The snap2-driven
-       inset prevents the fill from occluding the track's inset bevel at pos=1. */
-    box-shadow: var(--glow), 2px 2px var(--bevel-light), -2px -2px var(--bevel-dark);
+    /* Outset bevel so the fill reads as a raised control at win98 (snap2=1): white (#ffffff)
+       light on top-left, gray (#808080) dark on bottom-right. At kex/vibe (snap2=0) the
+       bevel colours are transparent so only the glow shows. The 4px snap2-driven inset
+       keeps the 2px outset bevel from reaching the track edge, so the track's inset bevel
+       remains visible — the fill reads as a raised control seated in a sunken track. */
+    box-shadow: var(--glow), -2px -2px var(--bevel-light), 2px 2px var(--bevel-dark);
   }
 
   .handle {
     position: absolute;
-    top: -4px;
-    bottom: -4px;
-    left: calc(var(--pos) * 100%);
+    top: calc((1 - var(--snap2)) * -4px);
+    bottom: calc((1 - var(--snap2)) * -4px);
+    left: calc(14px + var(--pos) * (100% - 28px));
     transform: translateX(-50%);
     width: 28px;
     background: var(--handle-bg);
     border-radius: var(--radius);
-    /* Outset bevel so the thumb reads as a raised win98 button (snap2=1), not a flat black bar.
-       At kex/vibe (snap2=0) the bevel colours are transparent and the background is the ink. */
-    box-shadow: 2px 2px var(--bevel-light), -2px -2px var(--bevel-dark);
+    /* Outset bevel so the thumb reads as a raised win98 button (snap2=1): white light on
+       top-left, gray dark on bottom-right. At kex/vibe (snap2=0) the bevel colours are
+       transparent and the background is the ink. top/bottom retract to 0 at snap2=1 so the
+       thumb stays inside the track — win98 slider thumbs don't overhang the track. */
+    box-shadow: -2px -2px var(--bevel-light), 2px 2px var(--bevel-dark);
     cursor: grab;
     transition: scale 0.1s var(--ease-out);
   }
