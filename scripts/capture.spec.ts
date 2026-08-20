@@ -5,6 +5,8 @@ import { test } from "@playwright/test";
 
 // Runs in the work dir next to a built `dist/`. Serves it over a local origin, captures a
 // full-page desktop + mobile screenshot, then shuts the server down. Driven by shot.ts.
+// At I the overflow check (oracle 7) runs at all three sampled morph positions (0 = vibe,
+// 0.5 = kex, 1 = win98) at each viewport, since Windows 98 chrome is the plausible overflow source.
 
 const root = __dirname;
 const dist = join(root, "dist");
@@ -61,6 +63,9 @@ const views = [
   { name: "mobile.png", width: 390, height: 844 },
 ];
 
+// Three sampled morph positions: 0 = vibe, 0.5 = kex, 1 = win98.
+const morphPositions = [0, 0.5, 1];
+
 for (const view of views) {
   test(`capture ${view.name} (${view.width}x${view.height})`, async ({ browser }) => {
     const page = await browser.newPage({
@@ -87,14 +92,31 @@ for (const view of views) {
       ),
     );
 
-    // Oracle 7: no horizontal overflow at either viewport.
-    const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
-    if (scrollWidth > view.width) {
-      throw new Error(
-        `horizontal overflow at ${view.width}x${view.height}: scrollWidth=${scrollWidth} > ${view.width}`,
+    // Oracle 7: no horizontal overflow at either viewport, at all three morph positions.
+    for (const p of morphPositions) {
+      await page.evaluate((pos) => {
+        document.documentElement.style.setProperty("--pos", String(pos));
+        document.documentElement.style.colorScheme = pos < 0.25 ? "dark" : "light";
+      }, p);
+      await page.evaluate(
+        () =>
+          new Promise((r) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
+          ),
       );
+      const scrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+      if (scrollWidth > view.width) {
+        throw new Error(
+          `horizontal overflow at ${view.width}x${view.height} pos=${p}: scrollWidth=${scrollWidth} > ${view.width}`,
+        );
+      }
     }
 
+    // Capture at the resting position (kex, 0.5) for the screenshot.
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty("--pos", "0.5");
+    });
+    await page.evaluate(() => document.fonts.ready);
     await page.screenshot({ path: join(root, view.name), fullPage: true });
     await page.close();
     console.log(`captured ${view.name}`);

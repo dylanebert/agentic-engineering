@@ -6,12 +6,15 @@ import { assertVaries, type AxisDriver } from "./variance";
 import { assertReducedMotion } from "./reduced";
 import { perceptualDelta } from "./png";
 
-// Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts four
-// things about the spectrum figure — variance across its claimed axis with assertVaries (oracle 5),
-// the reduced-motion resting state with assertReducedMotion (oracle 6), fill-vs-track perceptual
-// distinguishability, and the end labels bound to their positions (oracle 5b) — plus one thing about
-// the page itself: the applied type read off the built page (criterion 8, body IBM Plex Sans 600 /
-// headings Outfit). Runs in the work dir staged by figures.ts, next to a built dist/.
+// Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
+// seven things — four about the spectrum figure, three about the page-wide morph it drives
+// (variance, reduced-motion, contrast sweep), plus the applied type read off the built page
+// (criterion 8). The morph arms (oracles 5, 5b, 6) read the rendered page at three sampled
+// positions (0 = vibe, 0.5 = kex, 1 = win98); the observation channel is a canvas/pixel read of
+// the rendered page (screenshot → perceptualDelta), never a CSS-variable read — a vacuous
+// observation channel is the failure H paid for. The contrast-sweep arm (criterion 12) sweeps
+// --pos in 0.05 steps and asserts WCAG body color-vs-bg contrast ≥ 4.5 — the only instrument
+// that samples interior positions. Runs in the work dir staged by figures.ts, next to a built dist/.
 
 const root = __dirname;
 const dist = join(root, "dist");
@@ -63,30 +66,43 @@ test.afterAll(async () => {
   );
 });
 
-// Spectrum: --pos (0-1) drives the handle and fill. Six steps at 0, 0.2, 0.4, 0.6, 0.8, 1.0.
-const spectrumDriver: AxisDriver = async (page, step) => {
-  await page
-    .locator(".spectrum")
-    .evaluate((el, s) => el.style.setProperty("--pos", String(s / 5)), step);
+// Page-wide morph driver: sets --pos on :root (document.documentElement) so the entire page
+// restyles, and mirrors color-scheme so UA surfaces match a real drag. Three sampled positions:
+// 0 = vibe, 0.5 = kex, 1 = win98.
+const morphDriver: AxisDriver = async (page, step) => {
+  await page.evaluate((s) => {
+    const p = s / 2;
+    document.documentElement.style.setProperty("--pos", String(p));
+    document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+  }, step);
 };
 
-test("spectrum: varies across its axis", async ({ page }) => {
+// --- Oracle 5 (page-scale variance) ---
+
+test("page: varies across the morph axis (whole page)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
-  const result = await assertVaries(page, ".spectrum", spectrumDriver, 6);
-  console.log(`spectrum variance: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  // The observation channel is a pixel read of the rendered page (body screenshot), not a
+  // CSS-variable read — getComputedStyle on --pos would report the value the CSS names, not
+  // the dress that rendered, so a broken morph (all endpoints identical) would pass vacuously.
+  const result = await assertVaries(page, "body", morphDriver, 3);
+  console.log(`page variance: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
   for (const f of result.failures) console.log(`  ${f.reason}`);
   expect(result.failures).toEqual([]);
   expect(result.pass).toBe(true);
 });
 
-test("spectrum: reduced-motion resting state", async ({ page }) => {
+// --- Oracle 6 (reduced-motion resting state, page-scale) ---
+
+test("page: reduced-motion resting state at each morph position", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
-  const result = await assertReducedMotion(page, ".spectrum", spectrumDriver, 3);
-  console.log(`spectrum reduced: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  const result = await assertReducedMotion(page, "body", morphDriver, 3);
+  console.log(`page reduced: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
   for (const f of result.failures) console.log(`  ${f.reason}`);
   expect(result.failures).toEqual([]);
   expect(result.pass).toBe(true);
 });
+
+// --- Figure-level: fill distinguishable from track ---
 
 // Structural admissibility: the --pos driver moves the handle but not the static content
 // carrying the claim. This assertion reads the rendered pixels directly so a collapsed claim
@@ -116,6 +132,8 @@ test("spectrum: fill is perceptually distinguishable from the track", async ({ p
   expect(delta.meanDelta).toBeGreaterThan(3);
 });
 
+// --- Oracle 5b (end labels bound to positions) ---
+
 // F3: label-to-position correspondence. A figure whose claim is a named sequence owes one content
 // assertion binding each label to its index. Swapping SpectrumFigure's two end labels inverts the
 // figure's claim with every existing assertion green — this pins the text at each position.
@@ -130,13 +148,126 @@ test("spectrum: end labels bound to positions (vibe coding → organic human cod
   expect(labels).toEqual(["vibe coding", "organic human code"]);
 });
 
-// Criterion 8: font application. The computed font-family on body must resolve to IBM Plex Sans at
-// weight 600, and on h1/h2 to Outfit — read off the built page, not source. A webfont that fails to
-// load renders the fallback stack silently and every other oracle stays green. document.fonts.check
-// returns true when no @font-face matches (nothing needs loading), so it cannot see the failure.
-// A canvas measurement can: if the webfont never registered, the browser falls back to the generic
-// family and both measurements match. Mutation: point the font link at a nonexistent family and
-// watch this arm red.
+// --- Oracle: contrast sweep (criterion 12 / WCAG) ---
+
+// The only instrument that samples interior positions. Sweeps --pos in 0.05 steps from 0 to 1
+// and asserts WCAG contrast(body color, body background-color) ≥ 4.5 at every step. The vibe→kex
+// segment interpolates a light-on-dark pair through a dark-on-light pair, so bg and ink converge
+// mid-segment without the snap fix — this arm reds at ~1:1 around pos 0.25 before the fix and
+// greens after. Mutation: replace snap1 with t1 in the --bg/--ink/--text-dim/--text-muted
+// definitions and watch this arm red at pos 0.25.
+
+test("page: WCAG contrast ≥ 4.5 across the morph axis (0.05 sweep)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  const failures: { pos: number; contrast: number }[] = [];
+
+  for (let i = 0; i <= 20; i++) {
+    const pos = i / 20; // 0, 0.05, ..., 1.0
+    await page.evaluate((p) => {
+      document.documentElement.style.setProperty("--pos", p.toFixed(4));
+      document.documentElement.style.colorScheme = p < 0.25 ? "dark" : "light";
+    }, pos);
+    await page.evaluate(
+      () =>
+        new Promise((r) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
+        ),
+    );
+
+    const contrast = await page.evaluate(() => {
+      const cs = getComputedStyle(document.body);
+      // getComputedStyle may return color(srgb ...), oklab(...), or rgb() depending on
+      // the browser's internal representation of the color-mix result. Handle all three.
+      function parseColor(s: string): [number, number, number] {
+        // rgb(r, g, b) or rgba(r, g, b, a) — values 0-255
+        let m = s.match(/rgba?\(([^)]+)\)/);
+        if (m) {
+          const parts = m[1].split(",").map((x) => parseFloat(x.trim()));
+          return [parts[0], parts[1], parts[2]];
+        }
+        // color(srgb r g b) — values 0-1, optional / alpha
+        m = s.match(/color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*[\d.]+)?\)/);
+        if (m) {
+          return [parseFloat(m[1]) * 255, parseFloat(m[2]) * 255, parseFloat(m[3]) * 255];
+        }
+        // oklab(L a b) — L 0-1, a/b unbounded, optional / alpha
+        m = s.match(/oklab\(\s*([\d.-]+)\s+([\d.-]+)\s+([\d.-]+)(?:\s*\/\s*[\d.]+)?\s*\)/);
+        if (m) {
+          const L = parseFloat(m[1]), a = parseFloat(m[2]), b = parseFloat(m[3]);
+          const l_ = Math.pow(L + 0.3963377774 * a + 0.2158037573 * b, 3);
+          const m_ = Math.pow(L - 0.1055613458 * a - 0.0638541728 * b, 3);
+          const s_ = Math.pow(L - 0.0894841775 * a - 1.2914855480 * b, 3);
+          let r = 4.0767416621 * l_ - 3.3077115913 * m_ + 0.2309699292 * s_;
+          let g = -1.2684380087 * l_ + 2.6097574051 * m_ - 0.3413193965 * s_;
+          let bl = -0.0041960863 * l_ - 0.7034186147 * m_ + 1.7076147010 * s_;
+          const gamma = (c: number) => c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+          r = Math.max(0, Math.min(1, gamma(r)));
+          g = Math.max(0, Math.min(1, gamma(g)));
+          bl = Math.max(0, Math.min(1, gamma(bl)));
+          return [r * 255, g * 255, bl * 255];
+        }
+        // #rrggbb
+        const h = s.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+        if (h) {
+          return [parseInt(h[1], 16), parseInt(h[2], 16), parseInt(h[3], 16)];
+        }
+        return [0, 0, 0];
+      }
+      function luminance(r: number, g: number, b: number): number {
+        function lin(c: number): number {
+          c /= 255;
+          return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+        }
+        return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+      }
+      const [r1, g1, b1] = parseColor(cs.color);
+      const [r2, g2, b2] = parseColor(cs.backgroundColor);
+      const l1 = luminance(r1, g1, b1);
+      const l2 = luminance(r2, g2, b2);
+      const lighter = Math.max(l1, l2);
+      const darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    });
+
+    console.log(`contrast sweep: pos=${pos.toFixed(2)} contrast=${contrast.toFixed(2)}`);
+    if (contrast < 4.5) {
+      failures.push({ pos, contrast });
+    }
+  }
+
+  for (const f of failures) console.log(`  contrast FAIL: pos=${f.pos.toFixed(2)} contrast=${f.contrast.toFixed(2)}`);
+  expect(failures).toEqual([]);
+});
+
+// --- Oracle 5b (end descriptors bound to their ends) ---
+
+// The morph adds one descriptor per end naming what that end means. Permuting them inverts the
+// claim — the vibe descriptor must sit at pos=0 (left) and the organic descriptor at pos=1 (right).
+// Mutation: swap the two descriptor spans and watch this arm red.
+
+test("spectrum: end descriptors bound to their ends", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const descriptors = await page.locator(".spectrum .descriptors span").evaluateAll((els) =>
+    els.map((el) => el.textContent?.trim() ?? ""),
+  );
+  expect(descriptors).toEqual([
+    "the color a model picks by default",
+    "every line written by hand",
+  ]);
+});
+
+// --- Criterion 8 (font application) ---
+
+// Font application, shipped at H: the computed font-family on body resolves to IBM Plex Sans at
+// weight 600, and on h1/h2 to Outfit, read off the built page. A webfont that fails to load
+// renders the fallback stack silently and every other oracle stays green — this is the only
+// instrument that can see it. Mutation: point index.html's font <link> at a nonexistent family
+// and watch it red (H moved loading off CSS @import onto a preconnect + <link>, so the mutation
+// lives there). getComputedStyle alone cannot see this — the CSS still names the family after
+// the load fails, so the arm measures the family on a canvas against a sans-serif control:
+// identical widths mean the fallback rendered. Both directions observed at H.
 
 /** Measure whether a named webfont is actually rendering, not just specified in CSS. */
 async function isFontRendered(
