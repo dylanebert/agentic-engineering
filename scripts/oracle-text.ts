@@ -2,11 +2,12 @@ import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-// Self-terminating rendered-text oracle (criteria 3 and 4, amended at E's review). Builds the
-// site, stages dist + the oracle spec and its deps into a work dir, runs playwright, exits.
-// Serves the built dist over a local origin (not a dev server), extracts the page's visible text,
-// and runs the voice ban list, the em-dash cap, and the novelty regex over that text. Display-gated
-// like shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
+// Self-terminating rendered-text oracle (criteria 3 and 4, amended at E's review; widened at I
+// to three sampled morph positions). Builds the site, stages dist + the oracle spec and its deps
+// into a work dir, runs playwright, exits. Serves the built dist over a local origin (not a dev
+// server), extracts the page's visible text at all three morph positions (0 = vibe, 0.5 = kex,
+// 1 = win98), and runs the voice ban list, the em-dash cap, and the novelty regex over that text.
+// Display-gated like shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
 
 const repo = join(import.meta.dir, "..");
 const isWsl =

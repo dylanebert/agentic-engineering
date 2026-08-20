@@ -1,20 +1,21 @@
 <script lang="ts">
   // The spectrum: a draggable handle on the vibe-coding to organic-human-code axis. The page's
   // claim is the space between, so the handle rests at the midpoint under reduced motion. The
-  // drag is the standard scrub (ew-resize, full-height hit area, one gesture); the track and
-  // labels hold still while only the handle and fill move (ui.md: nothing moves under its own
-  // gesture). --pos (0-1) drives the handle and fill; the variance gate sets it directly, the
-  // drag handler computes it from the pointer.
-  let root: HTMLElement;
+  // drag is the standard pick-up-and-move (grab/grabbing, full-height hit area, one gesture); the
+  // track and labels hold still while only the handle and fill move (ui.md: nothing moves under
+  // its own gesture). --pos (0-1) is set on :root so the whole page restyles — neon-purple vibe
+  // at 0, kex at 0.5, Windows 98 chrome at 1 (stage I). The variance gate sets --pos directly,
+  // the drag handler computes it from the pointer.
   let track: HTMLElement;
   let pos = $state(0.5);
   let ariaNow = $state(50);
+  let dragging = $state(false);
 
-  // Single code path for both pointer and keyboard: clamp a normalized 0-1 value, write --pos,
-  // keep aria-valuenow truthful.
+  // Single code path for both pointer and keyboard: clamp a normalized 0-1 value, write --pos on
+  // :root so the page-wide morph responds, keep aria-valuenow truthful.
   function setPos(p: number): void {
     pos = Math.max(0, Math.min(1, p));
-    root.style.setProperty("--pos", pos.toFixed(4));
+    document.documentElement.style.setProperty("--pos", pos.toFixed(4));
     ariaNow = Math.round(pos * 100);
   }
 
@@ -26,6 +27,7 @@
   function onPointerDown(e: PointerEvent): void {
     e.preventDefault();
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    dragging = true;
     update(e.clientX);
   }
 
@@ -34,9 +36,14 @@
     update(e.clientX);
   }
 
-  // Keyboard step matches the variance gate's six positions (0, 0.2, 0.4, 0.6, 0.8, 1.0) so
-  // Left/Right walks the same points the gate tests.
-  const STEP = 1 / 5;
+  function onPointerUp(e: PointerEvent): void {
+    if (!(e.currentTarget as HTMLElement).hasPointerCapture(e.pointerId)) return;
+    dragging = false;
+  }
+
+  // Keyboard step matches the variance gate's three sampled positions (0, 0.5, 1) so Left/Right
+  // walks the same points the gate tests.
+  const STEP = 1 / 2;
 
   function onKeyDown(e: KeyboardEvent): void {
     switch (e.key) {
@@ -62,7 +69,7 @@
   }
 </script>
 
-<div class="spectrum" bind:this={root} style="--pos: 0.5">
+<div class="spectrum">
   <div class="axis-labels">
     <span>vibe coding</span>
     <span>organic human code</span>
@@ -73,10 +80,13 @@
     bind:this={track}
     onpointerdown={onPointerDown}
     onpointermove={onPointerMove}
+    onpointerup={onPointerUp}
+    onpointercancel={onPointerUp}
   >
     <div class="fill"></div>
     <div
       class="handle"
+      class:grabbing={dragging}
       role="slider"
       aria-label="position on the spectrum"
       aria-valuemin="0"
@@ -86,12 +96,14 @@
       onkeydown={onKeyDown}
     ></div>
   </div>
-  <p class="caption">vibe coding to organic human code</p>
+  <p class="descriptors">
+    <span class="descriptor-left">the color a model picks by default</span>
+    <span class="descriptor-right">every line written by hand</span>
+  </p>
 </div>
 
 <style>
   .spectrum {
-    --pos: 0.5;
     margin-top: 28px;
   }
 
@@ -110,7 +122,6 @@
     background: var(--surface-2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    cursor: ew-resize;
     touch-action: none;
   }
 
@@ -131,23 +142,24 @@
     width: 28px;
     background: var(--ink);
     border-radius: var(--radius);
+    cursor: grab;
     transition: scale 0.1s var(--ease-out);
+  }
+
+  .handle.grabbing {
+    cursor: grabbing;
   }
 
   .handle:active {
     scale: 1.1;
   }
 
-  .caption {
+  .descriptors {
+    display: flex;
+    justify-content: space-between;
     margin-top: 10px;
     font-family: var(--sans);
     font-size: 13px;
     color: var(--text-muted);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .handle {
-      transition: none;
-    }
   }
 </style>

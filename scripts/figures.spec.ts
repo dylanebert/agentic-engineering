@@ -6,12 +6,13 @@ import { assertVaries, type AxisDriver } from "./variance";
 import { assertReducedMotion } from "./reduced";
 import { perceptualDelta } from "./png";
 
-// Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts four
-// things about the spectrum figure — variance across its claimed axis with assertVaries (oracle 5),
-// the reduced-motion resting state with assertReducedMotion (oracle 6), fill-vs-track perceptual
-// distinguishability, and the end labels bound to their positions (oracle 5b) — plus one thing about
-// the page itself: the applied type read off the built page (criterion 8, body IBM Plex Sans 600 /
-// headings Outfit). Runs in the work dir staged by figures.ts, next to a built dist/.
+// Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts six
+// things — four about the spectrum figure and two about the page-wide morph it drives — plus
+// the applied type read off the built page (criterion 8). The morph arms (oracles 5, 5b, 6) read
+// the rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
+// channel is a canvas/pixel read of the rendered page (screenshot → perceptualDelta), never a
+// CSS-variable read — a vacuous observation channel is the failure H paid for. Runs in the work
+// dir staged by figures.ts, next to a built dist/.
 
 const root = __dirname;
 const dist = join(root, "dist");
@@ -63,30 +64,40 @@ test.afterAll(async () => {
   );
 });
 
-// Spectrum: --pos (0-1) drives the handle and fill. Six steps at 0, 0.2, 0.4, 0.6, 0.8, 1.0.
-const spectrumDriver: AxisDriver = async (page, step) => {
-  await page
-    .locator(".spectrum")
-    .evaluate((el, s) => el.style.setProperty("--pos", String(s / 5)), step);
+// Page-wide morph driver: sets --pos on :root (document.documentElement) so the entire page
+// restyles. Three sampled positions: 0 = vibe, 0.5 = kex, 1 = win98.
+const morphDriver: AxisDriver = async (page, step) => {
+  await page.evaluate((s) => {
+    document.documentElement.style.setProperty("--pos", String(s / 2));
+  }, step);
 };
 
-test("spectrum: varies across its axis", async ({ page }) => {
+// --- Oracle 5 (page-scale variance) ---
+
+test("page: varies across the morph axis (whole page)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
-  const result = await assertVaries(page, ".spectrum", spectrumDriver, 6);
-  console.log(`spectrum variance: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  // The observation channel is a pixel read of the rendered page (body screenshot), not a
+  // CSS-variable read — getComputedStyle on --pos would report the value the CSS names, not
+  // the dress that rendered, so a broken morph (all endpoints identical) would pass vacuously.
+  const result = await assertVaries(page, "body", morphDriver, 3);
+  console.log(`page variance: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
   for (const f of result.failures) console.log(`  ${f.reason}`);
   expect(result.failures).toEqual([]);
   expect(result.pass).toBe(true);
 });
 
-test("spectrum: reduced-motion resting state", async ({ page }) => {
+// --- Oracle 6 (reduced-motion resting state, page-scale) ---
+
+test("page: reduced-motion resting state at each morph position", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
-  const result = await assertReducedMotion(page, ".spectrum", spectrumDriver, 3);
-  console.log(`spectrum reduced: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
+  const result = await assertReducedMotion(page, "body", morphDriver, 3);
+  console.log(`page reduced: pass=${result.pass} steps=${result.steps} failures=${result.failures.length}`);
   for (const f of result.failures) console.log(`  ${f.reason}`);
   expect(result.failures).toEqual([]);
   expect(result.pass).toBe(true);
 });
+
+// --- Figure-level: fill distinguishable from track ---
 
 // Structural admissibility: the --pos driver moves the handle but not the static content
 // carrying the claim. This assertion reads the rendered pixels directly so a collapsed claim
@@ -116,6 +127,8 @@ test("spectrum: fill is perceptually distinguishable from the track", async ({ p
   expect(delta.meanDelta).toBeGreaterThan(3);
 });
 
+// --- Oracle 5b (end labels bound to positions) ---
+
 // F3: label-to-position correspondence. A figure whose claim is a named sequence owes one content
 // assertion binding each label to its index. Swapping SpectrumFigure's two end labels inverts the
 // figure's claim with every existing assertion green — this pins the text at each position.
@@ -130,13 +143,33 @@ test("spectrum: end labels bound to positions (vibe coding → organic human cod
   expect(labels).toEqual(["vibe coding", "organic human code"]);
 });
 
-// Criterion 8: font application. The computed font-family on body must resolve to IBM Plex Sans at
-// weight 600, and on h1/h2 to Outfit — read off the built page, not source. A webfont that fails to
-// load renders the fallback stack silently and every other oracle stays green. document.fonts.check
-// returns true when no @font-face matches (nothing needs loading), so it cannot see the failure.
-// A canvas measurement can: if the webfont never registered, the browser falls back to the generic
-// family and both measurements match. Mutation: point the font link at a nonexistent family and
-// watch this arm red.
+// --- Oracle 5b (end descriptors bound to their ends) ---
+
+// The morph adds one descriptor per end naming what that end means. Permuting them inverts the
+// claim — the vibe descriptor must sit at pos=0 (left) and the organic descriptor at pos=1 (right).
+// Mutation: swap the two descriptor spans and watch this arm red.
+
+test("spectrum: end descriptors bound to their ends", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const descriptors = await page.locator(".spectrum .descriptors span").evaluateAll((els) =>
+    els.map((el) => el.textContent?.trim() ?? ""),
+  );
+  expect(descriptors).toEqual([
+    "the color a model picks by default",
+    "every line written by hand",
+  ]);
+});
+
+// --- Criterion 8 (font application) ---
+
+// Font application, shipped at H: the computed font-family on body resolves to IBM Plex Sans at
+// weight 600, and on h1/h2 to Outfit, read off the built page. A webfont that fails to load
+// renders the fallback stack silently and every other oracle stays green — this is the only
+// instrument that can see it. Mutation: point index.html's font <link> at a nonexistent family
+// and watch it red (H moved loading off CSS @import onto a preconnect + <link>, so the mutation
+// lives there). getComputedStyle alone cannot see this — the CSS still names the family after
+// the load fails, so the arm measures the family on a canvas against a sans-serif control:
+// identical widths mean the fallback rendered. Both directions observed at H.
 
 /** Measure whether a named webfont is actually rendering, not just specified in CSS. */
 async function isFontRendered(
