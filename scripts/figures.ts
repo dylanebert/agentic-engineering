@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 // Self-terminating figure gate (oracle 5 + 6). Builds the site, stages dist + the figure spec
 // and its harness modules into a work dir, runs playwright, exits. Serves the built dist over a
-// local origin (not a dev server), drives each figure across its claimed axis with assertVaries
+// local origin (not a dev server), drives the spectrum figure across its claimed axis with assertVaries
 // and asserts the reduced-motion resting state with assertReducedMotion. Display-gated like
 // shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
 
