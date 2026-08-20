@@ -127,3 +127,61 @@ test("spectrum: end labels bound to positions (vibe coding → organic human cod
   );
   expect(labels).toEqual(["vibe coding", "organic human code"]);
 });
+
+// Criterion 8: font application. The computed font-family on body must resolve to IBM Plex Sans at
+// weight 600, and on h1/h2 to Outfit — read off the built page, not source. A webfont that fails to
+// load renders the fallback stack silently and every other oracle stays green. document.fonts.check
+// returns true when no @font-face matches (nothing needs loading), so it cannot see the failure.
+// A canvas measurement can: if the webfont never registered, the browser falls back to the generic
+// family and both measurements match. Mutation: point the font link at a nonexistent family and
+// watch this arm red.
+
+/** Measure whether a named webfont is actually rendering, not just specified in CSS. */
+async function isFontRendered(
+  page: import("@playwright/test").Page,
+  family: string,
+  weight: string,
+): Promise<boolean> {
+  return page.evaluate(
+    ({ family, weight }) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d")!;
+      const text = "mmmmmmmmmmlli";
+      ctx.font = `${weight} 72px "${family}", sans-serif`;
+      const w1 = ctx.measureText(text).width;
+      ctx.font = `${weight} 72px sans-serif`;
+      const w2 = ctx.measureText(text).width;
+      return Math.abs(w1 - w2) > 0.1;
+    },
+    { family, weight },
+  );
+}
+
+test("font application: body IBM Plex Sans 600, headings Outfit (criterion 8)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+
+  const bodyFont = await page.evaluate(() => {
+    const cs = getComputedStyle(document.body);
+    return { fontFamily: cs.fontFamily, fontWeight: cs.fontWeight };
+  });
+  console.log(`font application: body fontFamily=${bodyFont.fontFamily} weight=${bodyFont.fontWeight}`);
+
+  expect(bodyFont.fontFamily.toLowerCase()).toContain("ibm plex sans");
+  expect(bodyFont.fontWeight).toBe("600");
+
+  const plexRendered = await isFontRendered(page, "IBM Plex Sans", "600");
+  console.log(`font application: IBM Plex Sans rendered=${plexRendered}`);
+  expect(plexRendered).toBe(true);
+
+  const headingFonts = await page.locator("h1, h2").evaluateAll((els) =>
+    els.map((el) => getComputedStyle(el).fontFamily),
+  );
+  for (const ff of headingFonts) {
+    expect(ff.toLowerCase()).toContain("outfit");
+  }
+
+  const outfitRendered = await isFontRendered(page, "Outfit", "600");
+  console.log(`font application: Outfit rendered=${outfitRendered}`);
+  expect(outfitRendered).toBe(true);
+});
