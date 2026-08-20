@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 // Self-terminating figure gate (oracle 5 + 6). Builds the site, stages dist + the figure spec
 // and its harness modules into a work dir, runs playwright, exits. Serves the built dist over a
-// local origin (not a dev server), drives each figure across its claimed axis with assertVaries
+// local origin (not a dev server), drives the spectrum figure across its claimed axis with assertVaries
 // and asserts the reduced-motion resting state with assertReducedMotion. Display-gated like
 // shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
 
@@ -45,12 +45,6 @@ function prepWork(workDir: string): void {
   for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
     cpSync(join(import.meta.dir, f), join(workDir, f));
   }
-  // Stage the spec source file so the 5c assertion can read it from disk.
-  mkdirSync(join(workDir, "src", "lib", "assets"), { recursive: true });
-  cpSync(
-    join(repo, "src", "lib", "assets", "todo-spec.md"),
-    join(workDir, "src", "lib", "assets", "todo-spec.md"),
-  );
   writeFileSync(join(workDir, "package.json"), pkg);
   rmSync(join(workDir, "dist"), { recursive: true, force: true });
   cpSync(join(repo, "dist"), join(workDir, "dist"), { recursive: true });

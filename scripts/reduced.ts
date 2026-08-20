@@ -8,8 +8,7 @@ import type { AxisDriver } from "./variance";
 // has the bug this exists to catch (ui.md: a status view that can render "unknown" as "fine" has
 // the bug it exists to catch — the check is over the render's whole state set, not one frame).
 //
-// Like variance.ts, all four figures now exist; the self-test in instrument.spec.ts proved it
-// works, and figures.spec.ts drives it against the real page.
+// figures.spec.ts drives it against the real page.
 
 export interface ReducedMotionFailure {
   step: number;
