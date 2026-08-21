@@ -11,7 +11,7 @@ import { perceptualDelta } from "./png";
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
 // reduced-motion, contrast sweep, font application), and two new at K (vibe vocabulary and
 // reachability). The referent-vocabulary arm was widened to a three-way read at K but is the
-// same arm, not a new one. The morph arms (oracles 5, 5b, 6) read
+// same arm, not a new one. The morph arms (oracles 5, 6) read
 // the rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
 // channel is a canvas/pixel read of the rendered page (screenshot → perceptualDelta), never a
 // CSS-variable read — a vacuous observation channel is the failure H paid for. The contrast-sweep
