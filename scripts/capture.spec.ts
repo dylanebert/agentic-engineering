@@ -102,9 +102,13 @@ for (const view of views) {
         document.documentElement.classList.toggle("vibe", pos <= 0.25);
         document.documentElement.classList.toggle("win98", pos > 0.75);
       }, p);
-      // Wait for the style recalc to settle — poll the dependent --snap1/--snap2 computed values
-      // rather than the section bg alpha (getComputedStyle may return 'transparent' as a keyword
-      // for color-mix results, which the alpha-parsing regex doesn't match). (BLOCKER 1.)
+      // Wait for the style recalc to settle. This read is scrollWidth, which forces layout and so
+      // forces recalc — that is why this wait is sufficient. --snap1/--snap2 are registered
+      // @property inputs on :root, not dependents; Chromium recalculates them promptly, before the
+      // color-mix results that depend on them. Polling a registered root property is therefore not
+      // a dependent wait — any site reading a computed *derived* value must poll that derived value
+      // instead (the contrast sweep in figures.spec.ts does exactly that, on the section's computed
+      // backgroundColor alpha, and handles 'transparent' explicitly). (BLOCKER 1.)
       await page.waitForFunction((p) => {
         const cs = getComputedStyle(document.documentElement);
         const snap1 = parseFloat(cs.getPropertyValue('--snap1') || '-1');

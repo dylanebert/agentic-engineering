@@ -2,7 +2,7 @@ import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-// Self-terminating figure gate (oracles 5, 5b, 6, contrast sweep, 8 and 17). Builds the site,
+// Self-terminating figure gate (oracles 5, 5b, 6, contrast sweep, 8, 17, 20 and 21). Builds the site,
 // stages dist + the figure spec and its harness modules into a work dir, runs playwright, exits.
 // Serves the built dist over a local origin (not a dev server). Stage I widened oracles 5 and 6
 // from the figure box to the whole page: the morph driver sets --pos on :root at three sampled
@@ -14,9 +14,10 @@ import { join } from "node:path";
 // the built page at all three positions
 // (criterion 8, widened at J). Stage J added the referent-vocabulary arm (criterion 17): at pos=1
 // the rendered body and heading faces must differ from their pos=0.5 resolution on the canvas
-// width-measurement channel. Eight arms total, by name: page-varies, page-reduced-motion,
+// width-measurement channel. Stage K added the vibe-vocabulary arm (criterion 20) and the
+// reachability arm (criterion 21). Ten arms total, by name: page-varies, page-reduced-motion,
 // page-contrast-sweep, fill-distinguishable, end-labels-bound, end-descriptors-bound,
-// font-application, referent-vocabulary. Display-gated like
+// font-application, referent-vocabulary, vibe-vocabulary, reachability. Display-gated like
 // shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
 
 const repo = join(import.meta.dir, "..");
