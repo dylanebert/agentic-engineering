@@ -14,15 +14,15 @@
     "oracle-text": "bun run scripts/oracle-text.ts"
   },
   "devDependencies": {
-    "@playwright/test": "^1.50.0",
-    "@sveltejs/vite-plugin-svelte": "^7.1.2",
+    "@playwright/test": "^1.62.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/bun": "^1.2.0",
-    "@types/node": "^24.13.2",
+    "@types/bun": "^1.4.0",
+    "@types/node": "^24.13.3",
     "@typescript/native": "npm:typescript@7",
-    "svelte": "^5.56.4",
+    "svelte": "^5.56.10",
     "svelte-check": "^4.7.6",
     "typescript": "~6",
-    "vite": "^8.1.1"
+    "vite": "^8.2.2"
   }
 }
