@@ -61,14 +61,16 @@ async function isNonTrivial(page: Page, selector: string): Promise<boolean> {
   });
 }
 
-// Fix 6 (S1): the recorded state-0 red — byte-identity across a single rAF pair raced the
-// page's own first-paint settling (font swap, tile rasterization) right after load, so a
-// perfectly resting state could red on a sub-JND one-level shimmer between its first two
-// frames. The settle is now a condition read, not a fixed frame count: the read polls
-// rAF-separated frames until a consecutive pair is byte-identical (the render reached rest)
-// and reds only when the budget expires — which is exactly the bug class the arm exists to
-// catch, a state that never rests because a transition or animation is still in flight.
+// The recorded state-0 red came from comparing the first post-load raster with the next frame.
+// Discard one frame before establishing the candidate and require two stable pairs: one equal
+// stale pair can no longer be accepted as rest, while a real transition still exhausts the bound.
 export const REST_BUDGET = 12;
+
+async function nextFrame(page: Page): Promise<void> {
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => resolve(null))),
+  );
+}
 
 export async function settleToRest(
   page: Page,
@@ -76,17 +78,34 @@ export async function settleToRest(
   budget: number = REST_BUDGET,
 ): Promise<void> {
   const el = page.locator(selector);
-  let prev = await el.screenshot();
+  await nextFrame(page);
+  let previous = await el.screenshot();
+  let stablePairs = 0;
   for (let i = 0; i < budget; i++) {
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => r(null))),
-    );
+    await nextFrame(page);
     const next = await el.screenshot();
-    if (prev.equals(next)) return;
-    prev = next;
+    if (previous.equals(next)) {
+      stablePairs++;
+      if (stablePairs === 2) return;
+    } else {
+      stablePairs = 0;
+    }
+    previous = next;
   }
   throw new Error(
     `never reached rest within ${budget} rAF-separated frame pairs — a transition or animation is in flight under reduced-motion`,
+  );
+}
+
+async function activeMotion(page: Page, selector: string): Promise<number> {
+  return page.locator(selector).evaluate((el) =>
+    el.getAnimations({ subtree: true }).filter((animation) => {
+      if (animation.playState !== "running") return false;
+      const duration = Number(animation.effect?.getComputedTiming().activeDuration ?? 0);
+      // The page's reduced-motion contract clamps transitions to 0.01ms, below a rendered
+      // frame. Longer finite motion and infinite motion are observable violations.
+      return !Number.isFinite(duration) || duration > 0.01;
+    }).length,
   );
 }
 
@@ -108,6 +127,14 @@ export async function assertReducedMotion(
     await driver(page, step);
     const el = page.locator(selector);
     await el.waitFor({ state: "visible" });
+    const moving = await activeMotion(page, selector);
+    if (moving > 0) {
+      failures.push({
+        step,
+        reason: `state ${step} has ${moving} active animation(s) under reduced-motion`,
+      });
+      continue;
+    }
     try {
       await settleToRest(page, selector);
     } catch (err) {

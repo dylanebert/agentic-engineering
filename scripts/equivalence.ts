@@ -1,59 +1,114 @@
-// Self-terminating pre/post pixel-differential harness (gate 4). Builds nothing itself: the
-// caller passes two already-built dist directories (--pre, --post) and this stages the
-// equivalence spec plus the instrument's own PNG decoder into a work dir, then runs playwright
-// once. Both dists are served and screenshotted inside that single playwright invocation, so
-// environment variance cancels; the spec compares full-page screenshots pairwise at the five
-// sampled morph positions and reds on any pixel the refactor moved.
-//
-// Usage: bun scripts/equivalence.ts --pre <distDir> --post <distDir>
+// Self-terminating pre/post perceptual-differential gate (validation gate 4). With no
+// path arguments it builds the frozen baseline ref and the current candidate, then compares
+// both inside one Playwright invocation. Explicit --pre/--post roots exist for instrument
+// mutation runs; both are required together.
 
-import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
+import { requireDisplay } from "./display";
 
+const repo = join(import.meta.dir, "..");
+const baselineRef = "fe0a1c2";
 const args = process.argv.slice(2);
+
 function take(flag: string): string | undefined {
-  const i = args.indexOf(flag);
-  return i >= 0 ? args[i + 1] : undefined;
+  const index = args.indexOf(flag);
+  return index >= 0 ? args[index + 1] : undefined;
 }
-const pre = take("--pre") ? resolve(take("--pre")!) : undefined;
-const post = take("--post") ? resolve(take("--post")!) : undefined;
-if (!pre || !post) {
-  console.error("equivalence: --pre <distDir> --post <distDir> are required");
+
+function run(command: string[], cwd: string): void {
+  const result = Bun.spawnSync(command, {
+    cwd,
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+  if (result.exitCode !== 0) {
+    throw new Error(`'${command.join(" ")}' failed (exit ${result.exitCode})`);
+  }
+}
+
+function requireDist(label: string, root: string): void {
+  if (!existsSync(join(root, "index.html"))) {
+    throw new Error(`${label} dist has no index.html: ${root}`);
+  }
+}
+
+if (!requireDisplay("equivalence")) process.exit(0);
+
+const requestedPre = take("--pre");
+const requestedPost = take("--post");
+if (!!requestedPre !== !!requestedPost) {
+  console.error("equivalence: --pre and --post must be supplied together");
   process.exit(1);
 }
 
 const work = join(tmpdir(), `agentic-engineering-equivalence-${process.pid}`);
-rmSync(work, { recursive: true, force: true });
-mkdirSync(work, { recursive: true });
-cpSync(join(import.meta.dir, "equivalence.spec.ts"), join(work, "equivalence.spec.ts"));
-cpSync(join(import.meta.dir, "png.ts"), join(work, "png.ts"));
-cpSync(join(import.meta.dir, "playwright.config.ts"), join(work, "playwright.config.ts"));
+const harness = join(work, "harness");
+let exitCode = 1;
 
-writeFileSync(
-  join(work, "package.json"),
-  JSON.stringify({
-    name: "agentic-engineering-equivalence",
-    private: true,
-    dependencies: { "@playwright/test": "^1.50.0" },
-  }),
-);
-const install = Bun.spawnSync(["bun", "install"], { cwd: work, stdout: "inherit", stderr: "inherit" });
-if (install.exitCode !== 0) {
-  console.error("equivalence: bun install failed in work dir");
-  process.exit(1);
+try {
+  rmSync(work, { recursive: true, force: true });
+  mkdirSync(harness, { recursive: true });
+
+  let pre: string;
+  let post: string;
+  if (requestedPre && requestedPost) {
+    pre = resolve(requestedPre);
+    post = resolve(requestedPost);
+  } else {
+    const baseline = join(work, "baseline");
+    const archive = join(work, "baseline.tar");
+    mkdirSync(baseline, { recursive: true });
+    console.log(`equivalence: building baseline ${baselineRef}…`);
+    run(["git", "archive", "--format=tar", `--output=${archive}`, baselineRef], repo);
+    run(["tar", "-xf", archive, "-C", baseline], work);
+    run(["bun", "install", "--silent"], baseline);
+    run(["bun", "run", "build"], baseline);
+
+    console.log("equivalence: building candidate…");
+    run(["bun", "run", "build"], repo);
+    pre = join(baseline, "dist");
+    post = join(repo, "dist");
+  }
+
+  requireDist("baseline", pre);
+  requireDist("candidate", post);
+
+  for (const file of [
+    "equivalence.spec.ts",
+    "png.ts",
+    "reduced.ts",
+    "variance.ts",
+    "playwright.config.ts",
+  ]) {
+    cpSync(join(import.meta.dir, file), join(harness, file));
+  }
+  writeFileSync(
+    join(harness, "package.json"),
+    JSON.stringify({
+      name: "agentic-engineering-equivalence",
+      private: true,
+      dependencies: { "@playwright/test": "^1.50.0" },
+    }),
+  );
+  run(["bun", "install", "--silent"], harness);
+  run(["bunx", "playwright", "install", "chromium"], harness);
+
+  const result = Bun.spawnSync(
+    ["bunx", "playwright", "test", "--config", "playwright.config.ts"],
+    {
+      cwd: harness,
+      env: { ...process.env, EQ_PRE: pre, EQ_POST: post },
+      stdout: "inherit",
+      stderr: "inherit",
+    },
+  );
+  exitCode = result.exitCode ?? 1;
+} catch (error) {
+  console.error(`equivalence: ${(error as Error).message}`);
+} finally {
+  rmSync(work, { recursive: true, force: true });
 }
-const env: Record<string, string> = {
-  ...process.env,
-  EQ_PRE: pre,
-  EQ_POST: post,
-} as Record<string, string>;
-const r = Bun.spawnSync(["bunx", "playwright", "test", "--config", "playwright.config.ts"], {
-  cwd: work,
-  env,
-  stdout: "inherit",
-  stderr: "inherit",
-});
-rmSync(work, { recursive: true, force: true });
-process.exit(r.exitCode ?? 1);
+
+process.exit(exitCode);

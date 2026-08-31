@@ -1,10 +1,12 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { requireDisplay } from "./display";
 
 // Self-terminating full-page capture. Build the site, serve `dist`, screenshot desktop + mobile,
-// exit. Never leaves a dev server or browser open. Display-gated: on bare Linux without a display
-// it skips. On WSL the browser lives on the Windows host, so the work dir (dist + the capture
+// exit. Never leaves a dev server or browser open. A display is required by default; callers
+// that deliberately accept no browser evidence must opt into a skip. On WSL the browser lives
+// on the Windows host, so the work dir (dist + the capture
 // spec + its deps) is staged onto Windows TEMP and driven through PowerShell via `playwright
 // test` — direct playwright library use under bun-on-Windows hangs at launch, the runner works.
 
@@ -12,30 +14,7 @@ const repo = join(import.meta.dir, "..");
 const isWsl =
   process.platform === "linux" && existsSync("/proc/sys/fs/binfmt_misc/WSLInterop");
 
-function detectDisplay(): boolean {
-  // Test-only override: a seat that always has a display (macOS, WSL) cannot reach the skip
-  // branch, so the required-display arms could never be observed red there. This variable
-  // simulates a displayless seat for exactly those mutation runs; unset, detection is untouched.
-  if (process.env.KEX_SIMULATE_NO_DISPLAY === "1") return false;
-  if (isWsl) return true;
-  if (process.platform !== "linux") return true;
-  return !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
-}
-
-if (!detectDisplay()) {
-  // Required-display mode: a seat that would otherwise print a skip must exit red instead, so a
-  // required-display invocation can never mistake a skipped browser run for a green one.
-  const requireDisplay =
-    process.env.KEX_REQUIRE_DISPLAY === "1" || process.argv.includes("--require-display");
-  if (requireDisplay) {
-    console.error(
-      "shot: required-display mode — no display detected, refusing to skip (exit 1)",
-    );
-    process.exit(1);
-  }
-  console.log("shot: no display detected — skipping capture (exit 0)");
-  process.exit(0);
-}
+if (!requireDisplay("shot")) process.exit(0);
 
 function run(cmd: string[], cwd: string): void {
   const r = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });

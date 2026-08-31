@@ -2,7 +2,7 @@ import { createServer, type Server } from "node:http";
 import type { Page } from "@playwright/test";
 import { test, expect } from "@playwright/test";
 import { assertVaries, type AxisDriver } from "./variance";
-import { assertReducedMotion } from "./reduced";
+import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Self-test for the figure instrument (variance + reduced-motion). Serves synthetic fixtures and
@@ -95,11 +95,30 @@ const restlessHtml = `<!doctype html>
   </body>
 </html>`;
 
+const finiteMotionHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      body { margin: 0; padding: 24px; }
+      .figure {
+        width: 200px;
+        height: 200px;
+        background: hsl(calc(var(--step, 0) * 90deg), 70%, 50%);
+        transition: background 120ms linear;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="figure" id="fig"></div>
+  </body>
+</html>`;
+
 const fixtures: Record<string, string> = {
   "/hue": hueHtml,
   "/subperceptual": subPerceptualHtml,
   "/blank": blankHtml,
   "/restless": restlessHtml,
+  "/finite-motion": finiteMotionHtml,
 };
 
 let server: Server;
@@ -128,6 +147,16 @@ test.afterAll(async () => {
 // instead of step — every state renders the same hue, so the variance harness reds.
 const driver: AxisDriver = async (page, step) => {
   await page.locator("#fig").evaluate((el, s) => el.style.setProperty("--step", String(s)), step);
+};
+
+// The mutation lands on the second rAF. A settle that accepts its first equal pair returns on
+// the unchanged frame before this state is applied; the two-pair condition must wait through it.
+const delayedDriver: AxisDriver = async (page, step) => {
+  await page.locator("#fig").evaluate((el, s) => {
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => el.style.setProperty("--step", String(s))),
+    );
+  }, step);
 };
 
 async function settle(page: Page): Promise<void> {
@@ -161,6 +190,14 @@ test("reduced-motion: figure renders fully drawn at every state", async ({ page 
   expect(result.pass).toBe(true);
 });
 
+test("settle: does not accept an equal stale pair before the driven frame arrives", async ({ page }) => {
+  await page.goto(url + "/hue", { waitUntil: "networkidle" });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await delayedDriver(page, 2);
+  await settleToRest(page, "#fig");
+  await expect(page.locator("#fig")).toHaveCSS("background-color", "rgb(38, 217, 217)");
+});
+
 test("variance: sub-perceptual steps red at the perceptual floor (would pass byte-identity)", async ({ page }) => {
   await page.goto(url + "/subperceptual", { waitUntil: "networkidle" });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -190,20 +227,19 @@ test("reduced-motion: blank element reds (never drew is not 'fully drawn')", asy
   expect(result.failures.some((f) => /trivial|blank/i.test(f.reason))).toBe(true);
 });
 
-test("reduced-motion: permanently animating figure reds the settle (never rests)", async ({ page }) => {
+test("reduced-motion: permanently animating figure reds as active motion", async ({ page }) => {
   await page.goto(url + "/restless", { waitUntil: "networkidle" });
   const result = await assertReducedMotion(page, "#fig", driver, STEPS);
   expect(result.pass).toBe(false);
-  // Every step must fail on the settle's rest budget, not on triviality or anything else —
-  // the fixture draws constantly, so the only defect is that it never reaches rest.
   expect(result.failures.length).toBe(STEPS);
-  for (const f of result.failures) {
-    expect(f.reason).toMatch(/never reached rest/);
-  }
-  console.log(
-    `reduced-motion restless: pass=${result.pass} failures=${result.failures.length}/${result.steps}` +
-      ` first reason: ${result.failures[0]?.reason}`,
-  );
+  for (const f of result.failures) expect(f.reason).toMatch(/active animation/);
+});
+
+test("reduced-motion: finite transition reds even though it would settle within the budget", async ({ page }) => {
+  await page.goto(url + "/finite-motion", { waitUntil: "networkidle" });
+  const result = await assertReducedMotion(page, "#fig", driver, STEPS);
+  expect(result.pass).toBe(false);
+  expect(result.failures.some((failure) => /active animation/.test(failure.reason))).toBe(true);
 });
 
 test("guards: assertVaries throws for <2 steps", async ({ page }) => {

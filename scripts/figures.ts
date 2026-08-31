@@ -1,6 +1,7 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { requireDisplay } from "./display";
 
 // Self-terminating figure gate (oracles 5, 5b, 6, contrast sweep, 8, 17, 20 and 21). Builds the site,
 // stages dist + the figure spec and its harness modules into a work dir, runs playwright, exits.
@@ -24,30 +25,7 @@ const repo = join(import.meta.dir, "..");
 const isWsl =
   process.platform === "linux" && existsSync("/proc/sys/fs/binfmt_misc/WSLInterop");
 
-function detectDisplay(): boolean {
-  // Test-only override: a seat that always has a display (macOS, WSL) cannot reach the skip
-  // branch, so the required-display arms could never be observed red there. This variable
-  // simulates a displayless seat for exactly those mutation runs; unset, detection is untouched.
-  if (process.env.KEX_SIMULATE_NO_DISPLAY === "1") return false;
-  if (isWsl) return true;
-  if (process.platform !== "linux") return true;
-  return !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
-}
-
-if (!detectDisplay()) {
-  // Required-display mode: a seat that would otherwise print a skip must exit red instead, so a
-  // required-display invocation can never mistake a skipped browser run for a green one.
-  const requireDisplay =
-    process.env.KEX_REQUIRE_DISPLAY === "1" || process.argv.includes("--require-display");
-  if (requireDisplay) {
-    console.error(
-      "figures: required-display mode — no display detected, refusing to skip (exit 1)",
-    );
-    process.exit(1);
-  }
-  console.log("figures: no display detected — skipping (exit 0)");
-  process.exit(0);
-}
+if (!requireDisplay("figures")) process.exit(0);
 
 function run(cmd: string[], cwd: string): void {
   const r = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
