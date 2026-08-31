@@ -145,25 +145,28 @@
      at pos 0.75) — stepped chrome, not a continuously interpolated color. Its layout companion
      --heading-padding is flat. font-family and text-transform can't be values a dress varies by
      arithmetic either, so they ride the same class blocks. The mono token is not overridden —
-     the page has no <code> element, so a mono swap would be dead vocabulary. */
+     the page has no <code> element, so a mono swap would be dead vocabulary. The neutral reading
+     system uses regular body text, a semibold hierarchy and emphasis, a 624px page measure, and
+     moderate spacing; these values are literal template inputs rather than candidate aliases. */
   --body-font-size: 16px;
-  --body-font-weight: 600;
-  --body-line-height: 1.55;
+  --body-font-weight: 400;
+  --body-line-height: 1.6;
   --title-font-size: 34px;
   --title-font-size-sm: 28px;
-  --heading-font-size: 15px;
+  --heading-font-size: 20px;
   --heading-font-weight: 600;
-  --heading-color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--text-muted));
+  --emphasis-font-weight: 600;
+  --heading-color: var(--ink);
   --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: 0px;
-  --heading-margin-bottom: 10px;
+  --heading-margin-bottom: 14px;
   --heading-text-transform: lowercase;
   --heading-letter-spacing: -0.02em;
   /* Section h2 tracking only — the h1 (.title) keeps --heading-letter-spacing; at kex the h2
      carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
   --h2-letter-spacing: 0em;
   --link-decoration-opacity: 35%;
-  --measure: 680px;
+  --measure: 624px;
   --section-padding: 0px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;
@@ -207,6 +210,7 @@ html.vibe {
   --body-font-size: 16px;
   --body-font-weight: 400;
   --body-line-height: 1.78;
+  --emphasis-font-weight: 700;
   --title-font-size: 48px;
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
@@ -252,6 +256,7 @@ html.vibe .title {
    Case, and `none` was inert because the source is already lowercase. */
 html.win98 {
   --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
+  --heading-color: #ffffff;
   --display: 'Tahoma', 'MS Sans Serif', sans-serif;
   --heading-text-transform: capitalize;
 
@@ -263,6 +268,7 @@ html.win98 {
   --body-font-size: 11px;
   --body-font-weight: 400;
   --body-line-height: 1.4;
+  --emphasis-font-weight: 700;
   --title-font-size: 20px;
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
@@ -317,13 +323,13 @@ a:hover {
 }
 
 strong {
-  font-weight: 700;
+  font-weight: var(--emphasis-font-weight);
   color: var(--ink);
 }
 
 code {
   font-family: var(--mono);
-  /* JetBrains Mono is loaded at 400 only; inheriting body's 600 would render faux-bold. */
+  /* JetBrains Mono is loaded at 400 only; inheriting the body's regular weight would render faux-bold. */
   font-weight: 400;
   font-size: 0.9em;
 }

@@ -22,8 +22,8 @@
     </p>
     <p>
       Everyone is still in the "just try things and see what happens" phase, but
-      I've tried enough to be sure of one part: the hard part moved from writing
-      the code to checking it.
+      I've tried enough to be sure of one part: <strong>the hard part moved from
+      writing the code to checking it.</strong>
     </p>
   </section>
 
@@ -242,7 +242,7 @@
   }
 
   .section {
-    margin-top: 36px;
+    margin-top: 52px;
     /* Three-way background: vibe glass surface (rgba(255,255,255,0.1)) at snap1=0, kex transparent,
      win98 opaque white at snap2=1. The vibe glow shadow is present at snap1=0 and transparent
      elsewhere. At kex (snap1=1, snap2=0) both are transparent, so no visual change. */
@@ -282,7 +282,7 @@
   }
 
   .section p {
-    margin-top: 12px;
+    margin-top: 14px;
     color: var(--text-dim);
   }
 

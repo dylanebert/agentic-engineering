@@ -397,11 +397,11 @@ test("spectrum: end descriptors bound to their ends", async ({ page }) => {
 // --- Criterion 8 (font application, per-position) ---
 
 // Font application, shipped at H: the computed font-family on body resolves to IBM Plex Sans at
-// weight 600, and on h1/h2 to Outfit, read off the built page. A webfont that fails to load
-// renders the fallback stack silently and every other oracle stays green — this is the only
-// instrument that can see it. getComputedStyle alone cannot see this — the CSS still names the
-// family after the load fails, so the arm measures the family on a canvas against a sans-serif
-// control: identical widths mean the fallback rendered. Both directions observed at H.
+// the neutral treatment's regular weight, and on h1/h2 to Outfit, read off the built page. A
+// webfont that fails to load renders the fallback stack silently and every other oracle stays green
+// — this is the only instrument that can see it. getComputedStyle alone cannot see this — the CSS
+// still names the family after the load fails, so the arm measures the family on a canvas against a
+// sans-serif control: identical widths mean the fallback rendered. Both directions observed at H.
 //
 // At J the arm widens from a fixed read at rest to a per-position read at all three sampled
 // positions (0 = vibe, 0.5 = kex, 1 = win98), since the morph now carries a type channel: at
@@ -482,11 +482,11 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
       console.log(`font application (pos=${p}): Inter (heading weight) rendered=${headingInterRendered}`);
       expect(headingInterRendered).toBe(true);
     } else if (p < 0.75) {
-      // Kex: IBM Plex Sans 600 body, Outfit headings
+      // Kex: IBM Plex Sans 400 body, Outfit headings
       expect(bodyFont.fontFamily.toLowerCase()).toContain("ibm plex sans");
-      expect(bodyFont.fontWeight).toBe("600");
+      expect(bodyFont.fontWeight).toBe("400");
 
-      const plexRendered = await isFontRendered(page, "IBM Plex Sans", "600");
+      const plexRendered = await isFontRendered(page, "IBM Plex Sans", "400");
       console.log(`font application (pos=${p}): IBM Plex Sans rendered=${plexRendered}`);
       expect(plexRendered).toBe(true);
 
@@ -860,4 +860,171 @@ test("server: missing assets return 404, not an index.html fallback", async ({ r
   const response = await request.get(`${url}missing-asset.probe`);
   console.log(`missing-asset probe: status=${response.status()}`);
   expect(response.status()).toBe(404);
+});
+
+// S4 structural typography arms. These read the neutral page as rendered, rather than checking
+// token spelling. The values are deliberately independent of the temporary round-1 sheet: this
+// is the selected treatment's contract, not a copy of a candidate's record.
+test("typography: neutral hierarchy keeps headings at body size with restrained emphasis", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty("--pos", "0.5");
+    document.documentElement.classList.remove("vibe", "win98");
+  });
+  await page.waitForFunction(() => getComputedStyle(document.body).fontWeight === "400");
+  const reads = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    const title = getComputedStyle(document.querySelector(".title")!);
+    const heading = getComputedStyle(document.querySelector(".section h2")!);
+    const emphasis = getComputedStyle(document.querySelector("strong")!);
+    return {
+      bodySize: parseFloat(body.fontSize),
+      bodyWeight: body.fontWeight,
+      titleSize: parseFloat(title.fontSize),
+      headingSize: parseFloat(heading.fontSize),
+      headingWeight: heading.fontWeight,
+      emphasisWeight: emphasis.fontWeight,
+    };
+  });
+  console.log(`neutral hierarchy: body=${reads.bodySize}px/${reads.bodyWeight} heading=${reads.headingSize}px/${reads.headingWeight} title=${reads.titleSize}px emphasis=${reads.emphasisWeight}`);
+  expect(reads.headingSize).toBeGreaterThanOrEqual(reads.bodySize);
+  expect(reads.titleSize).toBeGreaterThan(reads.headingSize);
+  expect(reads.bodyWeight).toBe("400");
+  expect(reads.headingWeight).toBe("600");
+  expect(reads.emphasisWeight).toBe("600");
+  expect(Number(reads.emphasisWeight)).toBeGreaterThan(Number(reads.bodyWeight));
+});
+
+test("typography: neutral measure stays in the readable long-form band", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty("--pos", "0.5");
+    document.documentElement.classList.remove("vibe", "win98");
+  });
+  await page.waitForFunction(() => getComputedStyle(document.body).fontSize === "16px");
+  const reads = await page.evaluate(() => {
+    const paragraphs = [...document.querySelectorAll(".page .section p")];
+    let chars = 0;
+    let lines = 0;
+    for (const paragraph of paragraphs) {
+      const range = document.createRange();
+      range.selectNodeContents(paragraph);
+      const tops = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)));
+      chars += (paragraph.textContent ?? "").length;
+      lines += tops.size;
+    }
+    const pageBox = document.querySelector(".page")!.getBoundingClientRect();
+    return {
+      charsPerLine: chars / lines,
+      pageLeft: pageBox.left,
+      pageRight: pageBox.right,
+      pageWidth: pageBox.width,
+      viewportWidth: window.innerWidth,
+    };
+  });
+  console.log(`neutral measure: charsPerLine=${reads.charsPerLine.toFixed(1)} pageWidth=${reads.pageWidth} viewport=${reads.viewportWidth}`);
+  expect(reads.pageWidth).toBe(624);
+  expect(reads.charsPerLine).toBeGreaterThanOrEqual(60);
+  expect(reads.charsPerLine).toBeLessThanOrEqual(75);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobile = await page.evaluate(() => {
+    const page = document.querySelector(".page")!;
+    const box = page.getBoundingClientRect();
+    const styles = getComputedStyle(page);
+    return {
+      left: box.left,
+      right: box.right,
+      width: box.width,
+      paddingLeft: parseFloat(styles.paddingLeft),
+      paddingRight: parseFloat(styles.paddingRight),
+      viewport: window.innerWidth,
+    };
+  });
+  console.log(`mobile measure: page=${mobile.width}px padding=${mobile.paddingLeft}px/${mobile.paddingRight}px`);
+  expect(mobile.width).toBe(mobile.viewport);
+  expect(mobile.paddingLeft).toBe(20);
+  expect(mobile.paddingRight).toBe(20);
+});
+
+test("typography: emphasis and section rhythm are visible on the neutral canvas", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty("--pos", "0.5");
+    document.documentElement.classList.remove("vibe", "win98");
+  });
+  await page.waitForFunction(() => document.querySelector("strong") !== null);
+  const styles = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    const strong = getComputedStyle(document.querySelector("strong")!);
+    const paragraph = getComputedStyle(document.querySelector(".section p")!);
+    return { bodyWeight: body.fontWeight, strongWeight: strong.fontWeight, paragraphGap: parseFloat(paragraph.marginTop) };
+  });
+  expect(styles.strongWeight).not.toBe(styles.bodyWeight);
+  expect(Number(styles.strongWeight)).toBeGreaterThan(Number(styles.bodyWeight));
+
+  const probes = await page.evaluate(() => {
+    const body = getComputedStyle(document.body);
+    const text = "checking the work makes the difference";
+    for (const [name, weight] of [["regular", body.fontWeight], ["emphasis", "600"]]) {
+      const probe = document.createElement("span");
+      probe.dataset.s4Probe = name;
+      probe.textContent = text;
+      const top = name === "regular" ? 0 : 60;
+      probe.style.cssText = `position:fixed;left:0;top:${top}px;width:420px;height:44px;padding:8px;background:#fff;color:#171c24;font:${weight} 16px/1.6 ${body.fontFamily};`;
+      document.body.appendChild(probe);
+    }
+    return true;
+  });
+  expect(probes).toBe(true);
+  const regular = await page.locator('[data-s4-probe="regular"]').screenshot();
+  const emphasis = await page.locator('[data-s4-probe="emphasis"]').screenshot();
+  const emphasisDelta = perceptualDelta(regular, emphasis);
+  console.log(`neutral emphasis canvas: meanDelta=${emphasisDelta.meanDelta.toFixed(2)} extent=${emphasisDelta.extent.toFixed(4)}`);
+  expect(emphasisDelta.meanDelta).toBeGreaterThan(3);
+  await page.locator("[data-s4-probe]").evaluateAll((els) => els.forEach((el) => el.remove()));
+
+  const rhythm = await page.evaluate(() => {
+    const sections = [...document.querySelectorAll(".page .section")];
+    const gaps = sections.slice(1).map((section, index) => {
+      const previousParagraph = sections[index].querySelector("p:last-of-type")!.getBoundingClientRect();
+      const heading = section.querySelector("h2")!.getBoundingClientRect();
+      return heading.top - previousParagraph.bottom;
+    });
+    return { gaps, paragraphGap: parseFloat(getComputedStyle(sections[0].querySelector("p")!).marginTop) };
+  });
+  console.log(`neutral rhythm: gaps=${rhythm.gaps.map((gap) => gap.toFixed(1)).join(",")} paragraphGap=${rhythm.paragraphGap}`);
+  for (const gap of rhythm.gaps) expect(gap).toBeGreaterThan(rhythm.paragraphGap * 2.5);
+});
+
+// The style sweep must not alter the story or the visualization contract. This is intentionally
+// an observation of the consumer DOM: source markup and CSS token names cannot prove what readers
+// receive after Svelte rendering and text-transform.
+test("non-interference: story text, spectrum contract, and placeholder dimensions remain intact", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty("--pos", "0.5");
+    document.documentElement.classList.remove("vibe", "win98");
+  });
+  const result = await page.evaluate(() => {
+    const spectrum = document.querySelector(".spectrum")!;
+    const handle = spectrum.querySelector(".handle")!;
+    const placeholder = document.querySelector(".placeholder")!.getBoundingClientRect();
+    return {
+      text: (document.querySelector(".page") as HTMLElement).innerText,
+      ariaLabel: handle.getAttribute("aria-label"),
+      ariaNow: handle.getAttribute("aria-valuenow"),
+      labels: [...spectrum.querySelectorAll(".axis-labels span")].map((el) => el.textContent?.trim()),
+      descriptors: [...spectrum.querySelectorAll(".descriptors span")].map((el) => el.textContent?.trim()),
+      placeholderHeight: placeholder.height,
+    };
+  });
+  expect(result.text).toContain("Agentic engineering is the practice of directing agents");
+  expect(result.text).toContain("the hard part moved from writing the code to checking it.");
+  expect(result.text).toContain("The three are priced by cost against reach.");
+  expect(result.ariaLabel).toBe("position on the spectrum");
+  expect(result.ariaNow).toBe("50");
+  expect(result.labels).toEqual(["vibe coding", "organic human code"]);
+  expect(result.descriptors).toEqual(["the color a model picks by default", "every line written by hand"]);
+  expect(result.placeholderHeight).toBe(320);
 });
