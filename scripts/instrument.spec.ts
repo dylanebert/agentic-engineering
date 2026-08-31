@@ -69,11 +69,8 @@ const blankHtml = `<!doctype html>
   </body>
 </html>`;
 
-// Mutation fixture for the reduced-motion settle (fix 6): an animation that never settles —
-// infinite keyframes that do NOT honor prefers-reduced-motion. Every rAF-separated frame pair
-// differs in bytes, so the settle's condition read (two byte-identical consecutive frames)
-// can never fire: assertReducedMotion must red every step with the rest-budget expiry, not
-// sample a mid-animation frame and report it resting.
+// Mutation fixture for active-motion detection: infinite keyframes that do not honor
+// prefers-reduced-motion. The animation metadata arm rejects it before the raster settle runs.
 const restlessHtml = `<!doctype html>
 <html lang="en">
   <head>
@@ -113,12 +110,40 @@ const finiteMotionHtml = `<!doctype html>
   </body>
 </html>`;
 
+const rafRepaintHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      body { margin: 0; padding: 24px; }
+      .figure { width: 200px; height: 200px; }
+    </style>
+  </head>
+  <body>
+    <canvas class="figure" id="fig" width="200" height="200"></canvas>
+    <script>
+      const figure = document.querySelector("#fig");
+      const context = figure.getContext("2d");
+      let frame = 0;
+      function repaint() {
+        context.fillStyle = "white";
+        context.fillRect(0, 0, 200, 200);
+        context.fillStyle = "black";
+        context.font = "32px sans-serif";
+        context.fillText(String(frame++), 10, 50);
+        requestAnimationFrame(repaint);
+      }
+      requestAnimationFrame(repaint);
+    </script>
+  </body>
+</html>`;
+
 const fixtures: Record<string, string> = {
   "/hue": hueHtml,
   "/subperceptual": subPerceptualHtml,
   "/blank": blankHtml,
   "/restless": restlessHtml,
   "/finite-motion": finiteMotionHtml,
+  "/raf-repaint": rafRepaintHtml,
 };
 
 let server: Server;
@@ -147,16 +172,6 @@ test.afterAll(async () => {
 // instead of step — every state renders the same hue, so the variance harness reds.
 const driver: AxisDriver = async (page, step) => {
   await page.locator("#fig").evaluate((el, s) => el.style.setProperty("--step", String(s)), step);
-};
-
-// The mutation lands on the second rAF. A settle that accepts its first equal pair returns on
-// the unchanged frame before this state is applied; the two-pair condition must wait through it.
-const delayedDriver: AxisDriver = async (page, step) => {
-  await page.locator("#fig").evaluate((el, s) => {
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => el.style.setProperty("--step", String(s))),
-    );
-  }, step);
 };
 
 async function settle(page: Page): Promise<void> {
@@ -190,12 +205,23 @@ test("reduced-motion: figure renders fully drawn at every state", async ({ page 
   expect(result.pass).toBe(true);
 });
 
-test("settle: does not accept an equal stale pair before the driven frame arrives", async ({ page }) => {
+test("settle: a zero frame-pair budget rejects instead of reporting rest", async ({ page }) => {
   await page.goto(url + "/hue", { waitUntil: "networkidle" });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await delayedDriver(page, 2);
-  await settleToRest(page, "#fig");
-  await expect(page.locator("#fig")).toHaveCSS("background-color", "rgb(38, 217, 217)");
+  await expect(settleToRest(page, "#fig", 0)).rejects.toThrow(/never reached rest within 0/);
+});
+
+test("settle: does not accept one equal stale pair before the driven frame arrives", async () => {
+  const oldFrame = Buffer.from("old");
+  const newFrame = Buffer.from("new");
+  const frames = [oldFrame, oldFrame, newFrame, newFrame, newFrame];
+  let captures = 0;
+  const delayedPage = {
+    evaluate: async () => undefined,
+    locator: () => ({ screenshot: async () => frames[captures++] }),
+  } as unknown as Page;
+
+  await settleToRest(delayedPage, "#fig");
+  expect(captures).toBe(5);
 });
 
 test("variance: sub-perceptual steps red at the perceptual floor (would pass byte-identity)", async ({ page }) => {
@@ -240,6 +266,18 @@ test("reduced-motion: finite transition reds even though it would settle within 
   const result = await assertReducedMotion(page, "#fig", driver, STEPS);
   expect(result.pass).toBe(false);
   expect(result.failures.some((failure) => /active animation/.test(failure.reason))).toBe(true);
+});
+
+test("reduced-motion: rAF repaint invisible to getAnimations reds on rest-budget expiry", async ({ page }) => {
+  await page.goto(url + "/raf-repaint", { waitUntil: "networkidle" });
+  const animationCount = await page
+    .locator("#fig")
+    .evaluate((el) => el.getAnimations({ subtree: true }).length);
+  expect(animationCount).toBe(0);
+  const result = await assertReducedMotion(page, "#fig", driver, 1);
+  expect(result.pass).toBe(false);
+  expect(result.failures).toHaveLength(1);
+  expect(result.failures[0].reason).toMatch(/never reached rest within/);
 });
 
 test("guards: assertVaries throws for <2 steps", async ({ page }) => {

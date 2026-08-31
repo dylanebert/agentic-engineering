@@ -3,7 +3,7 @@
 // both inside one Playwright invocation. Explicit --pre/--post roots exist for instrument
 // mutation runs; both are required together.
 
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { requireDisplay } from "./display";
@@ -74,6 +74,9 @@ try {
 
   requireDist("baseline", pre);
   requireDist("candidate", post);
+  if (realpathSync(pre) === realpathSync(post)) {
+    throw new Error(`baseline and candidate resolve to the same root: ${realpathSync(pre)}`);
+  }
 
   for (const file of [
     "equivalence.spec.ts",
