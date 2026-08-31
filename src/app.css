@@ -134,14 +134,17 @@
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Type/layout channel — the flat neutral template block, the artifact a future post copies.
-     Every value here is the page's own neutral (kex) reading state as a literal, not nested
-     arithmetic over --snap1/--snap2: type and layout are discrete per dress, so each dress owns
-     a complete flat block in its class override (html.vibe / html.win98 below) and this default
-     block is the neutral one. The continuously interpolated channels (color, border, radius,
-     accent, bevel) stay arithmetic above and are not part of the template block. font-family
-     and text-transform can't be values a dress varies by arithmetic either, so they ride the
-     same class blocks. The mono token is not overridden — the page has no <code> element, so a
-     mono swap would be dead vocabulary. */
+     Every type/layout value here is the page's own neutral (kex) reading state as a literal,
+     not nested arithmetic over --snap1/--snap2: type and layout are discrete per dress, so each
+     dress owns a complete flat block in its class override (html.vibe / html.win98 below) and
+     this default block is the neutral one. The continuously interpolated channels (color,
+     border, radius, accent, bevel) stay arithmetic above and are not part of the template
+     block; the --heading-color/--heading-bg pair below is likewise dress chrome, not template
+     vocabulary — it is snap2-stepped (win98's navy caption bar) like the color channels, while
+     its layout companion --heading-padding is flat. font-family and text-transform can't be
+     values a dress varies by arithmetic either, so they ride the same class blocks. The mono
+     token is not overridden — the page has no <code> element, so a mono swap would be dead
+     vocabulary. */
   --body-font-size: 16px;
   --body-font-weight: 600;
   --body-line-height: 1.55;
@@ -151,7 +154,7 @@
   --heading-font-weight: 600;
   --heading-color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--text-muted));
   --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
-  --heading-padding: calc(var(--snap2) * 2px) calc(var(--snap2) * 4px);
+  --heading-padding: 0px;
   --heading-margin-bottom: 10px;
   --heading-text-transform: lowercase;
   --heading-letter-spacing: -0.02em;
@@ -199,7 +202,7 @@ html.vibe {
 
   /* Vibe type/layout block — the flat values the low end reads at, overriding the neutral
      defaults above. Inter 400 body, 1.78 leading, 48px title, 700 headings at -0.025em,
-     672px measure, glass-surface interior padding. */
+     672px measure, glass-surface interior padding. Headings carry no caption padding. */
   --body-font-size: 16px;
   --body-font-weight: 400;
   --body-line-height: 1.78;
@@ -207,6 +210,7 @@ html.vibe {
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
   --heading-font-weight: 700;
+  --heading-padding: 0px;
   --heading-margin-bottom: 12px;
   --heading-letter-spacing: -0.025em;
   --h2-letter-spacing: -0.025em;
@@ -253,7 +257,8 @@ html.win98 {
   /* Win98 type/layout block — Tahoma at 11px body, one coherent shrunken hierarchy: every
      secondary size drops to the win98 body size so section headings are no longer the smallest
      text on the page, link underlines go fully opaque, the measure narrows to the window
-     column, and window client areas carry interior padding. */
+     column, headings gain the caption-bar padding (2px 4px), and window client areas carry
+     interior padding. */
   --body-font-size: 11px;
   --body-font-weight: 400;
   --body-line-height: 1.4;
@@ -261,6 +266,7 @@ html.win98 {
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
   --heading-font-weight: 700;
+  --heading-padding: 2px 4px;
   --heading-margin-bottom: 6px;
   --heading-letter-spacing: 0em;
   --h2-letter-spacing: 0em;

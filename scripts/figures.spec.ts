@@ -7,11 +7,12 @@ import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// ten things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// eleven things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
-// reduced-motion, contrast sweep, font application), and two new at K (vibe vocabulary and
-// reachability). The referent-vocabulary arm was widened to a three-way read at K but is the
-// same arm, not a new one. The morph arms (oracles 5, 6) read
+// reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
+// reachability), and one added at S2 (the server's missing-asset 404 contract). The
+// referent-vocabulary arm was widened to a three-way read at K but is the same arm, not a new
+// one. The morph arms (oracles 5, 6) read
 // the rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
 // channel is a canvas/pixel read of the rendered page (screenshot → perceptualDelta), never a
 // CSS-variable read — a vacuous observation channel is the failure H paid for. The contrast-sweep
@@ -53,8 +54,10 @@ test.beforeAll(async () => {
       // 404 on missing assets — no SPA fallback. Serving index.html for a missing JS/CSS/font
       // request would feed HTML to a script or stylesheet tag; the page still renders its text
       // (inline HTML) and every arm can stay green while the figure's own asset silently never
-      // loaded. The equivalence server already 404s; this server is held to the same contract
-      // and the arm below pins it.
+      // loaded. The equivalence server behaves the same way for missing assets, and the arm
+      // below pins that missing-asset behavior here. (This server does not claim parity with
+      // the equivalence server beyond missing assets; the equivalence server additionally
+      // rejects path traversal, which is out of scope for this gate.)
       res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
       res.end(`missing asset: ${path}`);
       return;
@@ -81,11 +84,6 @@ test.afterAll(async () => {
 // (each dress owns its literal type/layout block), so the class toggle carries it; the color,
 // border, radius, and accent channels stay continuously interpolated through --t1/--t2. Three
 // sampled positions: 0 = vibe, 0.5 = kex, 1 = win98.
-
-// The server above must 404 a missing asset rather than serving index.html for it: a fallback
-// masks a failed script/stylesheet/font request behind a 200, and the page can render its
-// inline text with every other arm green while the figure's own asset never loaded. This arm
-// pins the contract; reverting the catch to the index.html fallback reds it (status 200).
 const morphDriver: AxisDriver = async (page, step) => {
   await page.evaluate((s) => {
     const p = s / 2;
@@ -786,9 +784,11 @@ test("reachability: class set matches position at each sampled state (criterion 
 // --- Server contract: missing assets 404 (no SPA fallback masking) ---
 
 // The figures server is the gate's only view of the built page; a fallback that serves
-// index.html for any missing path turns a broken asset into a 200 carrying HTML. This arm
-// pins the 404 contract the equivalence server already holds. Mutation: revert the catch to
-// the old `path = "index.html"` fallback and the probed status reads 200 — red.
+// index.html for a missing asset turns a broken script/stylesheet/font request into a 200
+// carrying HTML. This arm pins the server's missing-asset 404 behavior — nothing broader:
+// traversal handling is the equivalence server's own concern and is not claimed here.
+// Mutation: revert the catch to the old `path = "index.html"` fallback and the probed status
+// reads 200 — red.
 test("server: missing assets return 404, not an index.html fallback", async ({ request }) => {
   const response = await request.get(`${url}missing-asset.probe`);
   console.log(`missing-asset probe: status=${response.status()}`);

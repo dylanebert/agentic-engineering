@@ -19,9 +19,10 @@
     pos = Math.max(0, Math.min(1, p));
     document.documentElement.style.setProperty("--pos", pos.toFixed(4));
     document.documentElement.style.colorScheme = pos <= 0.25 ? "dark" : "light";
-    // Type/chrome vocabulary swap: font-family and text-transform can't be interpolated, so they
-    // snap via classes when --pos crosses the snap thresholds. html.vibe mirrors at the low end
-    // what html.win98 carries at the high end (criterion 19: layout perturbation owed symmetrically).
+    // Type/layout vocabulary swap: the type/layout channel is flat per dress — each dress owns a
+    // literal block of sizes, weights, measure, and padding that no arithmetic can interpolate —
+    // so it snaps via classes when --pos crosses the snap thresholds. html.vibe mirrors at the low
+    // end what html.win98 carries at the high end (criterion 19: layout perturbation owed symmetrically).
     // vibe uses pos <= 0.25 so the class boundary coincides with the --snap1 token step: at exactly
     // 0.25 snap1=0 (vibe tokens fully on) and the vibe class is on — no single-point mixed state.
     // win98 uses pos > 0.75 (strict) so at exactly 0.75 snap2=0 (kex) and the win98 class is off —
