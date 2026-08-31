@@ -1,6 +1,7 @@
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { requireDisplay } from "./display";
 
 // Self-terminating figure gate (oracles 5, 5b, 6, contrast sweep, 8, 17, 20 and 21). Builds the site,
 // stages dist + the figure spec and its harness modules into a work dir, runs playwright, exits.
@@ -24,16 +25,7 @@ const repo = join(import.meta.dir, "..");
 const isWsl =
   process.platform === "linux" && existsSync("/proc/sys/fs/binfmt_misc/WSLInterop");
 
-function detectDisplay(): boolean {
-  if (isWsl) return true;
-  if (process.platform !== "linux") return true;
-  return !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
-}
-
-if (!detectDisplay()) {
-  console.log("figures: no display detected — skipping (exit 0)");
-  process.exit(0);
-}
+if (!requireDisplay("figures")) process.exit(0);
 
 function run(cmd: string[], cwd: string): void {
   const r = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
@@ -54,6 +46,13 @@ run(["bun", "run", "build"], repo);
 
 function prepWork(workDir: string): void {
   mkdirSync(workDir, { recursive: true });
+  // The work dir is reused across runs. A stray .spec.ts left behind by a debugging session
+  // would be picked up by the config's testMatch and silently widen (or poison) the gate's
+  // assertion set — witnessed: a debug.spec.ts staged directly in the work dir ran on every
+  // figures pass. Remove every spec staging does not own before copying the committed set.
+  for (const f of readdirSync(workDir)) {
+    if (f.endsWith(".spec.ts")) rmSync(join(workDir, f), { force: true });
+  }
   for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
     cpSync(join(import.meta.dir, f), join(workDir, f));
   }

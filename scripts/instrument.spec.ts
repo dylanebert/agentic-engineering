@@ -2,7 +2,7 @@ import { createServer, type Server } from "node:http";
 import type { Page } from "@playwright/test";
 import { test, expect } from "@playwright/test";
 import { assertVaries, type AxisDriver } from "./variance";
-import { assertReducedMotion } from "./reduced";
+import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Self-test for the figure instrument (variance + reduced-motion). Serves synthetic fixtures and
@@ -69,10 +69,81 @@ const blankHtml = `<!doctype html>
   </body>
 </html>`;
 
+// Mutation fixture for active-motion detection: infinite keyframes that do not honor
+// prefers-reduced-motion. The animation metadata arm rejects it before the raster settle runs.
+const restlessHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      body { margin: 0; padding: 24px; }
+      .figure {
+        width: 200px;
+        height: 200px;
+        animation: drift 0.6s linear infinite;
+      }
+      @keyframes drift {
+        from { background: hsl(0, 70%, 50%); }
+        to { background: hsl(340, 70%, 50%); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="figure" id="fig"></div>
+  </body>
+</html>`;
+
+const finiteMotionHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      body { margin: 0; padding: 24px; }
+      .figure {
+        width: 200px;
+        height: 200px;
+        background: hsl(calc(var(--step, 0) * 90deg), 70%, 50%);
+        transition: background 120ms linear;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="figure" id="fig"></div>
+  </body>
+</html>`;
+
+const rafRepaintHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      body { margin: 0; padding: 24px; }
+      .figure { width: 200px; height: 200px; }
+    </style>
+  </head>
+  <body>
+    <canvas class="figure" id="fig" width="200" height="200"></canvas>
+    <script>
+      const figure = document.querySelector("#fig");
+      const context = figure.getContext("2d");
+      let frame = 0;
+      function repaint() {
+        context.fillStyle = "white";
+        context.fillRect(0, 0, 200, 200);
+        context.fillStyle = "black";
+        context.font = "32px sans-serif";
+        context.fillText(String(frame++), 10, 50);
+        requestAnimationFrame(repaint);
+      }
+      requestAnimationFrame(repaint);
+    </script>
+  </body>
+</html>`;
+
 const fixtures: Record<string, string> = {
   "/hue": hueHtml,
   "/subperceptual": subPerceptualHtml,
   "/blank": blankHtml,
+  "/restless": restlessHtml,
+  "/finite-motion": finiteMotionHtml,
+  "/raf-repaint": rafRepaintHtml,
 };
 
 let server: Server;
@@ -134,6 +205,25 @@ test("reduced-motion: figure renders fully drawn at every state", async ({ page 
   expect(result.pass).toBe(true);
 });
 
+test("settle: a zero frame-pair budget rejects instead of reporting rest", async ({ page }) => {
+  await page.goto(url + "/hue", { waitUntil: "networkidle" });
+  await expect(settleToRest(page, "#fig", 0)).rejects.toThrow(/never reached rest within 0/);
+});
+
+test("settle: does not accept one equal stale pair before the driven frame arrives", async () => {
+  const oldFrame = Buffer.from("old");
+  const newFrame = Buffer.from("new");
+  const frames = [oldFrame, oldFrame, newFrame, newFrame, newFrame];
+  let captures = 0;
+  const delayedPage = {
+    evaluate: async () => undefined,
+    locator: () => ({ screenshot: async () => frames[captures++] }),
+  } as unknown as Page;
+
+  await settleToRest(delayedPage, "#fig");
+  expect(captures).toBe(5);
+});
+
 test("variance: sub-perceptual steps red at the perceptual floor (would pass byte-identity)", async ({ page }) => {
   await page.goto(url + "/subperceptual", { waitUntil: "networkidle" });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -161,6 +251,33 @@ test("reduced-motion: blank element reds (never drew is not 'fully drawn')", asy
   const result = await assertReducedMotion(page, "#fig", driver, 1);
   expect(result.pass).toBe(false);
   expect(result.failures.some((f) => /trivial|blank/i.test(f.reason))).toBe(true);
+});
+
+test("reduced-motion: permanently animating figure reds as active motion", async ({ page }) => {
+  await page.goto(url + "/restless", { waitUntil: "networkidle" });
+  const result = await assertReducedMotion(page, "#fig", driver, STEPS);
+  expect(result.pass).toBe(false);
+  expect(result.failures.length).toBe(STEPS);
+  for (const f of result.failures) expect(f.reason).toMatch(/active animation/);
+});
+
+test("reduced-motion: finite transition reds even though it would settle within the budget", async ({ page }) => {
+  await page.goto(url + "/finite-motion", { waitUntil: "networkidle" });
+  const result = await assertReducedMotion(page, "#fig", driver, STEPS);
+  expect(result.pass).toBe(false);
+  expect(result.failures.some((failure) => /active animation/.test(failure.reason))).toBe(true);
+});
+
+test("reduced-motion: rAF repaint invisible to getAnimations reds on rest-budget expiry", async ({ page }) => {
+  await page.goto(url + "/raf-repaint", { waitUntil: "networkidle" });
+  const animationCount = await page
+    .locator("#fig")
+    .evaluate((el) => el.getAnimations({ subtree: true }).length);
+  expect(animationCount).toBe(0);
+  const result = await assertReducedMotion(page, "#fig", driver, 1);
+  expect(result.pass).toBe(false);
+  expect(result.failures).toHaveLength(1);
+  expect(result.failures[0].reason).toMatch(/never reached rest within/);
 });
 
 test("guards: assertVaries throws for <2 steps", async ({ page }) => {

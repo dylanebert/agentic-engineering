@@ -61,6 +61,54 @@ async function isNonTrivial(page: Page, selector: string): Promise<boolean> {
   });
 }
 
+// The recorded state-0 red came from comparing the first post-load raster with the next frame.
+// Discard one frame before establishing the candidate and require two stable pairs: one equal
+// stale pair can no longer be accepted as rest, while a real transition still exhausts the bound.
+export const REST_BUDGET = 12;
+
+async function nextFrame(page: Page): Promise<void> {
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => resolve(null))),
+  );
+}
+
+export async function settleToRest(
+  page: Page,
+  selector: string,
+  budget: number = REST_BUDGET,
+): Promise<void> {
+  const el = page.locator(selector);
+  await nextFrame(page);
+  let previous = await el.screenshot();
+  let stablePairs = 0;
+  for (let i = 0; i < budget; i++) {
+    await nextFrame(page);
+    const next = await el.screenshot();
+    if (previous.equals(next)) {
+      stablePairs++;
+      if (stablePairs === 2) return;
+    } else {
+      stablePairs = 0;
+    }
+    previous = next;
+  }
+  throw new Error(
+    `never reached rest within ${budget} rAF-separated frame pairs — a transition or animation is in flight under reduced-motion`,
+  );
+}
+
+async function activeMotion(page: Page, selector: string): Promise<number> {
+  return page.locator(selector).evaluate((el) =>
+    el.getAnimations({ subtree: true }).filter((animation) => {
+      if (animation.playState !== "running") return false;
+      const duration = Number(animation.effect?.getComputedTiming().activeDuration ?? 0);
+      // The page's reduced-motion contract clamps transitions to 0.01ms, below a rendered
+      // frame. Longer finite motion and infinite motion are observable violations.
+      return !Number.isFinite(duration) || duration > 0.01;
+    }).length,
+  );
+}
+
 export async function assertReducedMotion(
   page: Page,
   selector: string,
@@ -79,20 +127,20 @@ export async function assertReducedMotion(
     await driver(page, step);
     const el = page.locator(selector);
     await el.waitFor({ state: "visible" });
-    // One rAF to let the browser apply the step.
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => r(null))),
-    );
-    const first = await el.screenshot();
-    // A second screenshot after another rAF — if it differs, a transition is still in flight.
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => r(null))),
-    );
-    const second = await el.screenshot();
-    if (!first.equals(second)) {
+    const moving = await activeMotion(page, selector);
+    if (moving > 0) {
       failures.push({
         step,
-        reason: `state ${step} is not stable across frames — a transition is in flight under reduced-motion`,
+        reason: `state ${step} has ${moving} active animation(s) under reduced-motion`,
+      });
+      continue;
+    }
+    try {
+      await settleToRest(page, selector);
+    } catch (err) {
+      failures.push({
+        step,
+        reason: `state ${step} is not stable across frames — ${(err as Error).message}`,
       });
       continue;
     }

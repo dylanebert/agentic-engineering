@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { assertVaries, type AxisDriver } from "./variance";
-import { assertReducedMotion } from "./reduced";
+import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
@@ -122,13 +122,16 @@ test("spectrum: fill is perceptually distinguishable from the track", async ({ p
   const track = page.locator(".spectrum .track");
   // Hide the handle so the screenshot isolates fill-vs-track color, not handle position.
   await page.locator(".spectrum .handle").evaluate((el) => (el.style.visibility = "hidden"));
+  // Condition read, not a fixed wait: each driven state must render and reach rest (two
+  // consecutive rAF-separated frames byte-identical) before the screenshot is taken. A fixed
+  // 50ms wait raced the repaint; the settle reds on expiry instead of sampling a stale frame.
   // pos=0: track entirely unfilled (shows --surface-2)
   await spectrum.evaluate((el) => el.style.setProperty("--pos", "0"));
-  await page.waitForTimeout(50);
+  await settleToRest(page, ".spectrum .track");
   const unfilled = await track.screenshot();
   // pos=1: track entirely filled (shows --accent)
   await spectrum.evaluate((el) => el.style.setProperty("--pos", "1"));
-  await page.waitForTimeout(50);
+  await settleToRest(page, ".spectrum .track");
   const filled = await track.screenshot();
   // Reuse the JND-grounded delta from png.ts (JND=3 for 8-bit sRGB). If the fill were the same
   // color as the track, meanDelta would be 0 (only border-radius anti-aliasing differs a few

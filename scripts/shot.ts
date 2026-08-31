@@ -1,10 +1,12 @@
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { requireDisplay } from "./display";
 
 // Self-terminating full-page capture. Build the site, serve `dist`, screenshot desktop + mobile,
-// exit. Never leaves a dev server or browser open. Display-gated: on bare Linux without a display
-// it skips. On WSL the browser lives on the Windows host, so the work dir (dist + the capture
+// exit. Never leaves a dev server or browser open. A display is required by default; callers
+// that deliberately accept no browser evidence must opt into a skip. On WSL the browser lives
+// on the Windows host, so the work dir (dist + the capture
 // spec + its deps) is staged onto Windows TEMP and driven through PowerShell via `playwright
 // test` — direct playwright library use under bun-on-Windows hangs at launch, the runner works.
 
@@ -12,16 +14,7 @@ const repo = join(import.meta.dir, "..");
 const isWsl =
   process.platform === "linux" && existsSync("/proc/sys/fs/binfmt_misc/WSLInterop");
 
-function detectDisplay(): boolean {
-  if (isWsl) return true;
-  if (process.platform !== "linux") return true;
-  return !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
-}
-
-if (!detectDisplay()) {
-  console.log("shot: no display detected — skipping capture (exit 0)");
-  process.exit(0);
-}
+if (!requireDisplay("shot")) process.exit(0);
 
 function run(cmd: string[], cwd: string): void {
   const r = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
@@ -47,6 +40,11 @@ mkdirSync(shots, { recursive: true });
 // are left in place across runs — refreshing only dist + the spec keeps reruns fast.
 function prepWork(workDir: string): void {
   mkdirSync(workDir, { recursive: true });
+  // The work dir is reused across runs; sweep stray .spec.ts files a debugging session could
+  // have staged there before copying the committed set (same hazard as figures.ts's prepWork).
+  for (const f of readdirSync(workDir)) {
+    if (f.endsWith(".spec.ts")) rmSync(join(workDir, f), { force: true });
+  }
   cpSync(join(import.meta.dir, "capture.spec.ts"), join(workDir, "capture.spec.ts"));
   cpSync(join(import.meta.dir, "playwright.config.ts"), join(workDir, "playwright.config.ts"));
   writeFileSync(join(workDir, "package.json"), capturePkg);
