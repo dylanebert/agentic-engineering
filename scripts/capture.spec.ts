@@ -62,12 +62,14 @@ const views = [
   { name: "desktop.png", width: 1440, height: 900 },
   { name: "mobile.png", width: 390, height: 844 },
 ];
+const goldenBrowser = "chromium";
+const goldenPlatform = "darwin";
 
 // Three sampled morph positions: 0 = vibe, 0.5 = kex, 1 = win98.
 const morphPositions = [0, 0.5, 1];
 
 for (const view of views) {
-  test(`capture ${view.name} (${view.width}x${view.height})`, async ({ browser }) => {
+  test(`capture ${view.name} (${view.width}x${view.height})`, async ({ browser }, testInfo) => {
     const page = await browser.newPage({
       viewport: { width: view.width, height: view.height },
       deviceScaleFactor: 2,
@@ -161,12 +163,19 @@ for (const view of views) {
     if (restVibe) throw new Error("reachability: vibe class left on at resting pos=0.5");
     if (restWin98) throw new Error("reachability: win98 class left on at resting pos=0.5");
     await page.evaluate(() => document.fonts.ready);
-    // Platform-stamped golden: Playwright appends the browser and platform to this name, so
-    // byte comparisons never pretend pixels are portable across rendering environments.
-    await expect(page).toHaveScreenshot(view.name === "desktop.png" ? "neutral-desktop.png" : "neutral-mobile.png", {
-      fullPage: true,
-    });
+    // Always write the portable capture first, then compare only on the stamped seat. A WSL
+    // capture runs on Windows and has no Darwin golden by design.
     await page.screenshot({ path: join(root, view.name), fullPage: true });
+    const seat = `${testInfo.project.name}-${process.platform}`;
+    if (seat === `${goldenBrowser}-${goldenPlatform}`) {
+      // Playwright appends the project and platform to the snapshot filename.
+      await expect(page).toHaveScreenshot(
+        view.name === "desktop.png" ? "neutral-desktop.png" : "neutral-mobile.png",
+        { fullPage: true },
+      );
+    } else {
+      console.log(`golden: skipped on ${seat}; stamped seat is ${goldenBrowser}-${goldenPlatform}`);
+    }
     await page.close();
     console.log(`captured ${view.name}`);
   });

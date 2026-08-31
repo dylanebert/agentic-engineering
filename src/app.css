@@ -167,6 +167,9 @@
      carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
   --h2-letter-spacing: 0em;
   --link-decoration-opacity: 35%;
+  /* S5 local selection sweep on Chromium/Darwin: 548px → 72 chars (pass), 549px → 76
+     chars (fail). 548px is the selected widest passing value; this one-off upper-edge
+     selection is separate from the portable 60–75-character arm. */
   --measure: 548px;
   --section-padding: 0px;
   --meta-font-size: 14px;

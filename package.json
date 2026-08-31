@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json",
     "shot": "bun run scripts/shot.ts",
+    "shot:update": "bun run scripts/shot.ts --update-snapshots",
     "instrument": "bun run scripts/instrument.ts",
     "equivalence": "bun run scripts/equivalence.ts",
     "figures": "bun run scripts/figures.ts",

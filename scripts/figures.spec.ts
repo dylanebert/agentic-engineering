@@ -12,8 +12,8 @@ import { perceptualDelta } from "./png";
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
 // reachability), one added at S2 (the server's missing-asset 404 contract), one added at
 // S2's repair round (production-path reachability: real slider input, not a self-set driver), and
-// four S4/S5 neutral-template arms (hierarchy, readable measure, production strong emphasis and rhythm,
-// non-interference).
+// five S4/S5 neutral-template arms (hierarchy, portable readable measure, selected measure,
+// production strong emphasis and rhythm, non-interference).
 // The reachability claim K shipped drove --pos and toggled the classes itself, then asserted the
 // class set — circular about the production path; the repair round keeps that coverage under a
 // driver-parity name and adds the arm that reads classes after real keyboard/pointer input. The
@@ -945,7 +945,8 @@ test("typography: neutral measure stays in the readable long-form band", async (
     };
   });
   console.log(`neutral measure: maximumNonFinalLine=${reads.maximumNonFinalLine} pageWidth=${reads.pageWidth} viewport=${reads.viewportWidth}`);
-  expect(reads.pageWidth).toBe(548);
+  // This is the standing portability contract, intentionally broader than S5's one-off
+  // local selection arm below.
   expect(reads.maximumNonFinalLine).toBeGreaterThanOrEqual(60);
   expect(reads.maximumNonFinalLine).toBeLessThanOrEqual(75);
 
@@ -967,6 +968,51 @@ test("typography: neutral measure stays in the readable long-form band", async (
   expect(mobile.width).toBe(mobile.viewport);
   expect(mobile.paddingLeft).toBe(20);
   expect(mobile.paddingRight).toBe(20);
+});
+
+test("typography: selected desktop measure is the widest passing local sweep", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+  const sweep = await page.evaluate(() => {
+    const readMaximum = (width: number): number => {
+      const style = document.createElement("style");
+      style.textContent = `.page { max-width: ${width}px !important; }`;
+      document.head.append(style);
+      const lineLengths: number[] = [];
+      for (const paragraph of document.querySelectorAll(".page .section p")) {
+        const lines = new Map<number, number>();
+        const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
+        let node: Node | null;
+        while ((node = walker.nextNode())) {
+          const text = node.textContent ?? "";
+          for (let offset = 0; offset < text.length; offset += 1) {
+            const range = document.createRange();
+            range.setStart(node, offset);
+            range.setEnd(node, offset + 1);
+            const rect = range.getBoundingClientRect();
+            if (rect.width === 0) continue;
+            const top = Math.round(rect.top);
+            lines.set(top, (lines.get(top) ?? 0) + 1);
+          }
+        }
+        lineLengths.push(...[...lines.values()].slice(0, -1));
+      }
+      style.remove();
+      return Math.max(...lineLengths);
+    };
+    const selected = readMaximum(548);
+    const next = readMaximum(549);
+    return {
+      current: document.querySelector(".page")!.getBoundingClientRect().width,
+      selected,
+      next,
+    };
+  });
+  console.log(`neutral measure selection: current=${sweep.current}px, 548px max=${sweep.selected}, 549px max=${sweep.next}`);
+  expect(sweep.current).toBe(548);
+  expect(sweep.selected).toBeLessThanOrEqual(75);
+  expect(sweep.selected).toBeGreaterThanOrEqual(72);
+  expect(sweep.next).toBeGreaterThan(75);
 });
 
 test("typography: production strong emphasis and section rhythm are visible on the neutral canvas", async ({ page }) => {
