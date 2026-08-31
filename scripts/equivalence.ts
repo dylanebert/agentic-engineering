@@ -92,7 +92,7 @@ try {
     JSON.stringify({
       name: "agentic-engineering-equivalence",
       private: true,
-      dependencies: { "@playwright/test": "^1.50.0" },
+      dependencies: { "@playwright/test": "1.62.1" },
     }),
   );
   run(["bun", "install", "--silent"], harness);

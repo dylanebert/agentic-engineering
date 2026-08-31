@@ -1,12 +1,12 @@
 import { createServer, type Server } from "node:http";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
-// Runs in the work dir next to a built `dist/`. Serves it over a local origin, captures a
-// full-page desktop + mobile screenshot, then shuts the server down. Driven by shot.ts.
-// At I the overflow check (oracle 7) runs at all three sampled morph positions (0 = vibe,
-// 0.5 = kex, 1 = win98) at each viewport, since Windows 98 chrome is the plausible overflow source.
+// Runs in the work dir next to a built `dist/`. Serves it over a local origin, checks reachability
+// and horizontal overflow at three morph positions, then captures full-page desktop and mobile
+// screenshots. The neutral captures compare against platform-stamped goldens on the producing seat;
+// shot.ts stages this spec and collects the portable captures.
 
 const root = __dirname;
 const dist = join(root, "dist");
@@ -62,12 +62,14 @@ const views = [
   { name: "desktop.png", width: 1440, height: 900 },
   { name: "mobile.png", width: 390, height: 844 },
 ];
+const goldenBrowser = "chromium";
+const goldenPlatform = "darwin";
 
 // Three sampled morph positions: 0 = vibe, 0.5 = kex, 1 = win98.
 const morphPositions = [0, 0.5, 1];
 
 for (const view of views) {
-  test(`capture ${view.name} (${view.width}x${view.height})`, async ({ browser }) => {
+  test(`capture ${view.name} (${view.width}x${view.height})`, async ({ browser }, testInfo) => {
     const page = await browser.newPage({
       viewport: { width: view.width, height: view.height },
       deviceScaleFactor: 2,
@@ -161,7 +163,19 @@ for (const view of views) {
     if (restVibe) throw new Error("reachability: vibe class left on at resting pos=0.5");
     if (restWin98) throw new Error("reachability: win98 class left on at resting pos=0.5");
     await page.evaluate(() => document.fonts.ready);
+    // Always write the portable capture first, then compare only on the stamped seat. A WSL
+    // capture runs on Windows and has no Darwin golden by design.
     await page.screenshot({ path: join(root, view.name), fullPage: true });
+    const seat = `${testInfo.project.name}-${process.platform}`;
+    if (seat === `${goldenBrowser}-${goldenPlatform}`) {
+      // Playwright appends the project and platform to the snapshot filename.
+      await expect(page).toHaveScreenshot(
+        view.name === "desktop.png" ? "neutral-desktop.png" : "neutral-mobile.png",
+        { fullPage: true },
+      );
+    } else {
+      console.log(`golden: skipped on ${seat}; stamped seat is ${goldenBrowser}-${goldenPlatform}`);
+    }
     await page.close();
     console.log(`captured ${view.name}`);
   });

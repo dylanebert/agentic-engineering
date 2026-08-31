@@ -33,7 +33,7 @@ function run(cmd: string[], cwd: string): void {
 }
 
 const pkg = JSON.stringify(
-  { name: "agentic-engineering-oracle-text", private: true, dependencies: { "@playwright/test": "^1.50.0" } },
+  { name: "agentic-engineering-oracle-text", private: true, dependencies: { "@playwright/test": "1.62.1" } },
   null,
   2,
 );

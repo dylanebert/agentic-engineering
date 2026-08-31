@@ -8,4 +8,5 @@ export default defineConfig({
   retries: 0,
   reporter: "list",
   use: { headless: true },
+  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
 });

@@ -146,7 +146,7 @@
      font-family and text-transform can't be values a dress varies by arithmetic either, so they
      ride the same class blocks. The mono token is not overridden — the page has no <code> element,
      so a mono swap would be dead vocabulary. The neutral reading system uses regular body text,
-     a semibold hierarchy, a 500px page measure, and moderate spacing; these values are literal
+     a semibold hierarchy, a 548px page measure, and moderate spacing; these values are literal
      template inputs rather than candidate aliases. */
   --body-font-size: 16px;
   --body-font-weight: 400;
@@ -167,7 +167,10 @@
      carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
   --h2-letter-spacing: 0em;
   --link-decoration-opacity: 35%;
-  --measure: 500px;
+  /* S5 local selection sweep on Chromium/Darwin: 548px → 72 chars (pass), 549px → 76
+     chars (fail). 548px is the selected widest passing value; this one-off upper-edge
+     selection is separate from the portable 60–75-character arm. */
+  --measure: 548px;
   --section-padding: 0px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;

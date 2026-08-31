@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { requireDisplay } from "./display";
@@ -16,6 +16,14 @@ const isWsl =
 
 if (!requireDisplay("shot")) process.exit(0);
 
+const updateSnapshots =
+  process.env.UPDATE_SNAPSHOTS === "1" || process.argv.includes("--update-snapshots");
+const lock = readFileSync(join(repo, "bun.lock"), "utf8");
+const playwrightVersion = lock.match(
+  /^\s*"@playwright\/test": \["@playwright\/test@([^"]+)"/m,
+)?.[1];
+if (!playwrightVersion) throw new Error("shot: bun.lock has no exact @playwright/test version");
+
 function run(cmd: string[], cwd: string): void {
   const r = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
   if (r.exitCode !== 0) {
@@ -25,7 +33,11 @@ function run(cmd: string[], cwd: string): void {
 }
 
 const capturePkg = JSON.stringify(
-  { name: "agentic-engineering-capture", private: true, dependencies: { "@playwright/test": "^1.50.0" } },
+  {
+    name: "agentic-engineering-capture",
+    private: true,
+    dependencies: { "@playwright/test": playwrightVersion },
+  },
   null,
   2,
 );
@@ -47,6 +59,9 @@ function prepWork(workDir: string): void {
   }
   cpSync(join(import.meta.dir, "capture.spec.ts"), join(workDir, "capture.spec.ts"));
   cpSync(join(import.meta.dir, "playwright.config.ts"), join(workDir, "playwright.config.ts"));
+  rmSync(join(workDir, "capture.spec.ts-snapshots"), { recursive: true, force: true });
+  const snapshots = join(import.meta.dir, "capture.spec.ts-snapshots");
+  if (existsSync(snapshots)) cpSync(snapshots, join(workDir, "capture.spec.ts-snapshots"), { recursive: true });
   writeFileSync(join(workDir, "package.json"), capturePkg);
   rmSync(join(workDir, "dist"), { recursive: true, force: true });
   cpSync(join(repo, "dist"), join(workDir, "dist"), { recursive: true });
@@ -55,6 +70,16 @@ function prepWork(workDir: string): void {
 }
 
 function collect(workDir: string): void {
+  if (updateSnapshots) {
+    const source = join(workDir, "capture.spec.ts-snapshots");
+    if (!existsSync(source)) {
+      console.error("shot: expected platform-stamped snapshots were not produced");
+      process.exit(1);
+    }
+    const destination = join(import.meta.dir, "capture.spec.ts-snapshots");
+    rmSync(destination, { recursive: true, force: true });
+    cpSync(source, destination, { recursive: true });
+  }
   for (const name of ["desktop.png", "mobile.png"]) {
     const src = join(workDir, name);
     if (!existsSync(src)) {
@@ -85,7 +110,7 @@ if (isWsl) {
     [
       "powershell.exe",
       "-Command",
-      `$env:PLAYWRIGHT_BROWSERS_PATH = "$env:LOCALAPPDATA\\ms-playwright"; cd '${workWin}'; bun install --silent; bunx playwright install chromium; bunx playwright test --config playwright.config.ts`,
+      `$env:PLAYWRIGHT_BROWSERS_PATH = "$env:LOCALAPPDATA\\ms-playwright"; cd '${workWin}'; bun install --silent; bunx playwright install chromium; bunx playwright test --config playwright.config.ts${updateSnapshots ? " --update-snapshots" : ""}`,
     ],
     { stdout: "inherit", stderr: "inherit", timeout: 480_000 },
   );
@@ -99,7 +124,17 @@ if (isWsl) {
   prepWork(work);
   run(["bun", "install", "--silent"], work);
   run(["bunx", "playwright", "install", "chromium"], work);
-  run(["bunx", "playwright", "test", "--config", "playwright.config.ts"], work);
+  run(
+    [
+      "bunx",
+      "playwright",
+      "test",
+      "--config",
+      "playwright.config.ts",
+      ...(updateSnapshots ? ["--update-snapshots"] : []),
+    ],
+    work,
+  );
   collect(work);
 }
 
