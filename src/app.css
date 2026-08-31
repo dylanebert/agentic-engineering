@@ -133,33 +133,42 @@
   --display: 'Outfit', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Type channel — driven by --snap1 (step at pos 0.25, vibe→kex) and --snap2 (step at pos 0.75,
-     kex→win98), symmetric. At K the type/layout role --snap2 carried at 0.75 is owed at the low
-     end too (criterion 19: the morph perturbed layout toward win98 only), so --snap1 gains it.
-     Vibe (snap1=0): Inter 400, 1.78 leading, 48px title, 700 headings at -0.025em, 672px measure.
-     Kex (snap1=1, snap2=0): IBM Plex Sans 600 / Outfit at 16px, 1.55 leading, 34px title.
-     Win98 (snap1=1, snap2=1): Tahoma at 11px. font-family and text-transform can't be interpolated,
-     so they snap via the html.vibe / html.win98 classes (below). The mono token is not overridden
-     — the page has no <code> element, so a mono swap would be dead vocabulary. */
-  --body-font-size: calc((1 - var(--snap2)) * 16px + var(--snap2) * 11px);
-  --body-font-weight: calc((1 - var(--snap1)) * 400 + var(--snap1) * ((1 - var(--snap2)) * 600 + var(--snap2) * 400));
-  --body-line-height: calc((1 - var(--snap1)) * 1.78 + var(--snap1) * ((1 - var(--snap2)) * 1.55 + var(--snap2) * 1.4));
-  --title-font-size: calc((1 - var(--snap1)) * 48px + var(--snap1) * ((1 - var(--snap2)) * 34px + var(--snap2) * 20px));
-  --heading-font-size: calc((1 - var(--snap1)) * 20px + var(--snap1) * ((1 - var(--snap2)) * 15px + var(--snap2) * 11px));
-  --heading-font-weight: calc((1 - var(--snap1)) * 700 + var(--snap1) * ((1 - var(--snap2)) * 600 + var(--snap2) * 700));
+  /* Type/layout channel — the flat neutral template block, the artifact a future post copies.
+     Every type/layout value here is the page's own neutral (kex) reading state as a literal,
+     not nested arithmetic over --snap1/--snap2: type and layout are discrete per dress, so each
+     dress owns a complete flat block in its class override (html.vibe / html.win98 below) and
+     this default block is the neutral one. The arithmetic channels above are not part of the
+     template block, and they are not all one kind: border/radius/accent/bevel interpolate
+     continuously by --t1/--t2, while bg/ink/text step at --snap1 to dodge the polarity-flip
+     contrast collapse. The --heading-color/--heading-bg pair below is also dress chrome, not
+     template vocabulary, and it is snap2-stepped (win98's navy caption bar appears in one step
+     at pos 0.75) — stepped chrome, not a continuously interpolated color. Its layout companion
+     --heading-padding is flat. font-family and text-transform can't be values a dress varies by
+     arithmetic either, so they ride the same class blocks. The mono token is not overridden —
+     the page has no <code> element, so a mono swap would be dead vocabulary. */
+  --body-font-size: 16px;
+  --body-font-weight: 600;
+  --body-line-height: 1.55;
+  --title-font-size: 34px;
+  --title-font-size-sm: 28px;
+  --heading-font-size: 15px;
+  --heading-font-weight: 600;
   --heading-color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--text-muted));
   --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
-  --heading-padding: calc(var(--snap2) * 2px) calc(var(--snap2) * 4px);
-  --heading-margin-bottom: calc((1 - var(--snap1)) * 12px + var(--snap1) * ((1 - var(--snap2)) * 10px + var(--snap2) * 6px));
+  --heading-padding: 0px;
+  --heading-margin-bottom: 10px;
   --heading-text-transform: lowercase;
-  --heading-letter-spacing: calc((1 - var(--snap1)) * -0.025em + var(--snap1) * (1 - var(--snap2)) * -0.02em);
-  --link-decoration-opacity: calc(35% + var(--snap2) * 65%);
-
-  --measure: calc((1 - var(--snap1)) * 672px + var(--snap1) * ((1 - var(--snap2)) * 680px + var(--snap2) * 435px));
-
-  /* Section padding — snap1 gives vibe glass surfaces interior margins (12px), snap2 gives win98
-     window client areas interior margins (8px); at kex (snap1=1, snap2=0) no padding. */
-  --section-padding: calc((1 - var(--snap1)) * 12px + var(--snap1) * var(--snap2) * 8px);
+  --heading-letter-spacing: -0.02em;
+  /* Section h2 tracking only — the h1 (.title) keeps --heading-letter-spacing; at kex the h2
+     carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
+  --h2-letter-spacing: 0em;
+  --link-decoration-opacity: 35%;
+  --measure: 680px;
+  --section-padding: 0px;
+  --meta-font-size: 14px;
+  --dek-font-size: 15px;
+  --label-font-size: 13px;
+  --aside-font-size: 14.4px;
 
   /* Section background — three-way: vibe glass surface (rgba(255,255,255,0.1) translucent so the
      dark vibe bg shows through), kex transparent, win98 opaque white (#ffffff). The kex→win98 half
@@ -172,14 +181,6 @@
   /* Vibe glow shadow — colored (purple) box-shadow present at vibe (snap1=0), transparent elsewhere.
      The single most reproducible AI-slop tell after the color itself. */
   --vibe-glow: 0 25px 50px -12px rgba(168, 85, 247, calc((1 - var(--snap1)) * 0.5));
-
-  /* Secondary type sizes — routed through --snap2 so the endpoint has one coherent hierarchy.
-     At kex (snap2=0): each size is the H-shipped value. At win98 (snap2=1): all shrink to 11px
-     (the win98 body size) so section headings are no longer the smallest text on the page. */
-  --meta-font-size: calc((1 - var(--snap2)) * 14px + var(--snap2) * 11px);
-  --dek-font-size: calc((1 - var(--snap2)) * 15px + var(--snap2) * 11px);
-  --label-font-size: calc((1 - var(--snap2)) * 13px + var(--snap2) * 11px);
-  --aside-font-size: calc((1 - var(--snap2)) * 14.4px + var(--snap2) * 11px);
 
   /* Handle background — at kex the ink colour, at win98 the button-face colour (#c0c0c0) so
      the slider thumb reads as a raised control, not a flat black bar. */
@@ -199,6 +200,28 @@
 html.vibe {
   --sans: 'Inter', system-ui, sans-serif;
   --display: 'Inter', system-ui, sans-serif;
+
+  /* Vibe type/layout block — the flat values the low end reads at, overriding the neutral
+     defaults above. Inter 400 body, 1.78 leading, 48px title, 700 headings at -0.025em,
+     672px measure, glass-surface interior padding. Headings carry no caption padding. */
+  --body-font-size: 16px;
+  --body-font-weight: 400;
+  --body-line-height: 1.78;
+  --title-font-size: 48px;
+  --title-font-size-sm: 36px;
+  --heading-font-size: 20px;
+  --heading-font-weight: 700;
+  --heading-padding: 0px;
+  --heading-margin-bottom: 12px;
+  --heading-letter-spacing: -0.025em;
+  --h2-letter-spacing: -0.025em;
+  --link-decoration-opacity: 35%;
+  --measure: 672px;
+  --section-padding: 12px;
+  --meta-font-size: 14px;
+  --dek-font-size: 15px;
+  --label-font-size: 13px;
+  --aside-font-size: 14.4px;
 }
 
 html.vibe .page {
@@ -231,6 +254,30 @@ html.win98 {
   --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
   --display: 'Tahoma', 'MS Sans Serif', sans-serif;
   --heading-text-transform: capitalize;
+
+  /* Win98 type/layout block — Tahoma at 11px body, one coherent shrunken hierarchy: every
+     secondary size drops to the win98 body size so section headings are no longer the smallest
+     text on the page, link underlines go fully opaque, the measure narrows to the window
+     column, headings gain the caption-bar padding (2px 4px), and window client areas carry
+     interior padding. */
+  --body-font-size: 11px;
+  --body-font-weight: 400;
+  --body-line-height: 1.4;
+  --title-font-size: 20px;
+  --title-font-size-sm: 18px;
+  --heading-font-size: 11px;
+  --heading-font-weight: 700;
+  --heading-padding: 2px 4px;
+  --heading-margin-bottom: 6px;
+  --heading-letter-spacing: 0em;
+  --h2-letter-spacing: 0em;
+  --link-decoration-opacity: 100%;
+  --measure: 435px;
+  --section-padding: 8px;
+  --meta-font-size: 11px;
+  --dek-font-size: 11px;
+  --label-font-size: 11px;
+  --aside-font-size: 11px;
 }
 
 * {

@@ -256,10 +256,10 @@
     font-family: var(--display);
     font-size: var(--heading-font-size);
     font-weight: var(--heading-font-weight);
-    /* Negative tracking at vibe only (snap1=0); 0 at kex and win98, matching 0eef6f6 where the
-       h2 had no letter-spacing. The .title (h1) keeps --heading-letter-spacing which resolves
-       to -0.02em at kex — that value was present in 0eef6f6's .title and is unchanged here. */
-    letter-spacing: calc((1 - var(--snap1)) * -0.025em);
+    /* The h2's own tracking token — -0.025em at vibe, none at kex and win98 (matching 0eef6f6
+       where the h2 had no letter-spacing). The .title (h1) keeps --heading-letter-spacing, which
+       is -0.02em at kex — that value was present in 0eef6f6's .title and is unchanged here. */
+    letter-spacing: var(--h2-letter-spacing);
     text-transform: var(--heading-text-transform);
     color: var(--heading-color);
     background: var(--heading-bg);
@@ -322,7 +322,7 @@
     }
 
     .title {
-      font-size: calc((1 - var(--snap1)) * 36px + var(--snap1) * ((1 - var(--snap2)) * 28px + var(--snap2) * 18px));
+      font-size: var(--title-font-size-sm);
     }
 
     .placeholder {

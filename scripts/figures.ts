@@ -3,23 +3,29 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { requireDisplay } from "./display";
 
-// Self-terminating figure gate (oracles 5, 5b, 6, contrast sweep, 8, 17, 20 and 21). Builds the site,
-// stages dist + the figure spec and its harness modules into a work dir, runs playwright, exits.
-// Serves the built dist over a local origin (not a dev server). Stage I widened oracles 5 and 6
-// from the figure box to the whole page: the morph driver sets --pos on :root at three sampled
-// positions (0 = vibe, 0.5 = kex, 1 = win98), and assertVaries/assertReducedMotion read the
-// rendered page (body) via pixel screenshots — not CSS variables. Also binds the end descriptors
-// to their ends (oracle 5b, new at I) alongside the existing end-labels arm, sweeps --pos in 0.05
-// steps asserting WCAG contrast ≥ 4.5 across three channels: text-dim, text-muted, and
-// heading-text (criterion 18, the only interior-sampling arm), and reads the applied type off
-// the built page at all three positions
+// Self-terminating figure gate (oracles 5, 5b, 6, contrast sweep, 8, 17, 20 and 21, plus the
+// S2 missing-asset 404 server contract). Builds the site, stages dist + the figure spec and its
+// harness modules into a work dir, runs playwright, exits. Serves the built dist over a local
+// origin (not a dev server). Stage I widened oracles 5 and 6 from the figure box to the whole
+// page: the morph driver sets --pos on :root at three sampled positions (0 = vibe, 0.5 = kex,
+// 1 = win98), and assertVaries/assertReducedMotion read the rendered page (body) via pixel
+// screenshots — not CSS variables. Also binds the end descriptors to their ends (oracle 5b, new
+// at I) alongside the existing end-labels arm, sweeps --pos in 0.05 steps asserting WCAG contrast
+// ≥ 4.5 across three channels: text-dim, text-muted, and heading-text (criterion 18, the only
+// interior-sampling arm), and reads the applied type off the built page at all three positions
 // (criterion 8, widened at J). Stage J added the referent-vocabulary arm (criterion 17): at pos=1
 // the rendered body and heading faces must differ from their pos=0.5 resolution on the canvas
 // width-measurement channel. Stage K added the vibe-vocabulary arm (criterion 20) and the
-// reachability arm (criterion 21). Ten arms total, by name: page-varies, page-reduced-motion,
-// page-contrast-sweep, fill-distinguishable, end-labels-bound, end-descriptors-bound,
-// font-application, referent-vocabulary, vibe-vocabulary, reachability. Display-gated like
-// shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
+// reachability arm (criterion 21). S2 added the missing-asset 404 server contract, and S2's
+// repair round split reachability in two: a production-path arm that drives the real slider
+// input (keyboard on the handle, pointer clicks on the track) and reads the resulting classes,
+// and the original direct-set coverage kept under a parity name — it proves only that the gate
+// drivers' own class toggles match the documented thresholds, not that production reaches them.
+// Twelve arms total, by name: page-varies, page-reduced-motion, page-contrast-sweep,
+// fill-distinguishable, end-labels-bound, end-descriptors-bound, font-application,
+// referent-vocabulary, vibe-vocabulary, reachability-driver-parity, reachability-production,
+// missing-asset-404. Display-gated like shot.ts; WSL branch stages onto Windows TEMP and runs
+// through PowerShell.
 
 const repo = join(import.meta.dir, "..");
 const isWsl =
