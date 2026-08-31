@@ -61,6 +61,35 @@ async function isNonTrivial(page: Page, selector: string): Promise<boolean> {
   });
 }
 
+// Fix 6 (S1): the recorded state-0 red — byte-identity across a single rAF pair raced the
+// page's own first-paint settling (font swap, tile rasterization) right after load, so a
+// perfectly resting state could red on a sub-JND one-level shimmer between its first two
+// frames. The settle is now a condition read, not a fixed frame count: the read polls
+// rAF-separated frames until a consecutive pair is byte-identical (the render reached rest)
+// and reds only when the budget expires — which is exactly the bug class the arm exists to
+// catch, a state that never rests because a transition or animation is still in flight.
+export const REST_BUDGET = 12;
+
+export async function settleToRest(
+  page: Page,
+  selector: string,
+  budget: number = REST_BUDGET,
+): Promise<void> {
+  const el = page.locator(selector);
+  let prev = await el.screenshot();
+  for (let i = 0; i < budget; i++) {
+    await page.evaluate(
+      () => new Promise((r) => requestAnimationFrame(() => r(null))),
+    );
+    const next = await el.screenshot();
+    if (prev.equals(next)) return;
+    prev = next;
+  }
+  throw new Error(
+    `never reached rest within ${budget} rAF-separated frame pairs — a transition or animation is in flight under reduced-motion`,
+  );
+}
+
 export async function assertReducedMotion(
   page: Page,
   selector: string,
@@ -79,20 +108,12 @@ export async function assertReducedMotion(
     await driver(page, step);
     const el = page.locator(selector);
     await el.waitFor({ state: "visible" });
-    // One rAF to let the browser apply the step.
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => r(null))),
-    );
-    const first = await el.screenshot();
-    // A second screenshot after another rAF — if it differs, a transition is still in flight.
-    await page.evaluate(
-      () => new Promise((r) => requestAnimationFrame(() => r(null))),
-    );
-    const second = await el.screenshot();
-    if (!first.equals(second)) {
+    try {
+      await settleToRest(page, selector);
+    } catch (err) {
       failures.push({
         step,
-        reason: `state ${step} is not stable across frames — a transition is in flight under reduced-motion`,
+        reason: `state ${step} is not stable across frames — ${(err as Error).message}`,
       });
       continue;
     }

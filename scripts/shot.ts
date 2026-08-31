@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -13,12 +13,26 @@ const isWsl =
   process.platform === "linux" && existsSync("/proc/sys/fs/binfmt_misc/WSLInterop");
 
 function detectDisplay(): boolean {
+  // Test-only override: a seat that always has a display (macOS, WSL) cannot reach the skip
+  // branch, so the required-display arms could never be observed red there. This variable
+  // simulates a displayless seat for exactly those mutation runs; unset, detection is untouched.
+  if (process.env.KEX_SIMULATE_NO_DISPLAY === "1") return false;
   if (isWsl) return true;
   if (process.platform !== "linux") return true;
   return !!(process.env.DISPLAY || process.env.WAYLAND_DISPLAY);
 }
 
 if (!detectDisplay()) {
+  // Required-display mode: a seat that would otherwise print a skip must exit red instead, so a
+  // required-display invocation can never mistake a skipped browser run for a green one.
+  const requireDisplay =
+    process.env.KEX_REQUIRE_DISPLAY === "1" || process.argv.includes("--require-display");
+  if (requireDisplay) {
+    console.error(
+      "shot: required-display mode — no display detected, refusing to skip (exit 1)",
+    );
+    process.exit(1);
+  }
   console.log("shot: no display detected — skipping capture (exit 0)");
   process.exit(0);
 }
@@ -47,6 +61,11 @@ mkdirSync(shots, { recursive: true });
 // are left in place across runs — refreshing only dist + the spec keeps reruns fast.
 function prepWork(workDir: string): void {
   mkdirSync(workDir, { recursive: true });
+  // The work dir is reused across runs; sweep stray .spec.ts files a debugging session could
+  // have staged there before copying the committed set (same hazard as figures.ts's prepWork).
+  for (const f of readdirSync(workDir)) {
+    if (f.endsWith(".spec.ts")) rmSync(join(workDir, f), { force: true });
+  }
   cpSync(join(import.meta.dir, "capture.spec.ts"), join(workDir, "capture.spec.ts"));
   cpSync(join(import.meta.dir, "playwright.config.ts"), join(workDir, "playwright.config.ts"));
   writeFileSync(join(workDir, "package.json"), capturePkg);

@@ -69,10 +69,37 @@ const blankHtml = `<!doctype html>
   </body>
 </html>`;
 
+// Mutation fixture for the reduced-motion settle (fix 6): an animation that never settles —
+// infinite keyframes that do NOT honor prefers-reduced-motion. Every rAF-separated frame pair
+// differs in bytes, so the settle's condition read (two byte-identical consecutive frames)
+// can never fire: assertReducedMotion must red every step with the rest-budget expiry, not
+// sample a mid-animation frame and report it resting.
+const restlessHtml = `<!doctype html>
+<html lang="en">
+  <head>
+    <style>
+      body { margin: 0; padding: 24px; }
+      .figure {
+        width: 200px;
+        height: 200px;
+        animation: drift 0.6s linear infinite;
+      }
+      @keyframes drift {
+        from { background: hsl(0, 70%, 50%); }
+        to { background: hsl(340, 70%, 50%); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="figure" id="fig"></div>
+  </body>
+</html>`;
+
 const fixtures: Record<string, string> = {
   "/hue": hueHtml,
   "/subperceptual": subPerceptualHtml,
   "/blank": blankHtml,
+  "/restless": restlessHtml,
 };
 
 let server: Server;
@@ -161,6 +188,22 @@ test("reduced-motion: blank element reds (never drew is not 'fully drawn')", asy
   const result = await assertReducedMotion(page, "#fig", driver, 1);
   expect(result.pass).toBe(false);
   expect(result.failures.some((f) => /trivial|blank/i.test(f.reason))).toBe(true);
+});
+
+test("reduced-motion: permanently animating figure reds the settle (never rests)", async ({ page }) => {
+  await page.goto(url + "/restless", { waitUntil: "networkidle" });
+  const result = await assertReducedMotion(page, "#fig", driver, STEPS);
+  expect(result.pass).toBe(false);
+  // Every step must fail on the settle's rest budget, not on triviality or anything else —
+  // the fixture draws constantly, so the only defect is that it never reaches rest.
+  expect(result.failures.length).toBe(STEPS);
+  for (const f of result.failures) {
+    expect(f.reason).toMatch(/never reached rest/);
+  }
+  console.log(
+    `reduced-motion restless: pass=${result.pass} failures=${result.failures.length}/${result.steps}` +
+      ` first reason: ${result.failures[0]?.reason}`,
+  );
 });
 
 test("guards: assertVaries throws for <2 steps", async ({ page }) => {
