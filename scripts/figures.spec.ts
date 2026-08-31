@@ -7,11 +7,13 @@ import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// twelve things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// sixteen things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
-// reachability), one added at S2 (the server's missing-asset 404 contract), and one added at
-// S2's repair round (production-path reachability: real slider input, not a self-set driver).
+// reachability), one added at S2 (the server's missing-asset 404 contract), one added at
+// S2's repair round (production-path reachability: real slider input, not a self-set driver), and
+// four S4 neutral-template arms (hierarchy, readable measure, existing-link emphasis and rhythm,
+// non-interference).
 // The reachability claim K shipped drove --pos and toggled the classes itself, then asserted the
 // class set — circular about the production path; the repair round keeps that coverage under a
 // driver-parity name and adds the arm that reads classes after real keyboard/pointer input. The
@@ -650,6 +652,16 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
       const pCs = getComputedStyle(pEl);
       const h2 = document.querySelector(".section h2")!;
       const h2Cs = getComputedStyle(h2);
+      const mutedColor = getComputedStyle(document.querySelector(".meta")!).color;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d")!;
+      const canonicalColor = (color: string): string => {
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = color;
+        context.fillRect(0, 0, 1, 1);
+        const [r, g, b] = context.getImageData(0, 0, 1, 1).data;
+        return `${r},${g},${b}`;
+      };
       // Parse a box-shadow string into a list of shadow objects with their color.
       function parseBoxShadows(s: string): { color: string; r: number; g: number; b: number; a: number }[] {
         const shadows: { color: string; r: number; g: number; b: number; a: number }[] = [];
@@ -707,6 +719,8 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
         boxShadow,
         coloredShadow,
         radius,
+        headingColor: canonicalColor(h2Cs.color),
+        mutedColor: canonicalColor(mutedColor),
       };
     });
   }
@@ -717,14 +731,18 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
   console.log(`criterion 20 vibe (pos=0): textAlign=${vibe.textAlign} headingLS=${vibe.headingLetterSpacing} backdropFilter=${vibe.backdropFilter} borderWidth=${vibe.borderWidth} borderAlpha=${vibe.borderAlpha} coloredShadow=${vibe.coloredShadow} radius=${vibe.radius}`);
   console.log(`criterion 20 kex (pos=0.5): textAlign=${kex.textAlign} headingLS=${kex.headingLetterSpacing} backdropFilter=${kex.backdropFilter} borderWidth=${kex.borderWidth} borderAlpha=${kex.borderAlpha} coloredShadow=${kex.coloredShadow} radius=${kex.radius}`);
 
-  // 1. text-align: center on body copy at vibe, not center at kex.
+  // 1. The neutral heading-color flattening must not repaint the vibe dress: its section
+  // headings retain the existing muted-violet channel used by the masthead metadata.
+  expect(vibe.headingColor).toBe(vibe.mutedColor);
+
+  // 2. text-align: center on body copy at vibe, not center at kex.
   expect(vibe.textAlign).toBe("center");
   expect(kex.textAlign).not.toBe("center");
 
-  // 2. negative heading letter-spacing at vibe.
+  // 3. negative heading letter-spacing at vibe.
   expect(parseFloat(vibe.headingLetterSpacing)).toBeLessThan(0);
 
-  // 3. non-none backdrop-filter with a translucent 1px border at vibe.
+  // 4. non-none backdrop-filter with a translucent 1px border at vibe.
   const vibeBackdrop = vibe.backdropFilter !== "none" ||
     (typeof vibe.webkitBackdropFilter === "string" && vibe.webkitBackdropFilter !== "none" && vibe.webkitBackdropFilter !== "");
   expect(vibeBackdrop).toBe(true);
@@ -732,11 +750,11 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
   expect(vibe.borderAlpha).toBeGreaterThan(0);
   expect(vibe.borderAlpha).toBeLessThan(1);
 
-  // 4. colored (non-neutral) box-shadow at vibe, not at kex.
+  // 5. colored (non-neutral) box-shadow at vibe, not at kex.
   expect(vibe.coloredShadow).toBe(true);
   expect(kex.coloredShadow).toBe(false);
 
-  // 5. border radius exceeds kex's at vibe.
+  // 6. border radius exceeds kex's at vibe.
   expect(vibe.radius).toBeGreaterThan(kex.radius);
 });
 
@@ -865,7 +883,7 @@ test("server: missing assets return 404, not an index.html fallback", async ({ r
 // S4 structural typography arms. These read the neutral page as rendered, rather than checking
 // token spelling. The values are deliberately independent of the temporary round-1 sheet: this
 // is the selected treatment's contract, not a copy of a candidate's record.
-test("typography: neutral hierarchy keeps headings at body size with restrained emphasis", async ({ page }) => {
+test("typography: neutral hierarchy keeps headings at body size", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => {
     document.documentElement.style.setProperty("--pos", "0.5");
@@ -876,23 +894,19 @@ test("typography: neutral hierarchy keeps headings at body size with restrained 
     const body = getComputedStyle(document.body);
     const title = getComputedStyle(document.querySelector(".title")!);
     const heading = getComputedStyle(document.querySelector(".section h2")!);
-    const emphasis = getComputedStyle(document.querySelector("strong")!);
     return {
       bodySize: parseFloat(body.fontSize),
       bodyWeight: body.fontWeight,
       titleSize: parseFloat(title.fontSize),
       headingSize: parseFloat(heading.fontSize),
       headingWeight: heading.fontWeight,
-      emphasisWeight: emphasis.fontWeight,
     };
   });
-  console.log(`neutral hierarchy: body=${reads.bodySize}px/${reads.bodyWeight} heading=${reads.headingSize}px/${reads.headingWeight} title=${reads.titleSize}px emphasis=${reads.emphasisWeight}`);
+  console.log(`neutral hierarchy: body=${reads.bodySize}px/${reads.bodyWeight} heading=${reads.headingSize}px/${reads.headingWeight} title=${reads.titleSize}px`);
   expect(reads.headingSize).toBeGreaterThanOrEqual(reads.bodySize);
   expect(reads.titleSize).toBeGreaterThan(reads.headingSize);
   expect(reads.bodyWeight).toBe("400");
   expect(reads.headingWeight).toBe("600");
-  expect(reads.emphasisWeight).toBe("600");
-  expect(Number(reads.emphasisWeight)).toBeGreaterThan(Number(reads.bodyWeight));
 });
 
 test("typography: neutral measure stays in the readable long-form band", async ({ page }) => {
@@ -903,29 +917,36 @@ test("typography: neutral measure stays in the readable long-form band", async (
   });
   await page.waitForFunction(() => getComputedStyle(document.body).fontSize === "16px");
   const reads = await page.evaluate(() => {
-    const paragraphs = [...document.querySelectorAll(".page .section p")];
-    let chars = 0;
-    let lines = 0;
-    for (const paragraph of paragraphs) {
-      const range = document.createRange();
-      range.selectNodeContents(paragraph);
-      const tops = new Set([...range.getClientRects()].map((rect) => Math.round(rect.top)));
-      chars += (paragraph.textContent ?? "").length;
-      lines += tops.size;
+    const lineLengths: number[] = [];
+    for (const paragraph of document.querySelectorAll(".page .section p")) {
+      const lines = new Map<number, number>();
+      const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
+      let node: Node | null;
+      while ((node = walker.nextNode())) {
+        const text = node.textContent ?? "";
+        for (let offset = 0; offset < text.length; offset += 1) {
+          const range = document.createRange();
+          range.setStart(node, offset);
+          range.setEnd(node, offset + 1);
+          const rect = range.getBoundingClientRect();
+          if (rect.width === 0) continue;
+          const top = Math.round(rect.top);
+          lines.set(top, (lines.get(top) ?? 0) + 1);
+        }
+      }
+      const values = [...lines.values()];
+      lineLengths.push(...values.slice(0, -1));
     }
     const pageBox = document.querySelector(".page")!.getBoundingClientRect();
     return {
-      charsPerLine: chars / lines,
-      pageLeft: pageBox.left,
-      pageRight: pageBox.right,
+      maximumNonFinalLine: Math.max(...lineLengths),
       pageWidth: pageBox.width,
       viewportWidth: window.innerWidth,
     };
   });
-  console.log(`neutral measure: charsPerLine=${reads.charsPerLine.toFixed(1)} pageWidth=${reads.pageWidth} viewport=${reads.viewportWidth}`);
-  expect(reads.pageWidth).toBe(624);
-  expect(reads.charsPerLine).toBeGreaterThanOrEqual(60);
-  expect(reads.charsPerLine).toBeLessThanOrEqual(75);
+  console.log(`neutral measure: maximumNonFinalLine=${reads.maximumNonFinalLine} pageWidth=${reads.pageWidth} viewport=${reads.viewportWidth}`);
+  expect(reads.pageWidth).toBe(500);
+  expect(reads.maximumNonFinalLine).toBeLessThanOrEqual(75);
 
   await page.setViewportSize({ width: 390, height: 844 });
   const mobile = await page.evaluate(() => {
@@ -947,42 +968,41 @@ test("typography: neutral measure stays in the readable long-form band", async (
   expect(mobile.paddingRight).toBe(20);
 });
 
-test("typography: emphasis and section rhythm are visible on the neutral canvas", async ({ page }) => {
+test("typography: existing link emphasis and section rhythm are visible on the neutral canvas", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => {
     document.documentElement.style.setProperty("--pos", "0.5");
     document.documentElement.classList.remove("vibe", "win98");
   });
-  await page.waitForFunction(() => document.querySelector("strong") !== null);
   const styles = await page.evaluate(() => {
-    const body = getComputedStyle(document.body);
-    const strong = getComputedStyle(document.querySelector("strong")!);
-    const paragraph = getComputedStyle(document.querySelector(".section p")!);
-    return { bodyWeight: body.fontWeight, strongWeight: strong.fontWeight, paragraphGap: parseFloat(paragraph.marginTop) };
+    const paragraph = document.querySelector(".section p")!;
+    const link = paragraph.querySelector("a") ?? document.querySelector(".section a")!;
+    const body = getComputedStyle(paragraph);
+    const emphasized = getComputedStyle(link);
+    return {
+      paragraphColor: body.color,
+      linkColor: emphasized.color,
+      decoration: emphasized.textDecorationLine,
+      paragraphGap: parseFloat(body.marginTop),
+    };
   });
-  expect(styles.strongWeight).not.toBe(styles.bodyWeight);
-  expect(Number(styles.strongWeight)).toBeGreaterThan(Number(styles.bodyWeight));
+  expect(styles.linkColor).not.toBe(styles.paragraphColor);
+  expect(styles.decoration).toContain("underline");
 
-  const probes = await page.evaluate(() => {
-    const body = getComputedStyle(document.body);
-    const text = "checking the work makes the difference";
-    for (const [name, weight] of [["regular", body.fontWeight], ["emphasis", "600"]]) {
-      const probe = document.createElement("span");
-      probe.dataset.s4Probe = name;
-      probe.textContent = text;
-      const top = name === "regular" ? 0 : 60;
-      probe.style.cssText = `position:fixed;left:0;top:${top}px;width:420px;height:44px;padding:8px;background:#fff;color:#171c24;font:${weight} 16px/1.6 ${body.fontFamily};`;
-      document.body.appendChild(probe);
-    }
-    return true;
+  const link = page.locator(".section a").first();
+  const emphasized = await link.screenshot();
+  await link.evaluate((element) => {
+    const paragraph = element.closest("p")!;
+    const paragraphStyle = getComputedStyle(paragraph);
+    const plain = element as HTMLElement;
+    plain.style.color = paragraphStyle.color;
+    plain.style.textDecoration = "none";
+    plain.style.textShadow = "none";
   });
-  expect(probes).toBe(true);
-  const regular = await page.locator('[data-s4-probe="regular"]').screenshot();
-  const emphasis = await page.locator('[data-s4-probe="emphasis"]').screenshot();
-  const emphasisDelta = perceptualDelta(regular, emphasis);
-  console.log(`neutral emphasis canvas: meanDelta=${emphasisDelta.meanDelta.toFixed(2)} extent=${emphasisDelta.extent.toFixed(4)}`);
+  const plain = await link.screenshot();
+  const emphasisDelta = perceptualDelta(plain, emphasized);
+  console.log(`existing link emphasis canvas: meanDelta=${emphasisDelta.meanDelta.toFixed(2)} extent=${emphasisDelta.extent.toFixed(4)}`);
   expect(emphasisDelta.meanDelta).toBeGreaterThan(3);
-  await page.locator("[data-s4-probe]").evaluateAll((els) => els.forEach((el) => el.remove()));
 
   const rhythm = await page.evaluate(() => {
     const sections = [...document.querySelectorAll(".page .section")];

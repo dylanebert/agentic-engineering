@@ -22,8 +22,8 @@
     </p>
     <p>
       Everyone is still in the "just try things and see what happens" phase, but
-      I've tried enough to be sure of one part: <strong>the hard part moved from
-      writing the code to checking it.</strong>
+      I've tried enough to be sure of one part: the hard part moved from writing
+      the code to checking it.
     </p>
   </section>
 

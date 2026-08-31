@@ -141,13 +141,14 @@
      template block, and they are not all one kind: border/radius/accent/bevel interpolate
      continuously by --t1/--t2, while bg/ink/text step at --snap1 to dodge the polarity-flip
      contrast collapse. The --heading-color/--heading-bg pair below is also dress chrome, not
-     template vocabulary, and it is snap2-stepped (win98's navy caption bar appears in one step
-     at pos 0.75) — stepped chrome, not a continuously interpolated color. Its layout companion
-     --heading-padding is flat. font-family and text-transform can't be values a dress varies by
-     arithmetic either, so they ride the same class blocks. The mono token is not overridden —
-     the page has no <code> element, so a mono swap would be dead vocabulary. The neutral reading
-     system uses regular body text, a semibold hierarchy and emphasis, a 624px page measure, and
-     moderate spacing; these values are literal template inputs rather than candidate aliases. */
+     template vocabulary. The neutral heading color is the ink token; vibe and Win98 override it
+     in their flat dress blocks. The heading background remains dress chrome and snap2-stepped
+     (Win98's navy caption bar appears in one step at pos 0.75), while its padding is flat.
+     font-family and text-transform can't be values a dress varies by arithmetic either, so they
+     ride the same class blocks. The mono token is not overridden — the page has no <code> element,
+     so a mono swap would be dead vocabulary. The neutral reading system uses regular body text,
+     a semibold hierarchy, a 500px page measure, and moderate spacing; these values are literal
+     template inputs rather than candidate aliases. */
   --body-font-size: 16px;
   --body-font-weight: 400;
   --body-line-height: 1.6;
@@ -155,7 +156,6 @@
   --title-font-size-sm: 28px;
   --heading-font-size: 20px;
   --heading-font-weight: 600;
-  --emphasis-font-weight: 600;
   --heading-color: var(--ink);
   --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: 0px;
@@ -166,7 +166,7 @@
      carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
   --h2-letter-spacing: 0em;
   --link-decoration-opacity: 35%;
-  --measure: 624px;
+  --measure: 500px;
   --section-padding: 0px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;
@@ -203,6 +203,7 @@
 html.vibe {
   --sans: 'Inter', system-ui, sans-serif;
   --display: 'Inter', system-ui, sans-serif;
+  --heading-color: var(--vibe-text-muted);
 
   /* Vibe type/layout block — the flat values the low end reads at, overriding the neutral
      defaults above. Inter 400 body, 1.78 leading, 48px title, 700 headings at -0.025em,
@@ -210,7 +211,6 @@ html.vibe {
   --body-font-size: 16px;
   --body-font-weight: 400;
   --body-line-height: 1.78;
-  --emphasis-font-weight: 700;
   --title-font-size: 48px;
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
@@ -268,7 +268,6 @@ html.win98 {
   --body-font-size: 11px;
   --body-font-weight: 400;
   --body-line-height: 1.4;
-  --emphasis-font-weight: 700;
   --title-font-size: 20px;
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
@@ -320,11 +319,6 @@ a {
 a:hover {
   color: var(--accent-strong);
   text-decoration-color: var(--accent-strong);
-}
-
-strong {
-  font-weight: var(--emphasis-font-weight);
-  color: var(--ink);
 }
 
 code {
