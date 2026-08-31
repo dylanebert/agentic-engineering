@@ -159,6 +159,16 @@ const mutations: Mutation[] = [
     to: 'body::after { content: ""; display: block; width: 1600px; height: 10px; }',
   },
   {
+    // crop leg of the visualization-state arm — arms the frozen cropHeight constants. Shaves
+    // one css px off the desktop capture clip so its decoded height misses cropHeight × scale
+    // by 2 device px; a viewport-clamped capture would sit 600 device px short and also red.
+    label: "crop: desktop capture clip drifts one css px short of the frozen crop",
+    grep: "visualization state",
+    file: "contact.spec.ts",
+    from: "height: DESKTOP.cropHeight },",
+    to: "height: DESKTOP.cropHeight - 1 },",
+  },
+  {
     // sheet artifact arm
     label: "sheet: compose loop drops the last candidate row",
     grep: "contact sheet written",

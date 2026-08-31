@@ -30,9 +30,12 @@ import { candidates, FONT_URL_EXTRA, type Candidate } from "./candidates";
 //
 //   visualization-state identity — --pos stays 0.5, no vibe/win98 class, the spectrum's
 //     aria-valuenow, axis labels, and descriptors stay identical to the baseline, scroll rests
-//     at 0, and every capture's decoded dimensions match the baseline's (the crop is pinned,
-//     not just claimed).
-//     Mutation (exit 1): append `:root { --pos: 1; }` to candidate D's css (/* MUT4 */).
+//     at 0, and every capture's decoded dimensions match the baseline's AND the frozen crop
+//     exactly (cropHeight × device scale — a viewport-clamped capture is 150css px short and
+//     reds here; the crop is armed, not just claimed).
+//     Mutations (exit 1): append `:root { --pos: 1; }` to candidate D's css (/* MUT4 */), and
+//     shave one css px off the desktop capture clip so its decoded height misses the frozen
+//     crop by 2 device px.
 //
 //   palette channels — body ink, body background, link accent, and section background stay
 //     identical to the baseline's computed reads.
@@ -74,9 +77,14 @@ test.setTimeout(300_000);
 // Fixed crop per viewport — the same rect for the baseline and every candidate, so conditions
 // are identical and pixel deltas are same-shape reads. Crop heights were frozen after one
 // visual read: desktop shows title + first section + the spectrum's header region; mobile the
-// same passage at its own height.
+// same passage at its own height. cropHeight is a css-px height applied as a fullPage clip —
+// a bare clip on a viewport screenshot is silently clamped to the viewport (that bug shipped
+// in the first S3 artifact: "crop 1350px" was really 900), so the crop is ARMED: the
+// visualization-state arm decodes every capture and demands exactly cropHeight × device scale,
+// and a clip-drift mutation witnesses the leg (see contact.ts).
 const DESKTOP = { width: 1440, height: 900, cropHeight: 1350 };
-const MOBILE = { width: 390, height: 844, cropHeight: 1688 };
+const MOBILE = { width: 390, height: 844, cropHeight: 844 };
+const DEVICE_SCALE = 2;
 const SHEET_DESKTOP_WIDTH = 1000;
 const SHEET_MOBILE_WIDTH = 256;
 
@@ -219,22 +227,25 @@ async function readPage(page: Page): Promise<Reads> {
     document.body.appendChild(probe);
     const inkProbe = getComputedStyle(probe).color;
     probe.remove();
-    // Chars per rendered line: a Range over the LONGEST body paragraph (the first is short,
-    // so chars/lines quantizes coarsely by line count), counted by distinct line-box tops —
-    // a real geometry read, not px/em arithmetic. Logged for the S3 record; the 60–80 band
-    // binds the selected system at S4, not the candidates.
-    const longestP = Array.from(document.querySelectorAll(".section p")).reduce(
-      (best, el) => ((el.textContent ?? "").length > (best.textContent ?? "").length ? el : best),
-      p,
-    );
-    const range = document.createRange();
-    range.selectNodeContents(longestP);
-    const tops = new Set(
-      Array.from(range.getClientRects())
-        .filter((r) => r.width > 0)
-        .map((r) => Math.round(r.top)),
-    );
-    const chars = (longestP.textContent ?? "").replace(/\s+/g, " ").trim().length;
+    // Chars per rendered line: Range over EVERY body paragraph, each counted by distinct
+    // line-box tops, aggregated as total chars / total lines. A single paragraph quantizes
+    // (its line count can't resolve a 20–40px measure change); summing across the whole prose
+    // body averages that quantization over many line boxes. Still a real geometry read, not
+    // px/em arithmetic. Logged for the S3 record; the 60–80 band binds the selected system at
+    // S4, not the candidates.
+    let chars = 0;
+    let lines = 0;
+    for (const el of document.querySelectorAll(".section p")) {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const tops = new Set(
+        Array.from(range.getClientRects())
+          .filter((r) => r.width > 0)
+          .map((r) => Math.round(r.top)),
+      );
+      chars += (el.textContent ?? "").replace(/\s+/g, " ").trim().length;
+      lines += tops.size;
+    }
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d")!;
     const sample = "mmmmmmmmmmlli";
@@ -275,7 +286,7 @@ async function readPage(page: Page): Promise<Reads> {
       ),
       scrollY: window.scrollY,
       scrollWidth: document.documentElement.scrollWidth,
-      charsPerLine: tops.size > 0 ? chars / tops.size : 0,
+      charsPerLine: lines > 0 ? chars / lines : 0,
       plexWidths,
       outfitWidths,
       bodyFamily: cs(body).fontFamily,
@@ -293,6 +304,7 @@ async function readState(
   await gotoNeutral(desktop, candidate);
   const desktopReads = await readPage(desktop);
   const desktopShot = await desktop.screenshot({
+    fullPage: true,
     clip: { x: 0, y: 0, width: DESKTOP.width, height: DESKTOP.cropHeight },
   });
   const desktopText = await desktop.locator(".page").innerText();
@@ -300,6 +312,7 @@ async function readState(
   await gotoNeutral(mobile, candidate);
   const mobileReads = await readPage(mobile);
   const mobileShot = await mobile.screenshot({
+    fullPage: true,
     clip: { x: 0, y: 0, width: MOBILE.width, height: MOBILE.cropHeight },
   });
   const mobileText = await mobile.locator(".page").innerText();
@@ -329,12 +342,12 @@ let sheetWritten = false;
 test.beforeAll(async ({ browser }) => {
   const desktopCtx = await browser.newContext({
     viewport: { width: DESKTOP.width, height: DESKTOP.height },
-    deviceScaleFactor: 2,
+    deviceScaleFactor: DEVICE_SCALE,
     reducedMotion: "reduce",
   });
   const mobileCtx = await browser.newContext({
     viewport: { width: MOBILE.width, height: MOBILE.height },
-    deviceScaleFactor: 2,
+    deviceScaleFactor: DEVICE_SCALE,
     reducedMotion: "reduce",
   });
   const desktop = await desktopCtx.newPage();
@@ -362,7 +375,7 @@ test.beforeAll(async ({ browser }) => {
 </div>`;
   });
   const sheetHtml = `<!doctype html><html><body style="margin:0;background:#ffffff">
-<div style="padding:20px 24px;font:400 15px/1.5 sans-serif;color:#000">typography contact sheet — round 1 · four candidate reading treatments under identical conditions · family, prose, figures, palette, crop, and scroll position held · desktop 1440px (crop 1350px) · mobile 390px (crop 1688px)</div>
+<div style="padding:20px 24px;font:400 15px/1.5 sans-serif;color:#000">typography contact sheet — round 1 · four candidate reading treatments under identical conditions · family, prose, figures, crop, and scroll position held · palette channels held; section-heading ink is the hierarchy channel · desktop 1440px (crop 1350px) · mobile 390px (crop 844px)</div>
 ${rows.join("\n")}
 </body></html>`;
   await desktop.goto("about:blank");
@@ -506,6 +519,12 @@ test("admissibility: visualization state and crop are unchanged from the neutral
         baseDims.width,
         baseDims.height,
       ]);
+      // And the frozen crop is REAL, not a viewport-clamped stand-in: the decoded height must
+      // equal cropHeight × device scale exactly (fullPage + clip, not a bare viewport clip).
+      const crop = view === "desktop" ? DESKTOP : MOBILE;
+      expect(dims.height, `${c.key} ${view} crop height honored`).toBe(
+        crop.cropHeight * DEVICE_SCALE,
+      );
     }
   }
 });
