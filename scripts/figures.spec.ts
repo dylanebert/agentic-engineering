@@ -50,8 +50,14 @@ test.beforeAll(async () => {
     try {
       body = await readFile(join(dist, path));
     } catch {
-      path = "index.html";
-      body = await readFile(join(dist, path));
+      // 404 on missing assets — no SPA fallback. Serving index.html for a missing JS/CSS/font
+      // request would feed HTML to a script or stylesheet tag; the page still renders its text
+      // (inline HTML) and every arm can stay green while the figure's own asset silently never
+      // loaded. The equivalence server already 404s; this server is held to the same contract
+      // and the arm below pins it.
+      res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+      res.end(`missing asset: ${path}`);
+      return;
     }
     const type = types[path.slice(path.lastIndexOf("."))] ?? "application/octet-stream";
     res.writeHead(200, { "content-type": type });
@@ -70,10 +76,16 @@ test.afterAll(async () => {
 });
 
 // Page-wide morph driver: sets --pos on :root (document.documentElement) so the entire page
-// restyles, mirrors color-scheme so UA surfaces match a real drag, and toggles the win98 class
-// so the type/chrome vocabulary snaps at pos > 0.75 (font-family and text-transform can't be
-// interpolated, so they swap via a class — the same class setPos toggles). Three sampled
-// positions: 0 = vibe, 0.5 = kex, 1 = win98.
+// restyles, mirrors color-scheme so UA surfaces match a real drag, and toggles the vibe / win98
+// classes at the same thresholds setPos uses. The type/layout vocabulary is flat per class
+// (each dress owns its literal type/layout block), so the class toggle carries it; the color,
+// border, radius, and accent channels stay continuously interpolated through --t1/--t2. Three
+// sampled positions: 0 = vibe, 0.5 = kex, 1 = win98.
+
+// The server above must 404 a missing asset rather than serving index.html for it: a fallback
+// masks a failed script/stylesheet/font request behind a 200, and the page can render its
+// inline text with every other arm green while the figure's own asset never loaded. This arm
+// pins the contract; reverting the catch to the index.html fallback reds it (status 200).
 const morphDriver: AxisDriver = async (page, step) => {
   await page.evaluate((s) => {
     const p = s / 2;
@@ -731,11 +743,11 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
 // Every state any harness records is reachable by a reader: with html.vibe added, each captured
 // state and each gate driver's sampled position asserts that the class set matches the position
 // it claims (vibe at pos <= 0.25, neither in the middle, win98 at pos > 0.75). The boundary
-// positions 0.25 and 0.75 are tested explicitly because the class toggle must coincide with the
-// --snap1/--snap2 token step — at exactly 0.25 snap1=0 (vibe tokens on) so the vibe class must be
-// on, and at exactly 0.75 snap2=0 (kex tokens) so the win98 class must be off. J shipped a resting
-// capture with win98 left on at pos=0.5 and every other arm stayed green beside it; a second class
-// doubles the ways to produce an artifact no reader can reach.
+// positions 0.25 and 0.75 are tested explicitly because the class toggle carries the entire
+// flat type/layout vocabulary (font, hierarchy, measure, padding) and the remaining snap-stepped
+// color channels — a class on at the wrong position renders a dress no sampled state claims.
+// J shipped a resting capture with win98 left on at pos=0.5 and every other arm stayed green
+// beside it; a second class doubles the ways to produce an artifact no reader can reach.
 
 test("reachability: class set matches position at each sampled state (criterion 21)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
@@ -769,4 +781,16 @@ test("reachability: class set matches position at each sampled state (criterion 
       expect(win98).toBe(false);
     }
   }
+});
+
+// --- Server contract: missing assets 404 (no SPA fallback masking) ---
+
+// The figures server is the gate's only view of the built page; a fallback that serves
+// index.html for any missing path turns a broken asset into a 200 carrying HTML. This arm
+// pins the 404 contract the equivalence server already holds. Mutation: revert the catch to
+// the old `path = "index.html"` fallback and the probed status reads 200 — red.
+test("server: missing assets return 404, not an index.html fallback", async ({ request }) => {
+  const response = await request.get(`${url}missing-asset.probe`);
+  console.log(`missing-asset probe: status=${response.status()}`);
+  expect(response.status()).toBe(404);
 });
