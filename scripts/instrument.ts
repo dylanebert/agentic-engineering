@@ -68,7 +68,7 @@ const pkg = JSON.stringify(
   {
     name: "agentic-engineering-instrument",
     private: true,
-    dependencies: { "@playwright/test": "^1.50.0" },
+    dependencies: { "@playwright/test": "1.62.1" },
   },
   null,
   2,

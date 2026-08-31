@@ -7,7 +7,7 @@ import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// sixteen things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// seventeen things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
 // reachability), one added at S2 (the server's missing-asset 404 contract), one added at
@@ -972,6 +972,11 @@ test("typography: neutral measure stays in the readable long-form band", async (
 
 test("typography: selected desktop measure is the widest passing local sweep", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty("--pos", "0.5");
+    document.documentElement.classList.remove("vibe", "win98");
+  });
+  await page.waitForFunction(() => getComputedStyle(document.body).fontSize === "16px");
   await page.evaluate(() => document.fonts.ready);
   const sweep = await page.evaluate(() => {
     const readMaximum = (width: number): number => {

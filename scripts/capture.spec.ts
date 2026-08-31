@@ -3,10 +3,10 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 
-// Runs in the work dir next to a built `dist/`. Serves it over a local origin, captures a
-// full-page desktop + mobile screenshot, then shuts the server down. Driven by shot.ts.
-// At I the overflow check (oracle 7) runs at all three sampled morph positions (0 = vibe,
-// 0.5 = kex, 1 = win98) at each viewport, since Windows 98 chrome is the plausible overflow source.
+// Runs in the work dir next to a built `dist/`. Serves it over a local origin, checks reachability
+// and horizontal overflow at three morph positions, then captures full-page desktop and mobile
+// screenshots. The neutral captures compare against platform-stamped goldens on the producing seat;
+// shot.ts stages this spec and collects the portable captures.
 
 const root = __dirname;
 const dist = join(root, "dist");
