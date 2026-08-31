@@ -12,7 +12,7 @@ import { perceptualDelta } from "./png";
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
 // reachability), one added at S2 (the server's missing-asset 404 contract), one added at
 // S2's repair round (production-path reachability: real slider input, not a self-set driver), and
-// four S4 neutral-template arms (hierarchy, readable measure, production strong emphasis and rhythm,
+// four S4/S5 neutral-template arms (hierarchy, readable measure, production strong emphasis and rhythm,
 // non-interference).
 // The reachability claim K shipped drove --pos and toggled the classes itself, then asserted the
 // class set — circular about the production path; the repair round keeps that coverage under a
@@ -945,7 +945,7 @@ test("typography: neutral measure stays in the readable long-form band", async (
     };
   });
   console.log(`neutral measure: maximumNonFinalLine=${reads.maximumNonFinalLine} pageWidth=${reads.pageWidth} viewport=${reads.viewportWidth}`);
-  expect(reads.pageWidth).toBe(500);
+  expect(reads.pageWidth).toBe(548);
   expect(reads.maximumNonFinalLine).toBeGreaterThanOrEqual(60);
   expect(reads.maximumNonFinalLine).toBeLessThanOrEqual(75);
 

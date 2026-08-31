@@ -1,7 +1,7 @@
 import { createServer, type Server } from "node:http";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 // Runs in the work dir next to a built `dist/`. Serves it over a local origin, captures a
 // full-page desktop + mobile screenshot, then shuts the server down. Driven by shot.ts.
@@ -161,6 +161,11 @@ for (const view of views) {
     if (restVibe) throw new Error("reachability: vibe class left on at resting pos=0.5");
     if (restWin98) throw new Error("reachability: win98 class left on at resting pos=0.5");
     await page.evaluate(() => document.fonts.ready);
+    // Platform-stamped golden: Playwright appends the browser and platform to this name, so
+    // byte comparisons never pretend pixels are portable across rendering environments.
+    await expect(page).toHaveScreenshot(view.name === "desktop.png" ? "neutral-desktop.png" : "neutral-mobile.png", {
+      fullPage: true,
+    });
     await page.screenshot({ path: join(root, view.name), fullPage: true });
     await page.close();
     console.log(`captured ${view.name}`);
