@@ -19,15 +19,21 @@
     pos = Math.max(0, Math.min(1, p));
     document.documentElement.style.setProperty("--pos", pos.toFixed(4));
     document.documentElement.style.colorScheme = pos <= 0.25 ? "dark" : "light";
-    // Type/layout vocabulary swap: the type/layout channel is flat per dress — each dress owns a
-    // literal block of sizes, weights, measure, and padding that no arithmetic can interpolate —
-    // so it snaps via classes when --pos crosses the snap thresholds. html.vibe mirrors at the low
+    // Type/layout vocabulary swap: the type/layout channel is discrete per dress by design — each
+    // dress owns one flat, literal block of sizes, weights, measure, and padding, so a future post
+    // copies the whole dress as a unit instead of unwinding arithmetic. What makes a class swap
+    // mandatory is the block's non-interpolable properties: font-family (and, where a dress uses
+    // them, text-transform, text-align, and backdrop-filter) cannot be expressed as arithmetic
+    // over --pos, so they must ride a class. The numeric values in the block (sizes, weights,
+    // measure, padding) could interpolate — the flat block is the chosen design, not an arithmetic
+    // limitation. html.vibe mirrors at the low
     // end what html.win98 carries at the high end (criterion 19: layout perturbation owed symmetrically).
     // vibe uses pos <= 0.25 so the class boundary coincides with the --snap1 token step: at exactly
     // 0.25 snap1=0 (vibe tokens fully on) and the vibe class is on — no single-point mixed state.
     // win98 uses pos > 0.75 (strict) so at exactly 0.75 snap2=0 (kex) and the win98 class is off —
-    // also consistent. Every gate driver mirrors both toggles so a driven pos reaches the same
-    // vocabulary a hand drag does.
+    // also consistent. The pixel gates' drivers mirror both toggles so a driven pos reaches the
+    // same vocabulary a hand drag does; the production-path reachability arm drives the real
+    // input instead and reads the classes this code toggles.
     document.documentElement.classList.toggle("vibe", pos <= 0.25);
     document.documentElement.classList.toggle("win98", pos > 0.75);
     ariaNow = Math.round(pos * 100);

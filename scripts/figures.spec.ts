@@ -7,10 +7,14 @@ import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// eleven things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// twelve things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
-// reachability), and one added at S2 (the server's missing-asset 404 contract). The
+// reachability), one added at S2 (the server's missing-asset 404 contract), and one added at
+// S2's repair round (production-path reachability: real slider input, not a self-set driver).
+// The reachability claim K shipped drove --pos and toggled the classes itself, then asserted the
+// class set — circular about the production path; the repair round keeps that coverage under a
+// driver-parity name and adds the arm that reads classes after real keyboard/pointer input. The
 // referent-vocabulary arm was widened to a three-way read at K but is the same arm, not a new
 // one. The morph arms (oracles 5, 6) read
 // the rendered page at three sampled positions (0 = vibe, 0.5 = kex, 1 = win98); the observation
@@ -736,18 +740,81 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
   expect(vibe.radius).toBeGreaterThan(kex.radius);
 });
 
-// --- Criterion 21 (reachability, owed at K for both classes) ---
+// --- Criterion 21a (production-path reachability) ---
 
-// Every state any harness records is reachable by a reader: with html.vibe added, each captured
-// state and each gate driver's sampled position asserts that the class set matches the position
-// it claims (vibe at pos <= 0.25, neither in the middle, win98 at pos > 0.75). The boundary
-// positions 0.25 and 0.75 are tested explicitly because the class toggle carries the entire
-// flat type/layout vocabulary (font, hierarchy, measure, padding) and the remaining snap-stepped
-// color channels — a class on at the wrong position renders a dress no sampled state claims.
-// J shipped a resting capture with win98 left on at pos=0.5 and every other arm stayed green
-// beside it; a second class doubles the ways to produce an artifact no reader can reach.
+// The arm that proves the reachability claim: it drives the real slider — keyboard focus on the
+// .handle plus Home/End, and pointer clicks near the .track edges — through SpectrumFigure's own
+// onKeyDown/update/setPos path, then reads documentElement's classes. It never sets --pos and
+// never toggles a class itself, so a broken production class toggle reds here (the direct-set
+// driver below cannot see that — it toggles its own classes and asserts them, which is exactly
+// the circularity this arm exists to break). Exact boundaries 0.25/0.75 are deliberately not
+// driven here: accumulated arrow steps land at 0.25000000000000006 / 0.7500000000000002 in
+// IEEE-754, so which side of the threshold they fall on is floating-point accident, not
+// behavior; boundary parity stays in the direct-set arm, where the values are set exactly.
+// Mutation: disable setPos's two classList.toggle calls and watch this arm red while the
+// direct-set parity arm stays green.
+test("reachability: production path — real slider input produces the class set (criterion 21)", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const handle = page.locator(".spectrum .handle");
+  const track = page.locator(".spectrum .track");
+  const classes = () =>
+    page.evaluate(() => ({
+      vibe: document.documentElement.classList.contains("vibe"),
+      win98: document.documentElement.classList.contains("win98"),
+    }));
 
-test("reachability: class set matches position at each sampled state (criterion 21)", async ({ page }) => {
+  // Resting state, no input yet: kex, neither class on.
+  let c = await classes();
+  console.log(`production reachability (rest): vibe=${c.vibe} win98=${c.win98}`);
+  expect(c).toEqual({ vibe: false, win98: false });
+
+  // Keyboard: Home maps to pos 0 (vibe), End to pos 1 (win98) — setPos clamps both exactly.
+  await handle.focus();
+  await page.keyboard.press("Home");
+  c = await classes();
+  console.log(`production reachability (keyboard Home): vibe=${c.vibe} win98=${c.win98}`);
+  expect(c).toEqual({ vibe: true, win98: false });
+
+  await page.keyboard.press("End");
+  c = await classes();
+  console.log(`production reachability (keyboard End): vibe=${c.vibe} win98=${c.win98}`);
+  expect(c).toEqual({ vibe: false, win98: true });
+
+  // Pointer: clicks 15px inside each track edge, through update()'s rect arithmetic — the same
+  // mapping a drag takes. The left click maps to pos ≈ 0 (vibe), the right one to pos ≈ 0.997
+  // (win98, no clamping involved). The extreme edge pixels are avoided deliberately: the last
+  // pixel column of the track hit-tests to the section (subpixel edge), which stalls a click.
+  // The box is re-read immediately before each click because the track's width is itself
+  // dress-dependent (the flat --measure channel shrinks it at win98) — a box captured under one
+  // dress misplaces the next click under another.
+  await track.click({ position: { x: 15, y: 18 } });
+  c = await classes();
+  console.log(`production reachability (pointer near left edge): vibe=${c.vibe} win98=${c.win98}`);
+  expect(c).toEqual({ vibe: true, win98: false });
+
+  const box = await track.boundingBox();
+  await track.click({ position: { x: box!.width - 15, y: 18 } });
+  c = await classes();
+  console.log(`production reachability (pointer near right edge): vibe=${c.vibe} win98=${c.win98}`);
+  expect(c).toEqual({ vibe: false, win98: true });
+});
+
+// --- Criterion 21b (reachability driver parity, owed at K for both classes) ---
+
+// What this arm actually proves: the gate drivers' own direct class toggles agree with the
+// documented thresholds (vibe at pos <= 0.25, neither in the middle, win98 at pos > 0.75). It
+// sets --pos and toggles the classes itself, then asserts the class set — circular about the
+// production path: disabling SpectrumFigure's class toggles leaves it green. Production
+// reachability is the arm above. It is kept because every captured state and pixel-read driver
+// relies on that mirror being exactly the thresholds setPos uses — a drifted driver renders a
+// dress no reader can reach, and this arm reds on the drift before any screenshot silently
+// samples it. The boundary positions 0.25 and 0.75 are set (not stepped) here precisely because
+// the class toggle carries the entire flat type/layout vocabulary and the remaining snap-stepped
+// color channels. J shipped a resting capture with win98 left on at pos=0.5 and every other arm
+// stayed green beside it; a second class doubles the ways to produce an artifact no reader can
+// reach.
+
+test("reachability: direct-set driver parity at each sampled state (criterion 21, not production)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
 
@@ -766,7 +833,7 @@ test("reachability: class set matches position at each sampled state (criterion 
       document.documentElement.classList.contains("win98"),
     );
 
-    console.log(`criterion 21 (pos=${p}): vibe=${classes} win98=${win98}`);
+    console.log(`reachability driver parity (pos=${p}): vibe=${classes} win98=${win98}`);
 
     if (p <= 0.25) {
       expect(classes).toBe(true);

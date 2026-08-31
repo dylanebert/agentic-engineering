@@ -137,14 +137,15 @@
      Every type/layout value here is the page's own neutral (kex) reading state as a literal,
      not nested arithmetic over --snap1/--snap2: type and layout are discrete per dress, so each
      dress owns a complete flat block in its class override (html.vibe / html.win98 below) and
-     this default block is the neutral one. The continuously interpolated channels (color,
-     border, radius, accent, bevel) stay arithmetic above and are not part of the template
-     block; the --heading-color/--heading-bg pair below is likewise dress chrome, not template
-     vocabulary — it is snap2-stepped (win98's navy caption bar) like the color channels, while
-     its layout companion --heading-padding is flat. font-family and text-transform can't be
-     values a dress varies by arithmetic either, so they ride the same class blocks. The mono
-     token is not overridden — the page has no <code> element, so a mono swap would be dead
-     vocabulary. */
+     this default block is the neutral one. The arithmetic channels above are not part of the
+     template block, and they are not all one kind: border/radius/accent/bevel interpolate
+     continuously by --t1/--t2, while bg/ink/text step at --snap1 to dodge the polarity-flip
+     contrast collapse. The --heading-color/--heading-bg pair below is also dress chrome, not
+     template vocabulary, and it is snap2-stepped (win98's navy caption bar appears in one step
+     at pos 0.75) — stepped chrome, not a continuously interpolated color. Its layout companion
+     --heading-padding is flat. font-family and text-transform can't be values a dress varies by
+     arithmetic either, so they ride the same class blocks. The mono token is not overridden —
+     the page has no <code> element, so a mono swap would be dead vocabulary. */
   --body-font-size: 16px;
   --body-font-weight: 600;
   --body-line-height: 1.55;
