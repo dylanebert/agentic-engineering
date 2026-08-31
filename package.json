@@ -12,8 +12,7 @@
     "instrument": "bun run scripts/instrument.ts",
     "equivalence": "bun run scripts/equivalence.ts",
     "figures": "bun run scripts/figures.ts",
-    "oracle-text": "bun run scripts/oracle-text.ts",
-    "contact": "bun run scripts/contact.ts"
+    "oracle-text": "bun run scripts/oracle-text.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.62.1",

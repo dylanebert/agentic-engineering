@@ -140,30 +140,34 @@
      this default block is the neutral one. The arithmetic channels above are not part of the
      template block, and they are not all one kind: border/radius/accent/bevel interpolate
      continuously by --t1/--t2, while bg/ink/text step at --snap1 to dodge the polarity-flip
-     contrast collapse. The --heading-color/--heading-bg pair below is also dress chrome, not
-     template vocabulary, and it is snap2-stepped (win98's navy caption bar appears in one step
-     at pos 0.75) — stepped chrome, not a continuously interpolated color. Its layout companion
-     --heading-padding is flat. font-family and text-transform can't be values a dress varies by
-     arithmetic either, so they ride the same class blocks. The mono token is not overridden —
-     the page has no <code> element, so a mono swap would be dead vocabulary. */
+     contrast collapse. --heading-color is template vocabulary with a flat neutral value and
+     explicit dress overrides below. --heading-bg remains dress chrome and snap2-stepped
+     (Win98's navy caption bar appears in one step at pos 0.75), while its padding is flat.
+     font-family and text-transform can't be values a dress varies by arithmetic either, so they
+     ride the same class blocks. The mono token is not overridden — the page has no <code> element,
+     so a mono swap would be dead vocabulary. The neutral reading system uses regular body text,
+     a semibold hierarchy, a 500px page measure, and moderate spacing; these values are literal
+     template inputs rather than candidate aliases. */
   --body-font-size: 16px;
-  --body-font-weight: 600;
-  --body-line-height: 1.55;
+  --body-font-weight: 400;
+  --body-line-height: 1.6;
   --title-font-size: 34px;
   --title-font-size-sm: 28px;
-  --heading-font-size: 15px;
+  --heading-font-size: 20px;
   --heading-font-weight: 600;
-  --heading-color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--text-muted));
+  --heading-color: var(--ink);
+  --emphasis-font-weight: 600;
+  --emphasis-color: var(--ink);
   --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: 0px;
-  --heading-margin-bottom: 10px;
+  --heading-margin-bottom: 14px;
   --heading-text-transform: lowercase;
   --heading-letter-spacing: -0.02em;
   /* Section h2 tracking only — the h1 (.title) keeps --heading-letter-spacing; at kex the h2
      carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
   --h2-letter-spacing: 0em;
   --link-decoration-opacity: 35%;
-  --measure: 680px;
+  --measure: 500px;
   --section-padding: 0px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;
@@ -200,6 +204,7 @@
 html.vibe {
   --sans: 'Inter', system-ui, sans-serif;
   --display: 'Inter', system-ui, sans-serif;
+  --heading-color: var(--vibe-text-muted);
 
   /* Vibe type/layout block — the flat values the low end reads at, overriding the neutral
      defaults above. Inter 400 body, 1.78 leading, 48px title, 700 headings at -0.025em,
@@ -211,6 +216,8 @@ html.vibe {
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
   --heading-font-weight: 700;
+  --emphasis-font-weight: 700;
+  --emphasis-color: var(--ink);
   --heading-padding: 0px;
   --heading-margin-bottom: 12px;
   --heading-letter-spacing: -0.025em;
@@ -252,6 +259,7 @@ html.vibe .title {
    Case, and `none` was inert because the source is already lowercase. */
 html.win98 {
   --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
+  --heading-color: #ffffff;
   --display: 'Tahoma', 'MS Sans Serif', sans-serif;
   --heading-text-transform: capitalize;
 
@@ -267,6 +275,8 @@ html.win98 {
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
   --heading-font-weight: 700;
+  --emphasis-font-weight: 700;
+  --emphasis-color: var(--ink);
   --heading-padding: 2px 4px;
   --heading-margin-bottom: 6px;
   --heading-letter-spacing: 0em;
@@ -317,13 +327,13 @@ a:hover {
 }
 
 strong {
-  font-weight: 700;
-  color: var(--ink);
+  font-weight: var(--emphasis-font-weight);
+  color: var(--emphasis-color);
 }
 
 code {
   font-family: var(--mono);
-  /* JetBrains Mono is loaded at 400 only; inheriting body's 600 would render faux-bold. */
+  /* JetBrains Mono is loaded at 400 only; inheriting the body's regular weight would render faux-bold. */
   font-weight: 400;
   font-size: 0.9em;
 }
