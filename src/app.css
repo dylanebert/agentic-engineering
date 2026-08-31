@@ -140,9 +140,8 @@
      this default block is the neutral one. The arithmetic channels above are not part of the
      template block, and they are not all one kind: border/radius/accent/bevel interpolate
      continuously by --t1/--t2, while bg/ink/text step at --snap1 to dodge the polarity-flip
-     contrast collapse. The --heading-color/--heading-bg pair below is also dress chrome, not
-     template vocabulary. The neutral heading color is the ink token; vibe and Win98 override it
-     in their flat dress blocks. The heading background remains dress chrome and snap2-stepped
+     contrast collapse. --heading-color is template vocabulary with a flat neutral value and
+     explicit dress overrides below. --heading-bg remains dress chrome and snap2-stepped
      (Win98's navy caption bar appears in one step at pos 0.75), while its padding is flat.
      font-family and text-transform can't be values a dress varies by arithmetic either, so they
      ride the same class blocks. The mono token is not overridden — the page has no <code> element,
@@ -157,6 +156,8 @@
   --heading-font-size: 20px;
   --heading-font-weight: 600;
   --heading-color: var(--ink);
+  --emphasis-font-weight: 600;
+  --emphasis-color: var(--ink);
   --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: 0px;
   --heading-margin-bottom: 14px;
@@ -215,6 +216,8 @@ html.vibe {
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
   --heading-font-weight: 700;
+  --emphasis-font-weight: 700;
+  --emphasis-color: var(--ink);
   --heading-padding: 0px;
   --heading-margin-bottom: 12px;
   --heading-letter-spacing: -0.025em;
@@ -272,6 +275,8 @@ html.win98 {
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
   --heading-font-weight: 700;
+  --emphasis-font-weight: 700;
+  --emphasis-color: var(--ink);
   --heading-padding: 2px 4px;
   --heading-margin-bottom: 6px;
   --heading-letter-spacing: 0em;
@@ -319,6 +324,11 @@ a {
 a:hover {
   color: var(--accent-strong);
   text-decoration-color: var(--accent-strong);
+}
+
+strong {
+  font-weight: var(--emphasis-font-weight);
+  color: var(--emphasis-color);
 }
 
 code {

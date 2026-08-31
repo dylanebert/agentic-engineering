@@ -12,7 +12,7 @@ import { perceptualDelta } from "./png";
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
 // reachability), one added at S2 (the server's missing-asset 404 contract), one added at
 // S2's repair round (production-path reachability: real slider input, not a self-set driver), and
-// four S4 neutral-template arms (hierarchy, readable measure, existing-link emphasis and rhythm,
+// four S4 neutral-template arms (hierarchy, readable measure, production strong emphasis and rhythm,
 // non-interference).
 // The reachability claim K shipped drove --pos and toggled the classes itself, then asserted the
 // class set — circular about the production path; the repair round keeps that coverage under a
@@ -946,6 +946,7 @@ test("typography: neutral measure stays in the readable long-form band", async (
   });
   console.log(`neutral measure: maximumNonFinalLine=${reads.maximumNonFinalLine} pageWidth=${reads.pageWidth} viewport=${reads.viewportWidth}`);
   expect(reads.pageWidth).toBe(500);
+  expect(reads.maximumNonFinalLine).toBeGreaterThanOrEqual(60);
   expect(reads.maximumNonFinalLine).toBeLessThanOrEqual(75);
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -968,40 +969,49 @@ test("typography: neutral measure stays in the readable long-form band", async (
   expect(mobile.paddingRight).toBe(20);
 });
 
-test("typography: existing link emphasis and section rhythm are visible on the neutral canvas", async ({ page }) => {
+test("typography: production strong emphasis and section rhythm are visible on the neutral canvas", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => {
     document.documentElement.style.setProperty("--pos", "0.5");
     document.documentElement.classList.remove("vibe", "win98");
+    const paragraph = document.querySelector(".section p")!;
+    const strong = document.createElement("strong");
+    strong.dataset.figureProbe = "strong-emphasis";
+    strong.textContent = "strong emphasis";
+    strong.style.display = "inline-block";
+    strong.style.width = "120px";
+    strong.style.height = "26px";
+    paragraph.append(" ", strong);
   });
   const styles = await page.evaluate(() => {
     const paragraph = document.querySelector(".section p")!;
-    const link = paragraph.querySelector("a") ?? document.querySelector(".section a")!;
+    const strong = paragraph.querySelector("strong")!;
     const body = getComputedStyle(paragraph);
-    const emphasized = getComputedStyle(link);
+    const emphasized = getComputedStyle(strong);
     return {
       paragraphColor: body.color,
-      linkColor: emphasized.color,
-      decoration: emphasized.textDecorationLine,
-      paragraphGap: parseFloat(body.marginTop),
+      paragraphWeight: body.fontWeight,
+      emphasisColor: emphasized.color,
+      emphasisWeight: emphasized.fontWeight,
     };
   });
-  expect(styles.linkColor).not.toBe(styles.paragraphColor);
-  expect(styles.decoration).toContain("underline");
+  console.log(`strong emphasis: body=${styles.paragraphWeight}/${styles.paragraphColor} strong=${styles.emphasisWeight}/${styles.emphasisColor}`);
+  expect(styles.emphasisWeight).toBe("600");
+  expect(styles.emphasisColor).not.toBe(styles.paragraphColor);
 
-  const link = page.locator(".section a").first();
-  const emphasized = await link.screenshot();
-  await link.evaluate((element) => {
+  const strong = page.locator('strong[data-figure-probe="strong-emphasis"]');
+  const emphasized = await strong.screenshot();
+  await strong.evaluate((element) => {
     const paragraph = element.closest("p")!;
     const paragraphStyle = getComputedStyle(paragraph);
     const plain = element as HTMLElement;
+    plain.style.fontWeight = paragraphStyle.fontWeight;
     plain.style.color = paragraphStyle.color;
-    plain.style.textDecoration = "none";
     plain.style.textShadow = "none";
   });
-  const plain = await link.screenshot();
+  const plain = await strong.screenshot();
   const emphasisDelta = perceptualDelta(plain, emphasized);
-  console.log(`existing link emphasis canvas: meanDelta=${emphasisDelta.meanDelta.toFixed(2)} extent=${emphasisDelta.extent.toFixed(4)}`);
+  console.log(`production strong emphasis canvas: meanDelta=${emphasisDelta.meanDelta.toFixed(2)} extent=${emphasisDelta.extent.toFixed(4)}`);
   expect(emphasisDelta.meanDelta).toBeGreaterThan(3);
 
   const rhythm = await page.evaluate(() => {
