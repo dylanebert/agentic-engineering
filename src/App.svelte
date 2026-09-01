@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SpectrumFigure from "./lib/SpectrumFigure.svelte";
+  import HeroFigure from "./lib/HeroFigure.svelte";
 </script>
 
 <article class="page">
@@ -12,6 +12,8 @@
     <h1 class="title">agentic engineering</h1>
     <p class="dek">for beginners</p>
   </header>
+
+  <HeroFigure />
 
   <section class="section">
     <h2>agentic engineering</h2>
@@ -41,7 +43,6 @@
       between, where you stay in the loop, direct the work, and check each step,
       is where agentic engineering lives.
     </p>
-    <SpectrumFigure />
   </section>
 
   <section class="section">
@@ -102,10 +103,6 @@
       each one requires, and what done means, so a fresh conversation can pick
       up where the last left off.
     </p>
-    <!-- Walkthrough figure placeholder — sized to hold the page's rhythm until the figure lands. -->
-    <div class="placeholder" aria-label="walkthrough figure, to come">
-      <span class="placeholder-label">walkthrough</span>
-    </div>
   </section>
 
   <section class="section">
@@ -293,32 +290,6 @@
     color: var(--text-muted);
   }
 
-  .placeholder {
-    margin-top: 28px;
-    height: 320px;
-    border: calc((1 - var(--snap2)) * 1px) dashed var(--border);
-    border-radius: var(--radius);
-    background: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--surface-2));
-    /* At kex (snap2=0): no bevel (chrome bevel tokens are transparent, so inert).
-       At win98 (snap2=1): sunken inset bevel — dark (#808080) on top-left, light (#ffffff)
-       on bottom-right — so the placeholder reads as a sunken field inside the window, not
-       a hole punched through it. Dashed border is suppressed (not a win98 idiom). */
-    box-shadow:
-      inset -2px -2px var(--chrome-bevel-dark),
-      inset 2px 2px var(--chrome-bevel-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .placeholder-label {
-    font-family: var(--display);
-    font-size: var(--meta-font-size);
-    font-weight: var(--display-font-weight);
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
-  }
-
   @media (max-width: 560px) {
     .page {
       padding: 56px 20px 80px;
@@ -326,10 +297,6 @@
 
     .title {
       font-size: var(--title-font-size-sm);
-    }
-
-    .placeholder {
-      height: 240px;
     }
   }
 </style>

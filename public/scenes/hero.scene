@@ -1,0 +1,5 @@
+<scene>
+    <a ambient-light />
+    <a directional-light />
+    <a camera sear orbit="distance: 24; pitch: 0.45" transform />
+</scene>
