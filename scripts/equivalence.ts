@@ -62,7 +62,6 @@ try {
 
   for (const file of [
     "equivalence.spec.ts",
-    "playwright-version.ts",
     "png.ts",
     "reduced.ts",
     "variance.ts",

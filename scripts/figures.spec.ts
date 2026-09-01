@@ -915,9 +915,17 @@ test("typography: neutral measure stays in the readable long-form band", async (
     document.documentElement.style.setProperty("--pos", "0.5");
     document.documentElement.classList.remove("vibe", "win98");
   });
+  await page.evaluate(() => document.fonts.ready);
   await page.waitForFunction(() => {
-    const page = document.querySelector(".page");
-    return page !== null && Math.abs(page.getBoundingClientRect().width - 548) < 0.01;
+    const paragraph = document.querySelector(".page .section p");
+    if (!paragraph) return false;
+    const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
+    const node = walker.nextNode();
+    if (!node) return false;
+    const range = document.createRange();
+    range.setStart(node, 0);
+    range.setEnd(node, Math.min(1, node.textContent?.length ?? 0));
+    return range.getBoundingClientRect().height > 0;
   });
   const reads = await page.evaluate(() => {
     const lineLengths: number[] = [];
@@ -979,11 +987,18 @@ test("typography: selected desktop measure is the widest passing local sweep", a
     document.documentElement.style.setProperty("--pos", "0.5");
     document.documentElement.classList.remove("vibe", "win98");
   });
-  await page.waitForFunction(() => {
-    const page = document.querySelector(".page");
-    return page !== null && Math.abs(page.getBoundingClientRect().width - 548) < 0.01;
-  });
   await page.evaluate(() => document.fonts.ready);
+  await page.waitForFunction(() => {
+    const paragraph = document.querySelector(".page .section p");
+    if (!paragraph) return false;
+    const walker = document.createTreeWalker(paragraph, NodeFilter.SHOW_TEXT);
+    const node = walker.nextNode();
+    if (!node) return false;
+    const range = document.createRange();
+    range.setStart(node, 0);
+    range.setEnd(node, Math.min(1, node.textContent?.length ?? 0));
+    return range.getBoundingClientRect().height > 0;
+  });
   const sweep = await page.evaluate(() => {
     const readMaximum = (width: number): number => {
       const style = document.createElement("style");

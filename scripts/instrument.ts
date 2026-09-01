@@ -37,6 +37,22 @@ function commandMustRed(label: string, cmd: string[], cwd: string): void {
   console.log(`instrument: ${label} mutation red as required`);
 }
 
+function commandMustRedWithStderr(
+  label: string,
+  cmd: string[],
+  cwd: string,
+  expected: string,
+): void {
+  const result = Bun.spawnSync(cmd, { cwd, stdout: "pipe", stderr: "pipe" });
+  const stderr = new TextDecoder().decode(result.stderr);
+  if (result.exitCode === 0 || !stderr.includes(expected)) {
+    console.error(`instrument: ${label} did not reject with its guard message`);
+    console.error(stderr);
+    process.exit(1);
+  }
+  console.log(`instrument: ${label} rejected with its guard message`);
+}
+
 function sourceMutationMustRedAndRestore(
   label: string,
   path: string,
@@ -129,6 +145,8 @@ cpSync(join(import.meta.dir, "capture.spec.ts-snapshots"), join(work, "capture.s
 rmSync(join(work, "dist"), { recursive: true, force: true });
 cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
 
+console.log("instrument: building…");
+run(["bun", "run", "build"], repo);
 console.log("instrument: running self-test…");
 run(["bun", "install", "--silent"], work);
 run(["bunx", "playwright", "install", "chromium"], work);
@@ -192,7 +210,12 @@ commandMustRed(
   ["bun", "run", "equivalence.ts", "--pre", pre, "--post", post],
   work,
 );
-commandMustRed("retired no-argument equivalence mode", ["bun", "run", "equivalence.ts"], work);
+commandMustRedWithStderr(
+  "retired no-argument equivalence mode",
+  ["bun", "run", "equivalence.ts"],
+  work,
+  "equivalence: explicit --pre and --post roots are required",
+);
 rmSync(fixtureRoot, { recursive: true, force: true });
 
 const selectedMeasure = join(work, "figures.spec.ts");
@@ -216,25 +239,33 @@ sourceMutationMustRedAndRestore(
   work,
 );
 
-const goldenArm = join(work, "capture.spec.ts");
-sourceMutationMustRedAndRestore(
-  "golden screenshot",
-  goldenArm,
-  readFileSync(goldenArm, "utf8").replace(
-    '"neutral-desktop.png"',
-    '"neutral-mobile.png"',
-  ),
-  [
-    "bunx",
-    "playwright",
-    "test",
-    "--config",
-    "playwright.config.ts",
-    "capture.spec.ts",
-    "--grep",
-    "capture desktop.png",
-  ],
-  work,
-);
+if (process.platform === "darwin") {
+  const css = readdirSync(join(work, "dist", "assets")).find((file) => file.endsWith(".css"));
+  if (!css) {
+    console.error("instrument: golden screenshot mutation has no built stylesheet");
+    process.exit(1);
+  }
+  const stylesheet = join(work, "dist", "assets", css);
+  sourceMutationMustRedAndRestore(
+    "golden screenshot pixels",
+    stylesheet,
+    readFileSync(stylesheet, "utf8").replace("548px", "549px"),
+    [
+      "bunx",
+      "playwright",
+      "test",
+      "--config",
+      "playwright.config.ts",
+      "capture.spec.ts",
+      "--grep",
+      "capture desktop.png",
+    ],
+    work,
+  );
+} else {
+  console.log(
+    `instrument: golden screenshot pixel mutation skipped on ${process.platform}; stamped seat is darwin`,
+  );
+}
 
 console.log("instrument: self-test and mutation witnesses passed");
