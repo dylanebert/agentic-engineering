@@ -1,321 +1,19 @@
-/* Typed custom properties so calc() and color-mix() interpolate reliably. */
-@property --pos {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0.5;
-}
-
-@property --t1 {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
-
-@property --t2 {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-
-@property --snap1 {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 1;
-}
-
-@property --snap2 {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
-
-@property --glow-strength {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 0;
-}
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Outfit:wght@500;600;700&display=swap");
 
 :root {
   color-scheme: light;
-
-  /* Page-scoped position token — drives the whole-page theme morph (stage I).
-     0 = neon-purple vibe, 0.5 = kex (the page's own dress), 1 = Windows 98 chrome.
-     Set on :root by SpectrumFigure so the entire page restyles, not just the figure box. */
-  --pos: 0.5;
-
-  /* Interpolation factors for the three-point morph (vibe → kex → win98).
-     t1 = clamp(0, pos*2, 1): 0 at pos 0, 1 at pos 0.5, held at 1 past 0.5.
-     t2 = clamp(0, (pos-0.5)*2, 1): 0 at pos 0.5, 1 at pos 1, held at 0 below 0.5.
-     snap1 = clamp(0, (pos-0.25)*1000, 1): a step at pos 0.25 — 0 below (vibe dress),
-     1 above (kex dress). It prevents the polarity flip (light-ink-on-dark → dark-ink-on-light)
-     from interpolating through a mid-gray where bg and ink converge and contrast collapses to
-     ~1:1. The kex→win98 segment never dips (both ends share dark-on-light polarity), which is
-     the proof that the first segment's polarity flip is the structural cause.
-     snap2 = clamp(0, (pos-0.75)*1000, 1): a step at pos 0.75 — 0 below (kex type), 1 above
-     (win98 type). Symmetric with snap1: snap1 sits at the midpoint of the first segment
-     (0.25 of 0 to 0.5), snap2 at the midpoint of the second (0.75 of 0.5 to 1). The class
-     toggle (html.win98) uses pos > 0.75 so class and token step together — at exactly 0.75
-     both are kex, above 0.75 both are win98, no single-point mixed state.
-     glow-strength = (1-t1)*(1-t2): 1 at pos 0 (vibe), 0 from pos 0.5 on. */
-  --t1: clamp(0, var(--pos) * 2, 1);
-  --t2: clamp(0, (var(--pos) - 0.5) * 2, 1);
-  --snap1: clamp(0, (var(--pos) - 0.25) * 1000, 1);
-  --snap2: clamp(0, (var(--pos) - 0.75) * 1000, 1);
-  --glow-strength: calc((1 - var(--t1)) * (1 - var(--t2)));
-
-  /* Vibe endpoint (pos=0) — the glowing neon-purple dress a model picks by default. */
-  --vibe-bg: #13062b;
-  --vibe-ink: #f3e8ff;
-  --vibe-text-dim: #d4c1f0;
-  --vibe-text-muted: #a78bcc;
-  --vibe-border: #3d1f5e;
-  --vibe-accent: #b026ff;
-  --vibe-accent-strong: #d54fff;
-  --vibe-radius: 12px;
-  --vibe-bevel-light: transparent;
-  --vibe-bevel-dark: transparent;
-
-  /* Kex endpoint (pos=0.5) — the page's own dress, H's shipped output. */
-  --kex-bg: #fbfcfd;
-  --kex-ink: #171c24;
-  --kex-text-dim: #363c44;
-  --kex-text-muted: #69727f;
-  --kex-border: #d7dce2;
-  --kex-accent: #3a5a80;
-  --kex-accent-strong: #294564;
-  --kex-radius: 4px;
-  --kex-bevel-light: transparent;
-  --kex-bevel-dark: transparent;
-
-  /* Windows 98 endpoint (pos=1) — hand-built, dated chrome. */
-  --win-bg: #c0c0c0;
-  --win-ink: #000000;
-  --win-text-dim: #000000;
-  --win-text-muted: #404040;
-  --win-border: #808080;
-  --win-accent: #000080;
-  --win-accent-strong: #0000a0;
-  --win-radius: 0px;
-  --win-bevel-light: #ffffff;
-  --win-bevel-dark: #808080;
-
-  /* Current tokens — interpolated from the three endpoints by --pos.
-     bg/ink/text-dim/text-muted use snap1 (step at pos 0.25) for the vibe→kex segment to avoid
-     the polarity-flip contrast collapse, then interpolate to win98 by t2 (both dark-on-light,
-     no flip). accent/border/radius/bevel interpolate continuously across the whole range —
-     only bg/ink/text carry the polarity, so only they need the snap. */
-  --bg: color-mix(in srgb, color-mix(in srgb, var(--vibe-bg), var(--kex-bg) calc(var(--snap1) * 100%)), var(--win-bg) calc(var(--t2) * 100%));
-  --ink: color-mix(in srgb, color-mix(in srgb, var(--vibe-ink), var(--kex-ink) calc(var(--snap1) * 100%)), var(--win-ink) calc(var(--t2) * 100%));
-  --text-dim: color-mix(in srgb, color-mix(in srgb, var(--vibe-text-dim), var(--kex-text-dim) calc(var(--snap1) * 100%)), var(--win-text-dim) calc(var(--t2) * 100%));
-  --text-muted: color-mix(in srgb, color-mix(in srgb, var(--vibe-text-muted), var(--kex-text-muted) calc(var(--snap1) * 100%)), var(--win-text-muted) calc(var(--t2) * 100%));
-  --border: color-mix(in srgb, color-mix(in srgb, var(--vibe-border), var(--kex-border) calc(var(--t1) * 100%)), var(--win-border) calc(var(--t2) * 100%));
-  --accent: color-mix(in srgb, color-mix(in srgb, var(--vibe-accent), var(--kex-accent) calc(var(--t1) * 100%)), var(--win-accent) calc(var(--t2) * 100%));
-  --accent-strong: color-mix(in srgb, color-mix(in srgb, var(--vibe-accent-strong), var(--kex-accent-strong) calc(var(--t1) * 100%)), var(--win-accent-strong) calc(var(--t2) * 100%));
-  --radius: calc((1 - var(--t2)) * ((1 - var(--t1)) * var(--vibe-radius) + var(--t1) * var(--kex-radius)) + var(--t2) * var(--win-radius));
-  --bevel-light: color-mix(in srgb, color-mix(in srgb, var(--vibe-bevel-light), var(--kex-bevel-light) calc(var(--t1) * 100%)), var(--win-bevel-light) calc(var(--t2) * 100%));
-  --bevel-dark: color-mix(in srgb, color-mix(in srgb, var(--vibe-bevel-dark), var(--kex-bevel-dark) calc(var(--t1) * 100%)), var(--win-bevel-dark) calc(var(--t2) * 100%));
-  --bevel: inset 2px 2px var(--bevel-light), inset -2px -2px var(--bevel-dark);
-  --glow: 0 0 12px color-mix(in srgb, var(--vibe-accent) calc(var(--glow-strength) * 60%), transparent);
-
-  /* Chrome bevel — snap2-stepped (not continuous via t2) so the section's frame steps
-     coherently with its background at pos 0.75. Vibe and kex bevels are transparent, so
-     the chrome bevel goes from invisible (below 0.75) to white/gray (above 0.75) in one
-     step — no half-visible outline at the snap boundary. */
-  --chrome-bevel-light: color-mix(in srgb, var(--win-bevel-light) calc(var(--snap2) * 100%), transparent);
-  --chrome-bevel-dark: color-mix(in srgb, var(--win-bevel-dark) calc(var(--snap2) * 100%), transparent);
-  --chrome-bevel: -2px -2px var(--chrome-bevel-light), 2px 2px var(--chrome-bevel-dark);
-
-  --surface-2: color-mix(in srgb, var(--bg) 70%, var(--border));
-
+  --bg: #f7f8f8;
+  --surface: #ffffff;
+  --surface-2: #edf1f2;
+  --ink: #172129;
+  --text: #35434c;
+  --text-muted: #697881;
+  --border: #d7dfe2;
+  --accent: #287997;
+  --display: "Outfit", system-ui, sans-serif;
+  --sans: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
-
-  --mono: 'JetBrains Mono', ui-monospace, monospace;
-
-  /* Type/layout channel — the flat neutral template block, the artifact a future post copies.
-     The three marked template regions carry one exact token set. The pinned boundary ends before
-     heading chrome and text-transform, the two documented exclusions checked separately below. */
-  /* template region */
-  --sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --display: 'Outfit', system-ui, sans-serif;
-  --body-font-size: 16px;
-  --body-font-weight: 400;
-  --body-line-height: 1.6;
-  --title-font-size: 34px;
-  --title-font-size-sm: 28px;
-  --heading-font-size: 20px;
-  --heading-font-weight: 600;
-  --emphasis-font-weight: 600;
-  --display-font-weight: 500;
-  --heading-padding: 0px;
-  --heading-margin-bottom: 14px;
-  --heading-letter-spacing: -0.02em;
-  /* Section h2 tracking only — the h1 (.title) keeps --heading-letter-spacing; at kex the h2
-     carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
-  --h2-letter-spacing: 0em;
-  --link-decoration-opacity: 35%;
-  /* S5 local selection sweep on Chromium/Darwin: 548px → 72 chars (pass), 549px → 76
-     chars (fail). 548px is the selected widest passing value; this one-off upper-edge
-     selection is separate from the portable 60–75-character arm. */
-  --measure: 548px;
-  --section-padding: 0px;
-  --section-margin-top: 52px;
-  --paragraph-margin-top: 14px;
-  --meta-font-size: 14px;
-  --dek-font-size: 15px;
-  --label-font-size: 13px;
-  --aside-font-size: 14.4px;
-  /* end template region */
-  /* Scoped consumers: body and SpectrumFigure's .descriptors (--sans and body metrics), .page
-     (--measure), .head/.section (section spacing), a (--link-decoration-opacity),
-     .meta/.title/.dek/.section h2/.placeholder-label (display hierarchy), .section p/.aside
-     (copy rhythm), strong (emphasis), and SpectrumFigure's .axis-labels/.descriptors
-     (--display or --sans plus --label-font-size) use this copyable region. Interpolated
-     heading/emphasis colors and figure controls/chrome remain outside it. */
-  --heading-color: var(--ink);
-  --emphasis-color: var(--ink);
-  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
-  --heading-bg: transparent;
-  --heading-text-transform: lowercase;
-
-  /* Section background — three-way: vibe glass surface (rgba(255,255,255,0.1) translucent so the
-     dark vibe bg shows through), kex transparent, win98 opaque white (#ffffff). The kex→win98 half
-     uses --snap2 (a step at pos 0.75), not --t2 (continuous from 0.5), so the section background is
-     transparent at kex and steps to opaque white at win98 — no partially transparent white between
-     0.5 and 0.75. The spec locks the midpoint as the page's own kex style and the polarity behavior
-     as a discrete swap, never a cross-fade. The vibe glass at the low end uses --snap1 (step at 0.25). */
-  --section-bg: color-mix(in srgb, color-mix(in srgb, rgba(255, 255, 255, 0.1), transparent calc(var(--snap1) * 100%)), #ffffff calc(var(--snap2) * 100%));
-
-  /* Vibe glow shadow — colored (purple) box-shadow present at vibe (snap1=0), transparent elsewhere.
-     The single most reproducible AI-slop tell after the color itself. */
-  --vibe-glow: 0 25px 50px -12px rgba(168, 85, 247, calc((1 - var(--snap1)) * 0.5));
-
-  /* Handle background — at kex the ink colour, at win98 the button-face colour (#c0c0c0) so
-     the slider thumb reads as a raised control, not a flat black bar. */
-  --handle-bg: color-mix(in srgb, #c0c0c0 calc(var(--snap2) * 100%), var(--ink));
-}
-
-/* Vibe vocabulary swap — mirrors html.win98 from the opposite end (criterion 19: the layout
-   perturbation is accepted, so it is owed symmetrically). font-family, text-align, backdrop-filter
-   and the gradient clip can't be interpolated, so they snap via a class toggled by setPos (and
-   mirrored by every gate driver) when --pos crosses below 0.25 (the --snap1 threshold). Inter is
-   the Lovable/Bolt default face; text-align center is the strongest non-color layout tell; the
-   glass surface (backdrop-filter + translucent 1px border) is the single most reproducible chrome
-   tell; the gradient clip is confined to .title (the h1) only, not .section h2, so the contrast
-   sweep's heading channel reads the h2's own color, not a transparent gradient clip — the hazard
-   the spec pre-commits (gradient-clipped text renders color: transparent, which would make the
-   sweep's heading channel vacuous or spuriously red). */
-html.vibe {
-  /* Vibe type/layout block — the flat values the low end reads at, overriding the neutral
-     defaults above. Inter 400 body, 1.78 leading, 48px title, 700 headings at -0.025em,
-     672px measure, glass-surface interior padding. Headings carry no caption padding. */
-  /* template region */
-  --sans: 'Inter', system-ui, sans-serif;
-  --display: 'Inter', system-ui, sans-serif;
-  --body-font-size: 16px;
-  --body-font-weight: 400;
-  --body-line-height: 1.78;
-  --title-font-size: 48px;
-  --title-font-size-sm: 36px;
-  --heading-font-size: 20px;
-  --heading-font-weight: 700;
-  --emphasis-font-weight: 700;
-  --display-font-weight: 400;
-  --heading-padding: 0px;
-  --heading-margin-bottom: 12px;
-  --heading-letter-spacing: -0.025em;
-  --h2-letter-spacing: -0.025em;
-  --link-decoration-opacity: 35%;
-  --measure: 672px;
-  --section-padding: 12px;
-  --section-margin-top: 36px;
-  --paragraph-margin-top: 12px;
-  --meta-font-size: 14px;
-  --dek-font-size: 15px;
-  --label-font-size: 13px;
-  --aside-font-size: 14.4px;
-  /* end template region */
-  /* Scoped consumers: this dress overrides body and SpectrumFigure's .descriptors (--sans and
-     body metrics), .page (--measure), .head/.section (section spacing), a
-     (--link-decoration-opacity), .meta/.title/.dek/.section h2/.placeholder-label (display
-     hierarchy), .section p/.aside (copy rhythm), strong (emphasis), and SpectrumFigure's
-     .axis-labels/.descriptors (--display or --sans plus --label-font-size). Interpolated
-     heading/emphasis colors and figure controls/chrome remain outside the copyable region. */
-  --heading-color: var(--vibe-text-muted);
-  --emphasis-color: var(--ink);
-  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
-  --heading-bg: transparent;
-  --heading-text-transform: lowercase;
-}
-
-html.vibe .page {
-  text-align: center;
-}
-
-html.vibe .section,
-html.vibe .head {
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-html.vibe .title {
-  background: linear-gradient(135deg, var(--vibe-accent), var(--vibe-accent-strong));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Win98 vocabulary swap — font-family and text-transform can't be interpolated with calc or
-   color-mix, so they snap via a class toggled by setPos (and mirrored by every gate driver)
-   when --pos crosses 0.75. The class overrides the kex font tokens with the win98 face stack
-   (Tahoma is the closest available relative of MS Sans Serif; on a macOS seat it resolves to
-   the system Tahoma, on a Windows seat to the native one). No mono override: the page has no
-   <code> element, so a mono swap would be dead vocabulary. heading-text-transform becomes
-   capitalize so the lowercase h2 source text reads as Title Case — win98 captions are Title
-   Case, and `none` was inert because the source is already lowercase. */
-html.win98 {
-  /* Win98 type/layout block — Tahoma at 11px body, one coherent shrunken hierarchy: every
-     secondary size drops to the win98 body size so section headings are no longer the smallest
-     text on the page, link underlines go fully opaque, the measure narrows to the window
-     column, headings gain the caption-bar padding (2px 4px), and window client areas carry
-     interior padding. */
-  /* template region */
-  --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
-  --display: 'Tahoma', 'MS Sans Serif', sans-serif;
-  --body-font-size: 11px;
-  --body-font-weight: 400;
-  --body-line-height: 1.4;
-  --title-font-size: 20px;
-  --title-font-size-sm: 18px;
-  --heading-font-size: 11px;
-  --heading-font-weight: 700;
-  --emphasis-font-weight: 700;
-  --display-font-weight: 400;
-  --heading-padding: 2px 4px;
-  --heading-margin-bottom: 6px;
-  --heading-letter-spacing: 0em;
-  --h2-letter-spacing: 0em;
-  --link-decoration-opacity: 100%;
-  --measure: 435px;
-  --section-padding: 8px;
-  --section-margin-top: 36px;
-  --paragraph-margin-top: 12px;
-  --meta-font-size: 11px;
-  --dek-font-size: 11px;
-  --label-font-size: 11px;
-  --aside-font-size: 11px;
-  /* end template region */
-  /* Scoped consumers: this dress overrides body and SpectrumFigure's .descriptors (--sans and
-     body metrics), .page (--measure), .head/.section (section spacing), a
-     (--link-decoration-opacity), .meta/.title/.dek/.section h2/.placeholder-label (display
-     hierarchy), .section p/.aside (copy rhythm), strong (emphasis), and SpectrumFigure's
-     .axis-labels/.descriptors (--display or --sans plus --label-font-size). Interpolated
-     heading/emphasis colors and figure controls/chrome remain outside the copyable region. */
-  --heading-color: #ffffff;
-  --emphasis-color: var(--ink);
-  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
-  --heading-bg: #000080;
-  --heading-text-transform: capitalize;
 }
 
 * {
@@ -328,51 +26,188 @@ html {
 }
 
 body {
+  min-width: 320px;
   min-height: 100dvh;
   background: var(--bg);
-  color: var(--text-dim);
-  font-family: var(--sans);
-  font-size: var(--body-font-size);
-  line-height: var(--body-line-height);
-  font-weight: var(--body-font-weight);
+  color: var(--text);
+  font: 400 17px/1.65 var(--sans);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
 a {
   color: var(--accent);
-  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 38%, transparent);
   text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  text-decoration-color: color-mix(in srgb, var(--accent) var(--link-decoration-opacity), transparent);
-  text-shadow: var(--glow);
-  transition: text-decoration-color 0.15s, color 0.15s;
+  text-underline-offset: 3px;
 }
 
 a:hover {
-  color: var(--accent-strong);
-  text-decoration-color: var(--accent-strong);
+  text-decoration-color: var(--accent);
 }
 
-strong {
-  font-weight: var(--emphasis-font-weight);
-  color: var(--emphasis-color);
+button {
+  transition:
+    color 120ms var(--ease-out),
+    background 120ms var(--ease-out),
+    transform 100ms var(--ease-out);
 }
 
-code {
-  font-family: var(--mono);
-  /* JetBrains Mono is loaded at 400 only, so code stays at the available weight. */
-  font-weight: 400;
-  font-size: 0.9em;
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.page {
+  width: min(100% - 40px, 920px);
+  margin: 0 auto;
+  padding: 76px 0 120px;
+}
+
+.head {
+  position: relative;
+}
+
+.meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--text-muted);
+  font: 500 13px var(--display);
+}
+
+.meta a {
+  color: inherit;
+  text-decoration: none;
+}
+
+h1 {
+  margin-top: 12px;
+  color: var(--ink);
+  font: 650 clamp(42px, 8vw, 76px) / 0.95 var(--display);
+  letter-spacing: -0.055em;
+}
+
+.dek {
+  margin-top: 10px;
+  color: var(--text-muted);
+  font: 500 18px var(--display);
+}
+
+main {
+  width: min(100%, 650px);
+  margin: 90px auto 0;
+}
+
+section + section {
+  margin-top: 78px;
+}
+
+main section {
+  position: relative;
+}
+
+.section-number {
+  position: absolute;
+  top: 5px;
+  right: calc(100% + 28px);
+  color: var(--accent);
+  font: 500 11px var(--mono);
+}
+
+main h2 {
+  color: var(--ink);
+  font: 600 28px/1.15 var(--display);
+  letter-spacing: -0.025em;
+}
+
+main p {
+  margin-top: 16px;
+}
+
+.snapshot {
+  margin-top: 26px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #101820;
+  color: #edf4f6;
+}
+
+.code-lines {
+  display: grid;
+  gap: 13px;
+  min-height: 230px;
+  align-content: center;
+  padding: 42px;
+  background:
+    radial-gradient(circle at 80% 25%, rgba(77, 163, 198, 0.25), transparent 34%),
+    linear-gradient(rgba(132, 183, 205, 0.07) 1px, transparent 1px);
+  background-size: auto, 100% 32px;
+}
+
+.code-lines i {
+  display: block;
+  width: 55%;
+  height: 7px;
+  border-radius: 4px;
+  background: #7fc5dd;
+  opacity: 0.7;
+}
+
+.code-lines i:nth-child(2) {
+  width: 74%;
+  margin-left: 9%;
+}
+
+.code-lines i:nth-child(3) {
+  width: 42%;
+  margin-left: 9%;
+}
+
+.code-lines i:nth-child(4) {
+  width: 66%;
+}
+
+.code-lines i:nth-child(5) {
+  width: 36%;
+  margin-left: 9%;
+}
+
+.text-snapshot pre {
+  min-height: 210px;
+  padding: 46px;
+  color: #edf4f6;
+  font: 500 14px/1.8 var(--mono);
+}
+
+figcaption {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #aabac1;
+  font: 500 11px var(--mono);
+}
+
+@media (max-width: 760px) {
+  .page {
+    width: min(100% - 32px, 920px);
+    padding-top: 48px;
+  }
+
+  .section-number {
+    position: static;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  main {
+    margin-top: 70px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
 }
-
