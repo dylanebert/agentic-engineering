@@ -3,8 +3,8 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect, test } from "@playwright/test";
 
-// Runs in the work dir next to a built `dist/`. Serves it over a local origin, checks reachability
-// and horizontal overflow at three morph positions, then captures full-page desktop and mobile
+// Runs in the work dir next to a built `dist/`. Serves it over a local origin, checks direct-set
+// driver parity and horizontal overflow at three morph positions, then captures full-page desktop and mobile
 // screenshots. The neutral captures compare against platform-stamped goldens on the producing seat;
 // shot.ts stages this spec and collects the portable captures.
 
@@ -129,19 +129,19 @@ for (const view of views) {
       const hasVibe = await page.evaluate(() => document.documentElement.classList.contains("vibe"));
       const hasWin98 = await page.evaluate(() => document.documentElement.classList.contains("win98"));
       if (p <= 0.25) {
-        if (!hasVibe) throw new Error(`reachability: vibe class missing at pos=${p}`);
-        if (hasWin98) throw new Error(`reachability: win98 class present at pos=${p}`);
+        if (!hasVibe) throw new Error(`direct-set driver parity: vibe class missing at pos=${p}`);
+        if (hasWin98) throw new Error(`direct-set driver parity: win98 class present at pos=${p}`);
       } else if (p > 0.75) {
-        if (hasVibe) throw new Error(`reachability: vibe class present at pos=${p}`);
-        if (!hasWin98) throw new Error(`reachability: win98 class missing at pos=${p}`);
+        if (hasVibe) throw new Error(`direct-set driver parity: vibe class present at pos=${p}`);
+        if (!hasWin98) throw new Error(`direct-set driver parity: win98 class missing at pos=${p}`);
       } else {
-        if (hasVibe) throw new Error(`reachability: vibe class present at pos=${p}`);
-        if (hasWin98) throw new Error(`reachability: win98 class present at pos=${p}`);
+        if (hasVibe) throw new Error(`direct-set driver parity: vibe class present at pos=${p}`);
+        if (hasWin98) throw new Error(`direct-set driver parity: win98 class present at pos=${p}`);
       }
     }
 
     // Capture at the resting position (kex, 0.5) for the screenshot. Remove both classes
-    // so the resting capture is a state a reader can reach — the overflow loop ends at p=1
+    // so the resting capture is a state selected by the direct-set driver — the overflow loop ends at p=1
     // with html.win98 on, and resetting --pos alone leaves the class (BLOCKER 2). With html.vibe
     // added at K, the same hazard doubles: the loop starts at p=0 with html.vibe on.
     // Wait for the style recalc to settle (snap2=0 at pos=0.5, so section bg goes transparent).
@@ -160,8 +160,8 @@ for (const view of views) {
     // Direct-set driver parity at rest: neither dress class should be on at pos=0.5.
     const restVibe = await page.evaluate(() => document.documentElement.classList.contains("vibe"));
     const restWin98 = await page.evaluate(() => document.documentElement.classList.contains("win98"));
-    if (restVibe) throw new Error("reachability: vibe class left on at resting pos=0.5");
-    if (restWin98) throw new Error("reachability: win98 class left on at resting pos=0.5");
+    if (restVibe) throw new Error("direct-set driver parity: vibe class left on at resting pos=0.5");
+    if (restWin98) throw new Error("direct-set driver parity: win98 class left on at resting pos=0.5");
     await page.evaluate(() => document.fonts.ready);
     // Always write the portable capture first, then compare only on the stamped seat. A WSL
     // capture runs on Windows and has no Darwin golden by design.

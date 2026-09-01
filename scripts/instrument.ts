@@ -18,6 +18,11 @@ import { playwrightVersion } from "./playwright-version";
 
 const repo = join(import.meta.dir, "..");
 const documentedExclusions = new Set(["--heading-bg", "--heading-text-transform"]);
+const pinnedHeadingChrome = new Map([
+  [":root", "transparent"],
+  ["html.vibe", "transparent"],
+  ["html.win98", "#000080"],
+]);
 
 function declarations(source: string): Map<string, string> {
   const result = new Map<string, string>();
@@ -38,7 +43,7 @@ function blockRegion(source: string, selector: string, marker: string): string {
 function exclusionRegion(source: string, selector: string): Map<string, string> {
   const blockStart = source.indexOf(`${selector} {`);
   const regionEnd = source.indexOf("/* end template region */", blockStart);
-  const exclusionStart = source.indexOf("/* Documented heading chrome and text-transform asymmetries. */", regionEnd);
+  const exclusionStart = source.indexOf("/* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */", regionEnd);
   const sectionBackground = source.indexOf("/* Section background", exclusionStart);
   const blockEnd = source.indexOf("\n}", exclusionStart);
   const exclusionEnd = sectionBackground >= 0 && sectionBackground < blockEnd ? sectionBackground : blockEnd;
@@ -68,6 +73,9 @@ function assertTemplateSourceShape(source: string): void {
     const actual = exclusionRegion(source, selector);
     if (actual.size !== documentedExclusions.size || [...documentedExclusions].some((token) => !actual.has(token))) {
       throw new Error(`template source shape: ${selector} exclusions changed`);
+    }
+    if (actual.get("--heading-bg") !== pinnedHeadingChrome.get(selector)) {
+      throw new Error(`template source shape: ${selector} heading chrome is not pinned literal`);
     }
   }
 }
@@ -183,6 +191,7 @@ function sourceShapeMutationMustRed(label: string, mutated: string): void {
     );
   } finally {
     writeFileSync(path, source);
+    run(["bun", "run", "scripts/instrument.ts", "--source-shape-only"], repo);
   }
   console.log(`instrument: ${label} mutation restored green`);
 }
@@ -257,6 +266,10 @@ sourceShapeMutationMustRed(
   "template documented exclusion",
   cssSource.replace("  --heading-bg: #000080;\n  --heading-text-transform: capitalize;", "  --heading-text-transform: capitalize;"),
 );
+sourceShapeMutationMustRed(
+  "template heading chrome literal",
+  cssSource.replace("  --heading-bg: transparent;\n  --heading-text-transform: lowercase;", "  --heading-bg: color-mix(in srgb, #000080 0%, transparent);\n  --heading-text-transform: lowercase;"),
+);
 
 function refreshStagedDist(): void {
   rmSync(join(work, "dist"), { recursive: true, force: true });
@@ -281,6 +294,10 @@ function cssMutationMustRed(label: string, needle: string, replacement: string, 
     writeFileSync(path, source);
     run(["bun", "run", "build"], repo);
     refreshStagedDist();
+    run(
+      ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep],
+      work,
+    );
   }
   console.log(`instrument: ${label} mutation restored green`);
 }

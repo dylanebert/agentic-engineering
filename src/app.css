@@ -132,9 +132,8 @@
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Type/layout channel — the flat neutral template block, the artifact a future post copies.
-     The three marked template regions must carry one exact token set. Heading chrome and text
-     transform stay outside that set because they are the two documented dress asymmetries;
-     the source-shape arm checks those exclusions separately. */
+     The three marked template regions carry one exact token set. The pinned boundary ends before
+     heading chrome and text-transform, the two documented exclusions checked separately below. */
   /* template region */
   --sans: 'IBM Plex Sans', system-ui, sans-serif;
   --display: 'Outfit', system-ui, sans-serif;
@@ -167,8 +166,8 @@
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
   /* end template region */
-  /* Documented heading chrome and text-transform asymmetries. */
-  --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
+  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
+  --heading-bg: transparent;
   --heading-text-transform: lowercase;
 
   /* Section background — three-way: vibe glass surface (rgba(255,255,255,0.1) translucent so the
@@ -229,8 +228,8 @@ html.vibe {
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
   /* end template region */
-  /* Documented heading chrome and text-transform asymmetries. */
-  --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
+  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
+  --heading-bg: transparent;
   --heading-text-transform: lowercase;
 }
 
@@ -293,7 +292,7 @@ html.win98 {
   --label-font-size: 11px;
   --aside-font-size: 11px;
   /* end template region */
-  /* Documented heading chrome and text-transform asymmetries. */
+  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
   --heading-bg: #000080;
   --heading-text-transform: capitalize;
 }
