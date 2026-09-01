@@ -144,9 +144,7 @@
   --title-font-size-sm: 28px;
   --heading-font-size: 20px;
   --heading-font-weight: 600;
-  --heading-color: var(--ink);
   --emphasis-font-weight: 600;
-  --emphasis-color: var(--ink);
   --heading-padding: 0px;
   --heading-margin-bottom: 14px;
   --heading-letter-spacing: -0.02em;
@@ -165,7 +163,13 @@
   --dek-font-size: 15px;
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
+  --display-font-weight: 500;
   /* end template region */
+  /* Scoped consumers: body, .page, .title, .section, and strong consume the copyable
+     typography, measure, and rhythm tokens above. Continuously interpolated heading/emphasis
+     color aliases and figure/chrome tokens remain outside that boundary. */
+  --heading-color: var(--ink);
+  --emphasis-color: var(--ink);
   /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
   --heading-bg: transparent;
   --heading-text-transform: lowercase;
@@ -211,9 +215,7 @@ html.vibe {
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
   --heading-font-weight: 700;
-  --heading-color: var(--vibe-text-muted);
   --emphasis-font-weight: 700;
-  --emphasis-color: var(--ink);
   --heading-padding: 0px;
   --heading-margin-bottom: 12px;
   --heading-letter-spacing: -0.025em;
@@ -227,7 +229,12 @@ html.vibe {
   --dek-font-size: 15px;
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
+  --display-font-weight: 400;
   /* end template region */
+  /* Scoped consumers: this dress overrides the same body, .page, .title, .section, and strong
+     consumers; its continuously interpolated color aliases stay outside the copyable boundary. */
+  --heading-color: var(--vibe-text-muted);
+  --emphasis-color: var(--ink);
   /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
   --heading-bg: transparent;
   --heading-text-transform: lowercase;
@@ -275,9 +282,7 @@ html.win98 {
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
   --heading-font-weight: 700;
-  --heading-color: #ffffff;
   --emphasis-font-weight: 700;
-  --emphasis-color: var(--ink);
   --heading-padding: 2px 4px;
   --heading-margin-bottom: 6px;
   --heading-letter-spacing: 0em;
@@ -291,7 +296,12 @@ html.win98 {
   --dek-font-size: 11px;
   --label-font-size: 11px;
   --aside-font-size: 11px;
+  --display-font-weight: 400;
   /* end template region */
+  /* Scoped consumers: this dress overrides the same body, .page, .title, .section, and strong
+     consumers; its chrome and color aliases remain outside the copyable boundary. */
+  --heading-color: #ffffff;
+  --emphasis-color: var(--ink);
   /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
   --heading-bg: #000080;
   --heading-text-transform: capitalize;

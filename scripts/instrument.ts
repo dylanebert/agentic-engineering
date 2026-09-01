@@ -56,6 +56,7 @@ function exclusionRegion(source: string, selector: string): Map<string, string> 
 function assertTemplateSourceShape(source: string): void {
   const selectors = [":root", "html.vibe", "html.win98"];
   const blocks = selectors.map((selector) => declarations(blockRegion(source, selector, "/* template region */")));
+  const allTokens = declarations(source);
   const neutralTokens = new Set(blocks[0]!.keys());
   if (neutralTokens.size === 0) throw new Error("template source shape: neutral template region is empty");
   for (const [index, block] of blocks.entries()) {
@@ -65,8 +66,16 @@ function assertTemplateSourceShape(source: string): void {
   }
   for (const token of neutralTokens) {
     const value = blocks[0]!.get(token)!;
-    if (/(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(value)) {
+    const alias = value.match(/var\(\s*(--[a-z0-9-]+)\s*\)/)?.[1];
+    const resolved = alias ? allTokens.get(alias) ?? "" : "";
+    if (/(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(value) ||
+        /(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(resolved)) {
       throw new Error(`template source shape: neutral ${token} contains snap/interpolation arithmetic`);
+    }
+  }
+  for (const token of ["--heading-color", "--emphasis-color"]) {
+    if (neutralTokens.has(token)) {
+      throw new Error(`template source shape: ${token} must remain outside the copyable template region`);
     }
   }
   for (const selector of selectors) {
@@ -229,6 +238,7 @@ for (const file of [
   "instrument.spec.ts",
   "figures.spec.ts",
   "capture.spec.ts",
+  "oracle-text.spec.ts",
   "variance.ts",
   "reduced.ts",
   "png.ts",
@@ -255,8 +265,16 @@ sourceShapeMutationMustRed(
   cssSource.replace("--measure: 548px;", "--measure: calc(548px + 0px);"),
 );
 sourceShapeMutationMustRed(
+  "template indirect measure arithmetic",
+  `${cssSource.replace("  --measure: 548px;", "  --measure: var(--portable-measure);")}\n:root {\n  --portable-measure: calc(548px + 0px);\n}\n`,
+);
+sourceShapeMutationMustRed(
   "template vibe rhythm token",
   cssSource.replace("  --section-padding: 12px;\n  --section-margin-top: 36px;\n  --paragraph-margin-top: 12px;", "  --section-padding: 12px;\n  --section-margin-top: 36px;"),
+);
+sourceShapeMutationMustRed(
+  "template color alias boundary",
+  cssSource.replace("  --heading-font-weight: 600;", "  --heading-font-weight: 600;\n  --heading-color: var(--ink);"),
 );
 sourceShapeMutationMustRed(
   "template win98 rhythm token",
@@ -319,6 +337,53 @@ cssMutationMustRed(
   "  --section-margin-top: 52px;",
   "  --section-margin-top: 14px;",
   "typography: production strong emphasis",
+);
+cssMutationMustRed(
+  "portable readable measure",
+  "  --measure: 548px;",
+  "  --measure: 700px;",
+  "typography: neutral measure stays in the readable long-form band",
+);
+
+const captureSource = readFileSync(join(work, "capture.spec.ts"), "utf8");
+sourceMutationMustRedAndRestore(
+  "capture missing-asset 404",
+  join(work, "capture.spec.ts"),
+  captureSource.replace(
+    "      res.writeHead(404, { \"content-type\": \"text/plain; charset=utf-8\" });\n      res.end(`missing asset: ${path}`);\n      return;",
+    "      path = \"index.html\";\n      body = await readFile(join(dist, path));",
+  ),
+  [
+    "bunx",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.config.ts",
+    "capture.spec.ts",
+    "--grep",
+    "capture missing assets",
+  ],
+  work,
+);
+const oracleTextSource = readFileSync(join(work, "oracle-text.spec.ts"), "utf8");
+sourceMutationMustRedAndRestore(
+  "text-oracle missing-asset 404",
+  join(work, "oracle-text.spec.ts"),
+  oracleTextSource.replace(
+    "      res.writeHead(404, { \"content-type\": \"text/plain; charset=utf-8\" });\n      res.end(`missing asset: ${path}`);\n      return;",
+    "      path = \"index.html\";\n      body = await readFile(join(dist, path));",
+  ),
+  [
+    "bunx",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.config.ts",
+    "oracle-text.spec.ts",
+    "--grep",
+    "text oracle missing assets",
+  ],
+  work,
 );
 
 const reduced = join(work, "reduced.ts");

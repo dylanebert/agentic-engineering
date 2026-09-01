@@ -24,7 +24,7 @@ import { playwrightVersion } from "./playwright-version";
 // drivers' own class toggles match the documented thresholds, not that production reaches them.
 // Seventeen arms total, by name: page-varies, page-reduced-motion, page-contrast-sweep,
 // fill-distinguishable, end-labels-bound, end-descriptors-bound, font-application,
-// referent-vocabulary, vibe-vocabulary, reachability-driver-parity, reachability-production,
+// referent-vocabulary, vibe-vocabulary, direct-set-driver-parity, production-path-reachability,
 // missing-asset-404, neutral-hierarchy, readable-measure, selected-desktop-measure,
 // emphasis-and-rhythm, non-interference. Display-gated like shot.ts; WSL branch stages onto
 // Windows TEMP and runs through PowerShell.
