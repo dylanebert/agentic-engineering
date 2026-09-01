@@ -10,12 +10,15 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { requireDisplay } from "./display";
+import { playwrightVersion } from "./playwright-version";
 
 // Self-terminating instrument self-test. Stages the variance + reduced-motion specs and their
-// harness modules into a work dir with @playwright/test, runs playwright, exits. The synthetic
-// fixture is inline in the spec, so no build or dist is needed. Display-gated like shot.ts.
+// harness modules into a work dir with @playwright/test, runs playwright, exits. It also runs the
+// committed S5 selection and golden mutation witnesses against the built page. Display-gated.
 
 if (!requireDisplay("instrument")) process.exit(0);
+
+const repo = join(import.meta.dir, "..");
 
 function run(cmd: string[], cwd: string): void {
   const result = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
@@ -32,6 +35,42 @@ function commandMustRed(label: string, cmd: string[], cwd: string): void {
     process.exit(1);
   }
   console.log(`instrument: ${label} mutation red as required`);
+}
+
+function commandMustRedWithStderr(
+  label: string,
+  cmd: string[],
+  cwd: string,
+  expected: string,
+): void {
+  const result = Bun.spawnSync(cmd, { cwd, stdout: "pipe", stderr: "pipe" });
+  const stderr = new TextDecoder().decode(result.stderr);
+  if (result.exitCode === 0 || !stderr.includes(expected)) {
+    console.error(`instrument: ${label} did not reject with its guard message`);
+    console.error(stderr);
+    process.exit(1);
+  }
+  console.log(`instrument: ${label} rejected with its guard message`);
+}
+
+function sourceMutationMustRedAndRestore(
+  label: string,
+  path: string,
+  mutated: string,
+  cmd: string[],
+  cwd: string,
+): void {
+  const source = readFileSync(path, "utf8");
+  if (mutated === source) {
+    console.error(`instrument: ${label} mutation did not match its source`);
+    process.exit(1);
+  }
+  run(cmd, cwd);
+  writeFileSync(path, mutated);
+  commandMustRed(label, cmd, cwd);
+  writeFileSync(path, source);
+  run(cmd, cwd);
+  console.log(`instrument: ${label} mutation restored green`);
 }
 
 function reducedMutationMustRed(
@@ -68,7 +107,7 @@ const pkg = JSON.stringify(
   {
     name: "agentic-engineering-instrument",
     private: true,
-    dependencies: { "@playwright/test": "1.62.1" },
+    dependencies: { "@playwright/test": playwrightVersion },
   },
   null,
   2,
@@ -87,7 +126,10 @@ for (const file of [
   "display.ts",
   "equivalence.spec.ts",
   "equivalence.ts",
+  "playwright-version.ts",
   "instrument.spec.ts",
+  "figures.spec.ts",
+  "capture.spec.ts",
   "variance.ts",
   "reduced.ts",
   "png.ts",
@@ -96,7 +138,15 @@ for (const file of [
   cpSync(join(import.meta.dir, file), join(work, file));
 }
 writeFileSync(join(work, "package.json"), pkg);
+cpSync(join(repo, "bun.lock"), join(work, "bun.lock"));
+cpSync(join(import.meta.dir, "capture.spec.ts-snapshots"), join(work, "capture.spec.ts-snapshots"), {
+  recursive: true,
+});
+rmSync(join(work, "dist"), { recursive: true, force: true });
+cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
 
+console.log("instrument: building…");
+run(["bun", "run", "build"], repo);
 console.log("instrument: running self-test…");
 run(["bun", "install", "--silent"], work);
 run(["bunx", "playwright", "install", "chromium"], work);
@@ -160,6 +210,62 @@ commandMustRed(
   ["bun", "run", "equivalence.ts", "--pre", pre, "--post", post],
   work,
 );
+commandMustRedWithStderr(
+  "retired no-argument equivalence mode",
+  ["bun", "run", "equivalence.ts"],
+  work,
+  "equivalence: explicit --pre and --post roots are required",
+);
 rmSync(fixtureRoot, { recursive: true, force: true });
 
-console.log("instrument: self-test and 5 mutation witnesses passed");
+const selectedMeasure = join(work, "figures.spec.ts");
+sourceMutationMustRedAndRestore(
+  "S5 selected measure",
+  selectedMeasure,
+  readFileSync(selectedMeasure, "utf8").replace(
+    "const selected = readMaximum(548);",
+    "const selected = readMaximum(549);",
+  ),
+  [
+    "bunx",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.config.ts",
+    "figures.spec.ts",
+    "--grep",
+    "selected desktop measure",
+  ],
+  work,
+);
+
+if (process.platform === "darwin") {
+  const css = readdirSync(join(work, "dist", "assets")).find((file) => file.endsWith(".css"));
+  if (!css) {
+    console.error("instrument: golden screenshot mutation has no built stylesheet");
+    process.exit(1);
+  }
+  const stylesheet = join(work, "dist", "assets", css);
+  sourceMutationMustRedAndRestore(
+    "golden screenshot pixels",
+    stylesheet,
+    readFileSync(stylesheet, "utf8").replace("548px", "549px"),
+    [
+      "bunx",
+      "playwright",
+      "test",
+      "--config",
+      "playwright.config.ts",
+      "capture.spec.ts",
+      "--grep",
+      "capture desktop.png",
+    ],
+    work,
+  );
+} else {
+  console.log(
+    `instrument: golden screenshot pixel mutation skipped on ${process.platform}; stamped seat is darwin`,
+  );
+}
+
+console.log("instrument: self-test and mutation witnesses passed");
