@@ -125,7 +125,7 @@ for (const view of views) {
           `horizontal overflow at ${view.width}x${view.height} pos=${p}: scrollWidth=${scrollWidth} > ${view.width}`,
         );
       }
-      // Criterion 21: reachability — the class set must match the position this capture claims.
+      // Direct-set driver parity: the gate's class driver must match each documented threshold.
       const hasVibe = await page.evaluate(() => document.documentElement.classList.contains("vibe"));
       const hasWin98 = await page.evaluate(() => document.documentElement.classList.contains("win98"));
       if (p <= 0.25) {
@@ -157,7 +157,7 @@ for (const view of views) {
       const snap2 = parseFloat(cs.getPropertyValue('--snap2') || '-1');
       return Math.abs(snap1 - 1) < 0.001 && Math.abs(snap2 - 0) < 0.001;
     });
-    // Criterion 21: resting capture reachability — neither class should be on at pos=0.5.
+    // Direct-set driver parity at rest: neither dress class should be on at pos=0.5.
     const restVibe = await page.evaluate(() => document.documentElement.classList.contains("vibe"));
     const restWin98 = await page.evaluate(() => document.documentElement.classList.contains("win98"));
     if (restVibe) throw new Error("reachability: vibe class left on at resting pos=0.5");

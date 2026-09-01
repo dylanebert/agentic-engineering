@@ -16,9 +16,73 @@ import { playwrightVersion } from "./playwright-version";
 // harness modules into a work dir with @playwright/test, runs playwright, exits. It also runs the
 // committed S5 selection and golden mutation witnesses against the built page. Display-gated.
 
-if (!requireDisplay("instrument")) process.exit(0);
-
 const repo = join(import.meta.dir, "..");
+const templateTokens = [
+  "--sans",
+  "--display",
+  "--body-font-size",
+  "--body-font-weight",
+  "--body-line-height",
+  "--title-font-size",
+  "--title-font-size-sm",
+  "--heading-font-size",
+  "--heading-font-weight",
+  "--heading-color",
+  "--emphasis-font-weight",
+  "--emphasis-color",
+  "--heading-bg",
+  "--heading-padding",
+  "--heading-margin-bottom",
+  "--heading-text-transform",
+  "--heading-letter-spacing",
+  "--h2-letter-spacing",
+  "--link-decoration-opacity",
+  "--measure",
+  "--section-padding",
+  "--section-margin-top",
+  "--paragraph-margin-top",
+  "--meta-font-size",
+  "--dek-font-size",
+  "--label-font-size",
+  "--aside-font-size",
+] as const;
+const headingAsymmetries = new Set(["--heading-bg", "--heading-text-transform"]);
+
+function templateBlock(source: string, selector: string): Map<string, string> {
+  const start = source.indexOf(`${selector} {`);
+  if (start < 0) throw new Error(`template source shape: missing ${selector} block`);
+  const end = source.indexOf("\n}", start);
+  if (end < 0) throw new Error(`template source shape: unterminated ${selector} block`);
+  const declarations = new Map<string, string>();
+  const pattern = /^\s*(--[a-z0-9-]+)\s*:\s*([^;]+);/gm;
+  for (const match of source.slice(start, end).matchAll(pattern)) declarations.set(match[1]!, match[2]!.trim());
+  return declarations;
+}
+
+function assertTemplateSourceShape(source: string): void {
+  const blocks = [templateBlock(source, ":root"), templateBlock(source, "html.vibe"), templateBlock(source, "html.win98")];
+  for (const [index, block] of blocks.entries()) {
+    const actual = new Set(block.keys());
+    if (templateTokens.some((token) => !actual.has(token))) {
+      throw new Error(`template source shape: block ${index} does not declare the complete token set`);
+    }
+  }
+  for (const token of templateTokens) {
+    if (headingAsymmetries.has(token)) continue;
+    const value = blocks[0].get(token)!;
+    if (/(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(value)) {
+      throw new Error(`template source shape: neutral ${token} contains snap/interpolation arithmetic`);
+    }
+  }
+}
+
+if (process.env.INSTRUMENT_SOURCE_SHAPE_ONLY === "1") {
+  assertTemplateSourceShape(readFileSync(join(repo, "src/app.css"), "utf8"));
+  console.log("instrument: source-shape arm passed");
+  process.exit(0);
+}
+
+if (!requireDisplay("instrument")) process.exit(0);
 
 function run(cmd: string[], cwd: string): void {
   const result = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
@@ -28,8 +92,13 @@ function run(cmd: string[], cwd: string): void {
   }
 }
 
-function commandMustRed(label: string, cmd: string[], cwd: string): void {
-  const result = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
+function commandMustRed(label: string, cmd: string[], cwd: string, env?: Record<string, string>): void {
+  const result = Bun.spawnSync(cmd, {
+    cwd,
+    stdout: "inherit",
+    stderr: "inherit",
+    ...(env ? { env: { ...process.env, ...env } } : {}),
+  });
   if (result.exitCode === 0) {
     console.error(`instrument: ${label} mutation unexpectedly passed`);
     process.exit(1);
@@ -103,6 +172,23 @@ function reducedMutationMustRed(
   writeFileSync(reduced, source);
 }
 
+function sourceShapeMutationMustRed(label: string, mutated: string): void {
+  const path = join(repo, "src/app.css");
+  const source = readFileSync(path, "utf8");
+  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match its source`);
+  writeFileSync(path, mutated);
+  commandMustRed(
+    label,
+    ["bun", "run", "scripts/instrument.ts"],
+    repo,
+    { INSTRUMENT_SOURCE_SHAPE_ONLY: "1" },
+  );
+  writeFileSync(path, source);
+  console.log(`instrument: ${label} mutation restored green`);
+}
+
+assertTemplateSourceShape(readFileSync(join(repo, "src/app.css"), "utf8"));
+
 const pkg = JSON.stringify(
   {
     name: "agentic-engineering-instrument",
@@ -112,6 +198,10 @@ const pkg = JSON.stringify(
   null,
   2,
 );
+
+console.log("instrument: building…");
+rmSync(join(repo, "dist"), { recursive: true, force: true });
+run(["bun", "run", "build"], repo);
 
 const work = join(tmpdir(), "agentic-engineering-instrument");
 mkdirSync(work, { recursive: true });
@@ -145,12 +235,67 @@ cpSync(join(import.meta.dir, "capture.spec.ts-snapshots"), join(work, "capture.s
 rmSync(join(work, "dist"), { recursive: true, force: true });
 cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
 
-console.log("instrument: building…");
-run(["bun", "run", "build"], repo);
 console.log("instrument: running self-test…");
 run(["bun", "install", "--silent"], work);
 run(["bunx", "playwright", "install", "chromium"], work);
 run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "instrument.spec.ts"], work);
+
+const cssSource = readFileSync(join(repo, "src/app.css"), "utf8");
+sourceShapeMutationMustRed(
+  "template measure arithmetic",
+  cssSource.replace("--measure: 548px;", "--measure: calc(548px + 0px);"),
+);
+sourceShapeMutationMustRed(
+  "template vibe rhythm token",
+  cssSource.replace("  --section-padding: 12px;\n  --section-margin-top: 36px;\n  --paragraph-margin-top: 12px;", "  --section-padding: 12px;\n  --section-margin-top: 36px;"),
+);
+sourceShapeMutationMustRed(
+  "template win98 rhythm token",
+  cssSource.replace("  --section-padding: 8px;\n  --section-margin-top: 36px;\n  --paragraph-margin-top: 12px;", "  --section-padding: 8px;\n  --paragraph-margin-top: 12px;"),
+);
+
+function refreshStagedDist(): void {
+  rmSync(join(work, "dist"), { recursive: true, force: true });
+  cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
+}
+
+function cssMutationMustRed(label: string, needle: string, replacement: string, grep: string): void {
+  const path = join(repo, "src/app.css");
+  const source = readFileSync(path, "utf8");
+  const mutated = source.replace(needle, replacement);
+  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match its source`);
+  writeFileSync(path, mutated);
+  run(["bun", "run", "build"], repo);
+  refreshStagedDist();
+  commandMustRed(
+    label,
+    ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep],
+    work,
+  );
+  writeFileSync(path, source);
+  run(["bun", "run", "build"], repo);
+  refreshStagedDist();
+  console.log(`instrument: ${label} mutation restored green`);
+}
+
+cssMutationMustRed(
+  "heading/body ordering",
+  "  --heading-font-size: 20px;",
+  "  --heading-font-size: 15px;",
+  "typography: neutral hierarchy",
+);
+cssMutationMustRed(
+  "emphasis weight",
+  "  --emphasis-font-weight: 600;",
+  "  --emphasis-font-weight: 400;",
+  "typography: production strong emphasis",
+);
+cssMutationMustRed(
+  "section rhythm",
+  "  --section-margin-top: 52px;",
+  "  --section-margin-top: 14px;",
+  "typography: production strong emphasis",
+);
 
 const reduced = join(work, "reduced.ts");
 const reducedSource = readFileSync(reduced, "utf8");

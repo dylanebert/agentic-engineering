@@ -172,6 +172,8 @@
      selection is separate from the portable 60–75-character arm. */
   --measure: 548px;
   --section-padding: 0px;
+  --section-margin-top: 52px;
+  --paragraph-margin-top: 14px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;
   --label-font-size: 13px;
@@ -207,7 +209,6 @@
 html.vibe {
   --sans: 'Inter', system-ui, sans-serif;
   --display: 'Inter', system-ui, sans-serif;
-  --heading-color: var(--vibe-text-muted);
 
   /* Vibe type/layout block — the flat values the low end reads at, overriding the neutral
      defaults above. Inter 400 body, 1.78 leading, 48px title, 700 headings at -0.025em,
@@ -219,15 +220,20 @@ html.vibe {
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
   --heading-font-weight: 700;
+  --heading-color: var(--vibe-text-muted);
   --emphasis-font-weight: 700;
   --emphasis-color: var(--ink);
+  --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: 0px;
   --heading-margin-bottom: 12px;
+  --heading-text-transform: lowercase;
   --heading-letter-spacing: -0.025em;
   --h2-letter-spacing: -0.025em;
   --link-decoration-opacity: 35%;
   --measure: 672px;
   --section-padding: 12px;
+  --section-margin-top: 36px;
+  --paragraph-margin-top: 12px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;
   --label-font-size: 13px;
@@ -262,9 +268,7 @@ html.vibe .title {
    Case, and `none` was inert because the source is already lowercase. */
 html.win98 {
   --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
-  --heading-color: #ffffff;
   --display: 'Tahoma', 'MS Sans Serif', sans-serif;
-  --heading-text-transform: capitalize;
 
   /* Win98 type/layout block — Tahoma at 11px body, one coherent shrunken hierarchy: every
      secondary size drops to the win98 body size so section headings are no longer the smallest
@@ -278,15 +282,20 @@ html.win98 {
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
   --heading-font-weight: 700;
+  --heading-color: #ffffff;
   --emphasis-font-weight: 700;
   --emphasis-color: var(--ink);
+  --heading-bg: #000080;
   --heading-padding: 2px 4px;
   --heading-margin-bottom: 6px;
+  --heading-text-transform: capitalize;
   --heading-letter-spacing: 0em;
   --h2-letter-spacing: 0em;
   --link-decoration-opacity: 100%;
   --measure: 435px;
   --section-padding: 8px;
+  --section-margin-top: 36px;
+  --paragraph-margin-top: 12px;
   --meta-font-size: 11px;
   --dek-font-size: 11px;
   --label-font-size: 11px;
@@ -336,7 +345,7 @@ strong {
 
 code {
   font-family: var(--mono);
-  /* JetBrains Mono is loaded at 400 only; inheriting the body's regular weight would render faux-bold. */
+  /* JetBrains Mono is loaded at 400 only, so code stays at the available weight. */
   font-weight: 400;
   font-size: 0.9em;
 }
