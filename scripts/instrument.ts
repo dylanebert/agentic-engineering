@@ -16,23 +16,94 @@ import { playwrightVersion } from "./playwright-version";
 // harness modules into a work dir with @playwright/test, runs playwright, exits. It also runs the
 // committed S5 selection and golden mutation witnesses against the built page. Display-gated.
 
-if (!requireDisplay("instrument")) process.exit(0);
-
 const repo = join(import.meta.dir, "..");
+const documentedExclusions = new Set(["--heading-bg", "--heading-text-transform"]);
+const pinnedHeadingChrome = new Map([
+  [":root", "transparent"],
+  ["html.vibe", "transparent"],
+  ["html.win98", "#000080"],
+]);
+
+function declarations(source: string): Map<string, string> {
+  const result = new Map<string, string>();
+  const pattern = /^\s*(--[a-z0-9-]+)\s*:\s*([^;]+);/gm;
+  for (const match of source.matchAll(pattern)) result.set(match[1]!, match[2]!.trim());
+  return result;
+}
+
+function blockRegion(source: string, selector: string, marker: string): string {
+  const blockStart = source.indexOf(`${selector} {`);
+  if (blockStart < 0) throw new Error(`template source shape: missing ${selector} block`);
+  const regionStart = source.indexOf(marker, blockStart);
+  const regionEnd = source.indexOf("/* end template region */", regionStart);
+  if (regionStart < 0 || regionEnd < 0) throw new Error(`template source shape: missing ${selector} template region`);
+  return source.slice(regionStart + marker.length, regionEnd);
+}
+
+function exclusionRegion(source: string, selector: string): Map<string, string> {
+  const blockStart = source.indexOf(`${selector} {`);
+  const regionEnd = source.indexOf("/* end template region */", blockStart);
+  const exclusionStart = source.indexOf("/* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */", regionEnd);
+  const sectionBackground = source.indexOf("/* Section background", exclusionStart);
+  const blockEnd = source.indexOf("\n}", exclusionStart);
+  const exclusionEnd = sectionBackground >= 0 && sectionBackground < blockEnd ? sectionBackground : blockEnd;
+  if (blockStart < 0 || regionEnd < 0 || exclusionStart < 0 || exclusionEnd < 0) {
+    throw new Error(`template source shape: missing ${selector} exclusion region`);
+  }
+  return declarations(source.slice(exclusionStart, exclusionEnd));
+}
+
+function assertTemplateSourceShape(source: string): void {
+  const selectors = [":root", "html.vibe", "html.win98"];
+  const blocks = selectors.map((selector) => declarations(blockRegion(source, selector, "/* template region */")));
+  const neutralTokens = new Set(blocks[0]!.keys());
+  if (neutralTokens.size === 0) throw new Error("template source shape: neutral template region is empty");
+  for (const [index, block] of blocks.entries()) {
+    if (block.size !== neutralTokens.size || [...neutralTokens].some((token) => !block.has(token))) {
+      throw new Error(`template source shape: block ${index} does not exactly match the neutral token set`);
+    }
+  }
+  for (const token of neutralTokens) {
+    const value = blocks[0]!.get(token)!;
+    if (/(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(value)) {
+      throw new Error(`template source shape: neutral ${token} contains snap/interpolation arithmetic`);
+    }
+  }
+  for (const selector of selectors) {
+    const actual = exclusionRegion(source, selector);
+    if (actual.size !== documentedExclusions.size || [...documentedExclusions].some((token) => !actual.has(token))) {
+      throw new Error(`template source shape: ${selector} exclusions changed`);
+    }
+    if (actual.get("--heading-bg") !== pinnedHeadingChrome.get(selector)) {
+      throw new Error(`template source shape: ${selector} heading chrome is not pinned literal`);
+    }
+  }
+}
+
+if (process.argv.includes("--source-shape-only")) {
+  assertTemplateSourceShape(readFileSync(join(repo, "src/app.css"), "utf8"));
+  console.log("instrument: source-shape arm passed");
+  process.exit(0);
+}
+
+if (!requireDisplay("instrument")) process.exit(0);
 
 function run(cmd: string[], cwd: string): void {
   const result = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
   if (result.exitCode !== 0) {
-    console.error(`instrument: '${cmd.join(" ")}' failed (exit ${result.exitCode})`);
-    process.exit(1);
+    throw new Error(`instrument: '${cmd.join(" ")}' failed (exit ${result.exitCode})`);
   }
 }
 
-function commandMustRed(label: string, cmd: string[], cwd: string): void {
-  const result = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
+function commandMustRed(label: string, cmd: string[], cwd: string, env?: Record<string, string>): void {
+  const result = Bun.spawnSync(cmd, {
+    cwd,
+    stdout: "inherit",
+    stderr: "inherit",
+    ...(env ? { env: { ...process.env, ...env } } : {}),
+  });
   if (result.exitCode === 0) {
-    console.error(`instrument: ${label} mutation unexpectedly passed`);
-    process.exit(1);
+    throw new Error(`instrument: ${label} mutation unexpectedly passed`);
   }
   console.log(`instrument: ${label} mutation red as required`);
 }
@@ -46,9 +117,7 @@ function commandMustRedWithStderr(
   const result = Bun.spawnSync(cmd, { cwd, stdout: "pipe", stderr: "pipe" });
   const stderr = new TextDecoder().decode(result.stderr);
   if (result.exitCode === 0 || !stderr.includes(expected)) {
-    console.error(`instrument: ${label} did not reject with its guard message`);
-    console.error(stderr);
-    process.exit(1);
+    throw new Error(`instrument: ${label} did not reject with its guard message: ${stderr}`);
   }
   console.log(`instrument: ${label} rejected with its guard message`);
 }
@@ -67,8 +136,11 @@ function sourceMutationMustRedAndRestore(
   }
   run(cmd, cwd);
   writeFileSync(path, mutated);
-  commandMustRed(label, cmd, cwd);
-  writeFileSync(path, source);
+  try {
+    commandMustRed(label, cmd, cwd);
+  } finally {
+    writeFileSync(path, source);
+  }
   run(cmd, cwd);
   console.log(`instrument: ${label} mutation restored green`);
 }
@@ -86,22 +158,45 @@ function reducedMutationMustRed(
 
   const reduced = join(work, "reduced.ts");
   writeFileSync(reduced, mutated);
-  commandMustRed(
-    label,
-    [
-      "bunx",
-      "playwright",
-      "test",
-      "--config",
-      "playwright.config.ts",
-      "instrument.spec.ts",
-      "--grep",
-      grep,
-    ],
-    work,
-  );
-  writeFileSync(reduced, source);
+  try {
+    commandMustRed(
+      label,
+      [
+        "bunx",
+        "playwright",
+        "test",
+        "--config",
+        "playwright.config.ts",
+        "instrument.spec.ts",
+        "--grep",
+        grep,
+      ],
+      work,
+    );
+  } finally {
+    writeFileSync(reduced, source);
+  }
 }
+
+function sourceShapeMutationMustRed(label: string, mutated: string): void {
+  const path = join(repo, "src/app.css");
+  const source = readFileSync(path, "utf8");
+  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match its source`);
+  writeFileSync(path, mutated);
+  try {
+    commandMustRed(
+      label,
+      ["bun", "run", "scripts/instrument.ts", "--source-shape-only"],
+      repo,
+    );
+  } finally {
+    writeFileSync(path, source);
+    run(["bun", "run", "scripts/instrument.ts", "--source-shape-only"], repo);
+  }
+  console.log(`instrument: ${label} mutation restored green`);
+}
+
+assertTemplateSourceShape(readFileSync(join(repo, "src/app.css"), "utf8"));
 
 const pkg = JSON.stringify(
   {
@@ -112,6 +207,10 @@ const pkg = JSON.stringify(
   null,
   2,
 );
+
+console.log("instrument: building…");
+rmSync(join(repo, "dist"), { recursive: true, force: true });
+run(["bun", "run", "build"], repo);
 
 const work = join(tmpdir(), "agentic-engineering-instrument");
 mkdirSync(work, { recursive: true });
@@ -145,12 +244,82 @@ cpSync(join(import.meta.dir, "capture.spec.ts-snapshots"), join(work, "capture.s
 rmSync(join(work, "dist"), { recursive: true, force: true });
 cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
 
-console.log("instrument: building…");
-run(["bun", "run", "build"], repo);
 console.log("instrument: running self-test…");
 run(["bun", "install", "--silent"], work);
 run(["bunx", "playwright", "install", "chromium"], work);
 run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "instrument.spec.ts"], work);
+
+const cssSource = readFileSync(join(repo, "src/app.css"), "utf8");
+sourceShapeMutationMustRed(
+  "template measure arithmetic",
+  cssSource.replace("--measure: 548px;", "--measure: calc(548px + 0px);"),
+);
+sourceShapeMutationMustRed(
+  "template vibe rhythm token",
+  cssSource.replace("  --section-padding: 12px;\n  --section-margin-top: 36px;\n  --paragraph-margin-top: 12px;", "  --section-padding: 12px;\n  --section-margin-top: 36px;"),
+);
+sourceShapeMutationMustRed(
+  "template win98 rhythm token",
+  cssSource.replace("  --section-padding: 8px;\n  --section-margin-top: 36px;\n  --paragraph-margin-top: 12px;", "  --section-padding: 8px;\n  --paragraph-margin-top: 12px;"),
+);
+sourceShapeMutationMustRed(
+  "template documented exclusion",
+  cssSource.replace("  --heading-bg: #000080;\n  --heading-text-transform: capitalize;", "  --heading-text-transform: capitalize;"),
+);
+sourceShapeMutationMustRed(
+  "template heading chrome literal",
+  cssSource.replace("  --heading-bg: transparent;\n  --heading-text-transform: lowercase;", "  --heading-bg: color-mix(in srgb, #000080 0%, transparent);\n  --heading-text-transform: lowercase;"),
+);
+
+function refreshStagedDist(): void {
+  rmSync(join(work, "dist"), { recursive: true, force: true });
+  cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
+}
+
+function cssMutationMustRed(label: string, needle: string, replacement: string, grep: string): void {
+  const path = join(repo, "src/app.css");
+  const source = readFileSync(path, "utf8");
+  const mutated = source.replace(needle, replacement);
+  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match its source`);
+  writeFileSync(path, mutated);
+  try {
+    run(["bun", "run", "build"], repo);
+    refreshStagedDist();
+    commandMustRed(
+      label,
+      ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep],
+      work,
+    );
+  } finally {
+    writeFileSync(path, source);
+    run(["bun", "run", "build"], repo);
+    refreshStagedDist();
+    run(
+      ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep],
+      work,
+    );
+  }
+  console.log(`instrument: ${label} mutation restored green`);
+}
+
+cssMutationMustRed(
+  "heading/body ordering",
+  "  --heading-font-size: 20px;",
+  "  --heading-font-size: 15px;",
+  "typography: neutral hierarchy",
+);
+cssMutationMustRed(
+  "emphasis weight",
+  "  --emphasis-font-weight: 600;",
+  "  --emphasis-font-weight: 400;",
+  "typography: production strong emphasis",
+);
+cssMutationMustRed(
+  "section rhythm",
+  "  --section-margin-top: 52px;",
+  "  --section-margin-top: 14px;",
+  "typography: production strong emphasis",
+);
 
 const reduced = join(work, "reduced.ts");
 const reducedSource = readFileSync(reduced, "utf8");

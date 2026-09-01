@@ -242,7 +242,7 @@
   }
 
   .section {
-    margin-top: 52px;
+    margin-top: var(--section-margin-top);
     /* Three-way background: vibe glass surface (rgba(255,255,255,0.1)) at snap1=0, kex transparent,
      win98 opaque white at snap2=1. The vibe glow shadow is present at snap1=0 and transparent
      elsewhere. At kex (snap1=1, snap2=0) both are transparent, so no visual change. */
@@ -282,7 +282,7 @@
   }
 
   .section p {
-    margin-top: 14px;
+    margin-top: var(--paragraph-margin-top);
     color: var(--text-dim);
   }
 

@@ -129,25 +129,14 @@
 
   --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
 
-  --sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --display: 'Outfit', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
   /* Type/layout channel — the flat neutral template block, the artifact a future post copies.
-     Every type/layout value here is the page's own neutral (kex) reading state as a literal,
-     not nested arithmetic over --snap1/--snap2: type and layout are discrete per dress, so each
-     dress owns a complete flat block in its class override (html.vibe / html.win98 below) and
-     this default block is the neutral one. The arithmetic channels above are not part of the
-     template block, and they are not all one kind: border/radius/accent/bevel interpolate
-     continuously by --t1/--t2, while bg/ink/text step at --snap1 to dodge the polarity-flip
-     contrast collapse. --heading-color is template vocabulary with a flat neutral value and
-     explicit dress overrides below. --heading-bg remains dress chrome and snap2-stepped
-     (Win98's navy caption bar appears in one step at pos 0.75), while its padding is flat.
-     font-family and text-transform can't be values a dress varies by arithmetic either, so they
-     ride the same class blocks. The mono token is not overridden — the page has no <code> element,
-     so a mono swap would be dead vocabulary. The neutral reading system uses regular body text,
-     a semibold hierarchy, a 548px page measure, and moderate spacing; these values are literal
-     template inputs rather than candidate aliases. */
+     The three marked template regions carry one exact token set. The pinned boundary ends before
+     heading chrome and text-transform, the two documented exclusions checked separately below. */
+  /* template region */
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --display: 'Outfit', system-ui, sans-serif;
   --body-font-size: 16px;
   --body-font-weight: 400;
   --body-line-height: 1.6;
@@ -158,10 +147,8 @@
   --heading-color: var(--ink);
   --emphasis-font-weight: 600;
   --emphasis-color: var(--ink);
-  --heading-bg: color-mix(in srgb, #000080 calc(var(--snap2) * 100%), transparent);
   --heading-padding: 0px;
   --heading-margin-bottom: 14px;
-  --heading-text-transform: lowercase;
   --heading-letter-spacing: -0.02em;
   /* Section h2 tracking only — the h1 (.title) keeps --heading-letter-spacing; at kex the h2
      carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
@@ -172,10 +159,16 @@
      selection is separate from the portable 60–75-character arm. */
   --measure: 548px;
   --section-padding: 0px;
+  --section-margin-top: 52px;
+  --paragraph-margin-top: 14px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
+  /* end template region */
+  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
+  --heading-bg: transparent;
+  --heading-text-transform: lowercase;
 
   /* Section background — three-way: vibe glass surface (rgba(255,255,255,0.1) translucent so the
      dark vibe bg shows through), kex transparent, win98 opaque white (#ffffff). The kex→win98 half
@@ -205,13 +198,12 @@
    the spec pre-commits (gradient-clipped text renders color: transparent, which would make the
    sweep's heading channel vacuous or spuriously red). */
 html.vibe {
-  --sans: 'Inter', system-ui, sans-serif;
-  --display: 'Inter', system-ui, sans-serif;
-  --heading-color: var(--vibe-text-muted);
-
   /* Vibe type/layout block — the flat values the low end reads at, overriding the neutral
      defaults above. Inter 400 body, 1.78 leading, 48px title, 700 headings at -0.025em,
      672px measure, glass-surface interior padding. Headings carry no caption padding. */
+  /* template region */
+  --sans: 'Inter', system-ui, sans-serif;
+  --display: 'Inter', system-ui, sans-serif;
   --body-font-size: 16px;
   --body-font-weight: 400;
   --body-line-height: 1.78;
@@ -219,6 +211,7 @@ html.vibe {
   --title-font-size-sm: 36px;
   --heading-font-size: 20px;
   --heading-font-weight: 700;
+  --heading-color: var(--vibe-text-muted);
   --emphasis-font-weight: 700;
   --emphasis-color: var(--ink);
   --heading-padding: 0px;
@@ -228,10 +221,16 @@ html.vibe {
   --link-decoration-opacity: 35%;
   --measure: 672px;
   --section-padding: 12px;
+  --section-margin-top: 36px;
+  --paragraph-margin-top: 12px;
   --meta-font-size: 14px;
   --dek-font-size: 15px;
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
+  /* end template region */
+  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
+  --heading-bg: transparent;
+  --heading-text-transform: lowercase;
 }
 
 html.vibe .page {
@@ -261,16 +260,14 @@ html.vibe .title {
    capitalize so the lowercase h2 source text reads as Title Case — win98 captions are Title
    Case, and `none` was inert because the source is already lowercase. */
 html.win98 {
-  --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
-  --heading-color: #ffffff;
-  --display: 'Tahoma', 'MS Sans Serif', sans-serif;
-  --heading-text-transform: capitalize;
-
   /* Win98 type/layout block — Tahoma at 11px body, one coherent shrunken hierarchy: every
      secondary size drops to the win98 body size so section headings are no longer the smallest
      text on the page, link underlines go fully opaque, the measure narrows to the window
      column, headings gain the caption-bar padding (2px 4px), and window client areas carry
      interior padding. */
+  /* template region */
+  --sans: 'Tahoma', 'MS Sans Serif', sans-serif;
+  --display: 'Tahoma', 'MS Sans Serif', sans-serif;
   --body-font-size: 11px;
   --body-font-weight: 400;
   --body-line-height: 1.4;
@@ -278,6 +275,7 @@ html.win98 {
   --title-font-size-sm: 18px;
   --heading-font-size: 11px;
   --heading-font-weight: 700;
+  --heading-color: #ffffff;
   --emphasis-font-weight: 700;
   --emphasis-color: var(--ink);
   --heading-padding: 2px 4px;
@@ -287,10 +285,16 @@ html.win98 {
   --link-decoration-opacity: 100%;
   --measure: 435px;
   --section-padding: 8px;
+  --section-margin-top: 36px;
+  --paragraph-margin-top: 12px;
   --meta-font-size: 11px;
   --dek-font-size: 11px;
   --label-font-size: 11px;
   --aside-font-size: 11px;
+  /* end template region */
+  /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
+  --heading-bg: #000080;
+  --heading-text-transform: capitalize;
 }
 
 * {
@@ -336,7 +340,7 @@ strong {
 
 code {
   font-family: var(--mono);
-  /* JetBrains Mono is loaded at 400 only; inheriting the body's regular weight would render faux-bold. */
+  /* JetBrains Mono is loaded at 400 only, so code stays at the available weight. */
   font-weight: 400;
   font-size: 0.9em;
 }
