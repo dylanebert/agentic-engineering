@@ -35,10 +35,11 @@
 <style>
   .hero {
     position: relative;
-    height: 320px;
+    width: 100%;
+    aspect-ratio: 3 / 2;
     margin-top: 28px;
     overflow: hidden;
-    background: #fff;
+    background: var(--bg);
   }
 
   canvas {
@@ -54,14 +55,8 @@
     display: grid;
     place-items: center;
     color: var(--text-muted);
-    background: #fff;
+    background: var(--bg);
     font-family: var(--display);
     font-size: var(--label-font-size);
-  }
-
-  @media (max-width: 560px) {
-    .hero {
-      height: 240px;
-    }
   }
 </style>
