@@ -915,7 +915,10 @@ test("typography: neutral measure stays in the readable long-form band", async (
     document.documentElement.style.setProperty("--pos", "0.5");
     document.documentElement.classList.remove("vibe", "win98");
   });
-  await page.waitForFunction(() => getComputedStyle(document.body).fontSize === "16px");
+  await page.waitForFunction(() => {
+    const page = document.querySelector(".page");
+    return page !== null && Math.abs(page.getBoundingClientRect().width - 548) < 0.01;
+  });
   const reads = await page.evaluate(() => {
     const lineLengths: number[] = [];
     for (const paragraph of document.querySelectorAll(".page .section p")) {
@@ -976,7 +979,10 @@ test("typography: selected desktop measure is the widest passing local sweep", a
     document.documentElement.style.setProperty("--pos", "0.5");
     document.documentElement.classList.remove("vibe", "win98");
   });
-  await page.waitForFunction(() => getComputedStyle(document.body).fontSize === "16px");
+  await page.waitForFunction(() => {
+    const page = document.querySelector(".page");
+    return page !== null && Math.abs(page.getBoundingClientRect().width - 548) < 0.01;
+  });
   await page.evaluate(() => document.fonts.ready);
   const sweep = await page.evaluate(() => {
     const readMaximum = (width: number): number => {

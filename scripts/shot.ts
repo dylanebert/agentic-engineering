@@ -1,7 +1,8 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { requireDisplay } from "./display";
+import { playwrightVersion } from "./playwright-version";
 
 // Self-terminating full-page capture. Build the site, serve `dist`, screenshot desktop + mobile,
 // exit. Never leaves a dev server or browser open. A display is required by default; callers
@@ -18,12 +19,6 @@ if (!requireDisplay("shot")) process.exit(0);
 
 const updateSnapshots =
   process.env.UPDATE_SNAPSHOTS === "1" || process.argv.includes("--update-snapshots");
-const lock = readFileSync(join(repo, "bun.lock"), "utf8");
-const playwrightVersion = lock.match(
-  /^\s*"@playwright\/test": \["@playwright\/test@([^"]+)"/m,
-)?.[1];
-if (!playwrightVersion) throw new Error("shot: bun.lock has no exact @playwright/test version");
-
 function run(cmd: string[], cwd: string): void {
   const r = Bun.spawnSync(cmd, { cwd, stdout: "inherit", stderr: "inherit" });
   if (r.exitCode !== 0) {

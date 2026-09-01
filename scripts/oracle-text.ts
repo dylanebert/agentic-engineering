@@ -1,6 +1,7 @@
 import { cpSync, existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { playwrightVersion } from "./playwright-version";
 
 // Self-terminating rendered-text oracle (criteria 3 and 4, amended at E's review; widened at I
 // to three sampled morph positions). Builds the site, stages dist + the oracle spec and its deps
@@ -33,7 +34,7 @@ function run(cmd: string[], cwd: string): void {
 }
 
 const pkg = JSON.stringify(
-  { name: "agentic-engineering-oracle-text", private: true, dependencies: { "@playwright/test": "1.62.1" } },
+  { name: "agentic-engineering-oracle-text", private: true, dependencies: { "@playwright/test": playwrightVersion } },
   null,
   2,
 );

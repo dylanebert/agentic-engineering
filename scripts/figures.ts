@@ -2,6 +2,7 @@ import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } fro
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { requireDisplay } from "./display";
+import { playwrightVersion } from "./playwright-version";
 
 // Self-terminating figure gate (oracles 5, 5b, 6, contrast sweep, 8, 17, 20 and 21, plus the
 // S2 missing-asset 404 server contract). Builds the site, stages dist + the figure spec and its
@@ -43,7 +44,7 @@ function run(cmd: string[], cwd: string): void {
 }
 
 const pkg = JSON.stringify(
-  { name: "agentic-engineering-figures", private: true, dependencies: { "@playwright/test": "1.62.1" } },
+  { name: "agentic-engineering-figures", private: true, dependencies: { "@playwright/test": playwrightVersion } },
   null,
   2,
 );
