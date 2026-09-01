@@ -145,6 +145,7 @@
   --heading-font-size: 20px;
   --heading-font-weight: 600;
   --emphasis-font-weight: 600;
+  --display-font-weight: 500;
   --heading-padding: 0px;
   --heading-margin-bottom: 14px;
   --heading-letter-spacing: -0.02em;
@@ -215,6 +216,7 @@ html.vibe {
   --heading-font-size: 20px;
   --heading-font-weight: 700;
   --emphasis-font-weight: 700;
+  --display-font-weight: 400;
   --heading-padding: 0px;
   --heading-margin-bottom: 12px;
   --heading-letter-spacing: -0.025em;
@@ -281,6 +283,7 @@ html.win98 {
   --heading-font-size: 11px;
   --heading-font-weight: 700;
   --emphasis-font-weight: 700;
+  --display-font-weight: 400;
   --heading-padding: 2px 4px;
   --heading-margin-bottom: 6px;
   --heading-letter-spacing: 0em;

@@ -529,6 +529,40 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
   }
 });
 
+// The secondary display channel is explicit on the neutral page and stays at its prior regular
+// weight in both dresses. This reads the applied declarations on every secondary display consumer,
+// then checks the neutral Outfit face through the canvas font channel rather than only its family
+// name. Mutation: changing the neutral 500 token or either dress's 400 token reds this arm.
+test("font application: secondary display weight per dress", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+
+  for (const position of [0, 0.5, 1]) {
+    await page.evaluate((pos) => {
+      document.documentElement.style.setProperty("--pos", String(pos));
+      document.documentElement.classList.toggle("vibe", pos <= 0.25);
+      document.documentElement.classList.toggle("win98", pos > 0.75);
+    }, position);
+    await page.evaluate(() =>
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
+    const reads = await page.locator(".meta, .dek, .placeholder-label").evaluateAll((els) =>
+      els.map((element) => {
+        const style = getComputedStyle(element);
+        return { family: style.fontFamily.toLowerCase(), weight: style.fontWeight };
+      }),
+    );
+    const expectedWeight = position === 0.5 ? "500" : "400";
+    console.log(`secondary display weight (pos=${position}): ${reads.map((read) => read.weight).join(",")}`);
+    expect(reads.length).toBeGreaterThan(0);
+    expect(reads.every((read) => read.weight === expectedWeight)).toBe(true);
+    if (position === 0.5) {
+      expect(reads.every((read) => read.family.includes("outfit"))).toBe(true);
+      expect(await isFontRendered(page, "Outfit", "500")).toBe(true);
+    }
+  }
+});
+
 // --- Criterion 17 (referent-vocabulary arm, widened to three-way at K) ---
 
 // The arm that would have red on I's shipped right end. At J it read only pos=0.5 and pos=1, so it

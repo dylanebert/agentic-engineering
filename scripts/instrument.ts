@@ -344,6 +344,24 @@ cssMutationMustRed(
   "  --measure: 700px;",
   "typography: neutral measure stays in the readable long-form band",
 );
+cssMutationMustRed(
+  "neutral secondary display weight",
+  "  --display-font-weight: 500;",
+  "  --display-font-weight: 400;",
+  "secondary display weight",
+);
+cssMutationMustRed(
+  "vibe secondary display weight",
+  "  --display-font-weight: 400;\n  --heading-padding: 0px;",
+  "  --display-font-weight: 500;\n  --heading-padding: 0px;",
+  "secondary display weight",
+);
+cssMutationMustRed(
+  "win98 secondary display weight",
+  "  --display-font-weight: 400;\n  --heading-padding: 2px 4px;",
+  "  --display-font-weight: 500;\n  --heading-padding: 2px 4px;",
+  "secondary display weight",
+);
 
 const captureSource = readFileSync(join(work, "capture.spec.ts"), "utf8");
 sourceMutationMustRedAndRestore(
