@@ -7,13 +7,14 @@ import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// seventeen things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// eighteen things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
-// reachability), one added at S2 (the server's missing-asset 404 contract), one added at
-// S2's repair round (production-path reachability: real slider input, not a self-set driver), and
-// five S4/S5 neutral-template arms (hierarchy, portable readable measure, selected measure,
-// production strong emphasis and rhythm, non-interference).
+// driver parity), one added at S2 (the server's missing-asset 404 contract), one added at
+// S2's repair round (production-path reachability: real slider input, not a self-set driver),
+// one added at S8 (secondary display weight per dress), and five S4/S5 neutral-template arms
+// (hierarchy, portable readable measure, selected measure, production strong emphasis and rhythm,
+// non-interference).
 // The reachability claim K shipped drove --pos and toggled the classes itself, then asserted the
 // class set — circular about the production path; the repair round keeps that coverage under a
 // driver-parity name and adds the arm that reads classes after real keyboard/pointer input. The

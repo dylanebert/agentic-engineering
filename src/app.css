@@ -165,9 +165,11 @@
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
   /* end template region */
-  /* Scoped consumers: body, .page, .title, .section, and strong consume the copyable
-     typography, measure, and rhythm tokens above. Continuously interpolated heading/emphasis
-     color aliases and figure/chrome tokens remain outside that boundary. */
+  /* Scoped consumers: body (--sans and body metrics), .page (--measure), .head/.section
+     (section spacing), .meta/.title/.dek/.section h2/.placeholder-label (display hierarchy),
+     .section p/.aside (copy rhythm), strong (emphasis), and SpectrumFigure's .axis-labels and
+     .descriptors (--label-font-size) use this copyable region. Interpolated heading/emphasis
+     colors and figure controls/chrome remain outside it. */
   --heading-color: var(--ink);
   --emphasis-color: var(--ink);
   /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
@@ -231,8 +233,11 @@ html.vibe {
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
   /* end template region */
-  /* Scoped consumers: this dress overrides the same body, .page, .title, .section, and strong
-     consumers; its continuously interpolated color aliases stay outside the copyable boundary. */
+  /* Scoped consumers: this dress overrides body (--sans and body metrics), .page (--measure),
+     .head/.section (section spacing), .meta/.title/.dek/.section h2/.placeholder-label (display
+     hierarchy), .section p/.aside (copy rhythm), strong (emphasis), and SpectrumFigure's
+     .axis-labels and .descriptors (--label-font-size). Interpolated heading/emphasis colors and
+     figure controls/chrome remain outside the copyable region. */
   --heading-color: var(--vibe-text-muted);
   --emphasis-color: var(--ink);
   /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
@@ -298,8 +303,11 @@ html.win98 {
   --label-font-size: 11px;
   --aside-font-size: 11px;
   /* end template region */
-  /* Scoped consumers: this dress overrides the same body, .page, .title, .section, and strong
-     consumers; its chrome and color aliases remain outside the copyable boundary. */
+  /* Scoped consumers: this dress overrides body (--sans and body metrics), .page (--measure),
+     .head/.section (section spacing), .meta/.title/.dek/.section h2/.placeholder-label (display
+     hierarchy), .section p/.aside (copy rhythm), strong (emphasis), and SpectrumFigure's
+     .axis-labels and .descriptors (--label-font-size). Interpolated heading/emphasis colors and
+     figure controls/chrome remain outside the copyable region. */
   --heading-color: #ffffff;
   --emphasis-color: var(--ink);
   /* Pinned boundary: heading chrome and text-transform are exact documented exclusions. */
