@@ -1,5 +1,6 @@
 <scene>
-    <a ambient-light />
-    <a directional-light />
-    <a camera sear orbit="distance: 24; pitch: 0.45" transform />
+    <a ambient-light="color: 0xffffff; intensity: 0.8" />
+    <a directional-light="direction: -0.4 -1 -0.55; color: 0xffffff; intensity: 1.1" />
+    <a id="camera" camera="clear-color: 0xffffff" sear glaze="tonemap: 1" transform orbit="distance: 5; yaw: 0.6; pitch: 0.3; target: @cube" />
+    <a id="cube" part transform color="rgba: 0.32 0.4 0.48" />
 </scene>

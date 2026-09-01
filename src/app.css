@@ -153,10 +153,8 @@
      carries none (0eef6f6's h2 had no letter-spacing), at vibe -0.025em. */
   --h2-letter-spacing: 0em;
   --link-decoration-opacity: 35%;
-  /* S5 local selection sweep on Chromium/Darwin: 548px → 72 chars (pass), 549px → 76
-     chars (fail). 548px is the selected widest passing value; this one-off upper-edge
-     selection is separate from the portable 60–75-character arm. */
-  --measure: 548px;
+  /* Standard desktop article width; .page's existing padding leaves a 632px text column. */
+  --measure: 680px;
   --section-padding: 0px;
   --section-margin-top: 52px;
   --paragraph-margin-top: 14px;
