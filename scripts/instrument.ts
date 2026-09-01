@@ -14,7 +14,8 @@ import { playwrightVersion } from "./playwright-version";
 
 // Self-terminating instrument self-test. Stages the variance + reduced-motion specs and their
 // harness modules into a work dir with @playwright/test, runs playwright, exits. It also runs the
-// committed S5 selection and golden mutation witnesses against the built page. Display-gated.
+// committed typography, measure, selection, source-shape, server, font, and golden mutation
+// witnesses against the built page. Display-gated.
 
 const repo = join(import.meta.dir, "..");
 const documentedExclusions = new Set(["--heading-bg", "--heading-text-transform"]);
@@ -31,13 +32,27 @@ function declarations(source: string): Map<string, string> {
   return result;
 }
 
-function blockRegion(source: string, selector: string, marker: string): string {
+function selectorBlock(source: string, selector: string): string {
   const blockStart = source.indexOf(`${selector} {`);
   if (blockStart < 0) throw new Error(`template source shape: missing ${selector} block`);
-  const regionStart = source.indexOf(marker, blockStart);
-  const regionEnd = source.indexOf("/* end template region */", regionStart);
+  const open = source.indexOf("{", blockStart);
+  let depth = 0;
+  for (let index = open; index < source.length; index += 1) {
+    if (source[index] === "{") depth += 1;
+    if (source[index] === "}") {
+      depth -= 1;
+      if (depth === 0) return source.slice(open + 1, index);
+    }
+  }
+  throw new Error(`template source shape: unterminated ${selector} block`);
+}
+
+function blockRegion(source: string, selector: string, marker: string): string {
+  const block = selectorBlock(source, selector);
+  const regionStart = block.indexOf(marker);
+  const regionEnd = block.indexOf("/* end template region */", regionStart);
   if (regionStart < 0 || regionEnd < 0) throw new Error(`template source shape: missing ${selector} template region`);
-  return source.slice(regionStart + marker.length, regionEnd);
+  return block.slice(regionStart + marker.length, regionEnd);
 }
 
 function exclusionRegion(source: string, selector: string): Map<string, string> {
@@ -56,6 +71,10 @@ function exclusionRegion(source: string, selector: string): Map<string, string> 
 function assertTemplateSourceShape(source: string): void {
   const selectors = [":root", "html.vibe", "html.win98"];
   const blocks = selectors.map((selector) => declarations(blockRegion(source, selector, "/* template region */")));
+  // Resolve one-hop aliases in the neutral :root block only. A dress may reuse an alias name for
+  // its own value; a whole-file last-wins map would let that later declaration hide arithmetic in
+  // the neutral template and make the source-shape arm order-dependent.
+  const neutralTokensInRoot = declarations(selectorBlock(source, ":root"));
   const neutralTokens = new Set(blocks[0]!.keys());
   if (neutralTokens.size === 0) throw new Error("template source shape: neutral template region is empty");
   for (const [index, block] of blocks.entries()) {
@@ -65,8 +84,16 @@ function assertTemplateSourceShape(source: string): void {
   }
   for (const token of neutralTokens) {
     const value = blocks[0]!.get(token)!;
-    if (/(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(value)) {
+    const alias = value.match(/var\(\s*(--[a-z0-9-]+)\s*\)/)?.[1];
+    const resolved = alias ? neutralTokensInRoot.get(alias) ?? "" : "";
+    if (/(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(value) ||
+        /(?:calc|clamp|color-mix|--(?:snap|t1|t2))/.test(resolved)) {
       throw new Error(`template source shape: neutral ${token} contains snap/interpolation arithmetic`);
+    }
+  }
+  for (const token of ["--heading-color", "--emphasis-color"]) {
+    if (neutralTokens.has(token)) {
+      throw new Error(`template source shape: ${token} must remain outside the copyable template region`);
     }
   }
   for (const selector of selectors) {
@@ -229,6 +256,7 @@ for (const file of [
   "instrument.spec.ts",
   "figures.spec.ts",
   "capture.spec.ts",
+  "oracle-text.spec.ts",
   "variance.ts",
   "reduced.ts",
   "png.ts",
@@ -255,8 +283,37 @@ sourceShapeMutationMustRed(
   cssSource.replace("--measure: 548px;", "--measure: calc(548px + 0px);"),
 );
 sourceShapeMutationMustRed(
+  "template indirect measure arithmetic",
+  cssSource
+    .replace("  --measure: 548px;", "  --measure: var(--portable-measure);")
+    .replace(
+      "  /* end template region */\n  /* Scoped consumers: body",
+      "  /* end template region */\n  --portable-measure: calc(548px + 0px);\n  /* Scoped consumers: body",
+    ),
+);
+sourceShapeMutationMustRed(
+  "template indirect arithmetic survives a shadowed alias",
+  cssSource
+    .replace(
+      "  --measure: 548px;",
+      "  --measure: var(--portable-measure);",
+    )
+    .replace(
+      "  /* end template region */\n  /* Scoped consumers: body",
+      "  /* end template region */\n  --portable-measure: calc(548px + 0px);\n  /* Scoped consumers: body",
+    )
+    .replace(
+      "  /* end template region */\n  /* Scoped consumers: this dress overrides body",
+      "  /* end template region */\n  --portable-measure: 548px;\n  /* Scoped consumers: this dress overrides body",
+    ),
+);
+sourceShapeMutationMustRed(
   "template vibe rhythm token",
   cssSource.replace("  --section-padding: 12px;\n  --section-margin-top: 36px;\n  --paragraph-margin-top: 12px;", "  --section-padding: 12px;\n  --section-margin-top: 36px;"),
+);
+sourceShapeMutationMustRed(
+  "template color alias boundary",
+  cssSource.replace("  --heading-font-weight: 600;", "  --heading-font-weight: 600;\n  --heading-color: var(--ink);"),
 );
 sourceShapeMutationMustRed(
   "template win98 rhythm token",
@@ -319,6 +376,71 @@ cssMutationMustRed(
   "  --section-margin-top: 52px;",
   "  --section-margin-top: 14px;",
   "typography: production strong emphasis",
+);
+cssMutationMustRed(
+  "portable readable measure",
+  "  --measure: 548px;",
+  "  --measure: 700px;",
+  "typography: neutral measure stays in the readable long-form band",
+);
+cssMutationMustRed(
+  "neutral secondary display weight",
+  "  --display-font-weight: 500;",
+  "  --display-font-weight: 400;",
+  "secondary display weight",
+);
+cssMutationMustRed(
+  "vibe secondary display weight",
+  "  --display-font-weight: 400;\n  --heading-padding: 0px;",
+  "  --display-font-weight: 500;\n  --heading-padding: 0px;",
+  "secondary display weight",
+);
+cssMutationMustRed(
+  "win98 secondary display weight",
+  "  --display-font-weight: 400;\n  --heading-padding: 2px 4px;",
+  "  --display-font-weight: 500;\n  --heading-padding: 2px 4px;",
+  "secondary display weight",
+);
+
+const captureSource = readFileSync(join(work, "capture.spec.ts"), "utf8");
+sourceMutationMustRedAndRestore(
+  "capture missing-asset 404",
+  join(work, "capture.spec.ts"),
+  captureSource.replace(
+    "      res.writeHead(404, { \"content-type\": \"text/plain; charset=utf-8\" });\n      res.end(`missing asset: ${path}`);\n      return;",
+    "      path = \"index.html\";\n      body = await readFile(join(dist, path));",
+  ),
+  [
+    "bunx",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.config.ts",
+    "capture.spec.ts",
+    "--grep",
+    "capture missing assets",
+  ],
+  work,
+);
+const oracleTextSource = readFileSync(join(work, "oracle-text.spec.ts"), "utf8");
+sourceMutationMustRedAndRestore(
+  "text-oracle missing-asset 404",
+  join(work, "oracle-text.spec.ts"),
+  oracleTextSource.replace(
+    "      res.writeHead(404, { \"content-type\": \"text/plain; charset=utf-8\" });\n      res.end(`missing asset: ${path}`);\n      return;",
+    "      path = \"index.html\";\n      body = await readFile(join(dist, path));",
+  ),
+  [
+    "bunx",
+    "playwright",
+    "test",
+    "--config",
+    "playwright.config.ts",
+    "oracle-text.spec.ts",
+    "--grep",
+    "text oracle missing assets",
+  ],
+  work,
 );
 
 const reduced = join(work, "reduced.ts");

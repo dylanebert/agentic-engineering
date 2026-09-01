@@ -205,6 +205,7 @@
   .meta {
     font-family: var(--display);
     font-size: var(--meta-font-size);
+    font-weight: var(--display-font-weight);
     color: var(--text-muted);
     margin-bottom: 14px;
   }
@@ -237,6 +238,7 @@
   .dek {
     font-family: var(--display);
     font-size: var(--dek-font-size);
+    font-weight: var(--display-font-weight);
     color: var(--text-muted);
     margin-top: 10px;
   }
@@ -312,6 +314,7 @@
   .placeholder-label {
     font-family: var(--display);
     font-size: var(--meta-font-size);
+    font-weight: var(--display-font-weight);
     color: var(--text-muted);
     letter-spacing: 0.02em;
   }

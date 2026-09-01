@@ -7,13 +7,14 @@ import { assertReducedMotion, settleToRest } from "./reduced";
 import { perceptualDelta } from "./png";
 
 // Figure gate. Serves the built dist over a local origin, navigates to the page, and asserts
-// seventeen things — four about the spectrum figure (fill distinguishable, end labels bound, end
+// eighteen things — four about the spectrum figure (fill distinguishable, end labels bound, end
 // descriptors bound, referent vocabulary), four about the page-wide morph it drives (variance,
 // reduced-motion, contrast sweep, font application), two added at K (vibe vocabulary and
-// reachability), one added at S2 (the server's missing-asset 404 contract), one added at
-// S2's repair round (production-path reachability: real slider input, not a self-set driver), and
-// five S4/S5 neutral-template arms (hierarchy, portable readable measure, selected measure,
-// production strong emphasis and rhythm, non-interference).
+// driver parity), one added at S2 (the server's missing-asset 404 contract), one added at
+// S2's repair round (production-path reachability: real slider input, not a self-set driver),
+// one added at S8 (secondary display weight per dress), and five S4/S5 neutral-template arms
+// (hierarchy, portable readable measure, selected measure, production strong emphasis and rhythm,
+// non-interference).
 // The reachability claim K shipped drove --pos and toggled the classes itself, then asserted the
 // class set — circular about the production path; the repair round keeps that coverage under a
 // driver-parity name and adds the arm that reads classes after real keyboard/pointer input. The
@@ -529,6 +530,40 @@ test("font application: per-position at vibe, kex, win98 (criterion 8)", async (
   }
 });
 
+// The secondary display channel is explicit on the neutral page and stays at its prior regular
+// weight in both dresses. This reads the applied declarations on every secondary display consumer,
+// then checks the neutral Outfit face through the canvas font channel rather than only its family
+// name. Mutation: changing the neutral 500 token or either dress's 400 token reds this arm.
+test("font application: secondary display weight per dress", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+
+  for (const position of [0, 0.5, 1]) {
+    await page.evaluate((pos) => {
+      document.documentElement.style.setProperty("--pos", String(pos));
+      document.documentElement.classList.toggle("vibe", pos <= 0.25);
+      document.documentElement.classList.toggle("win98", pos > 0.75);
+    }, position);
+    await page.evaluate(() =>
+      new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
+    const reads = await page.locator(".meta, .dek, .placeholder-label").evaluateAll((els) =>
+      els.map((element) => {
+        const style = getComputedStyle(element);
+        return { family: style.fontFamily.toLowerCase(), weight: style.fontWeight };
+      }),
+    );
+    const expectedWeight = position === 0.5 ? "500" : "400";
+    console.log(`secondary display weight (pos=${position}): ${reads.map((read) => read.weight).join(",")}`);
+    expect(reads.length).toBeGreaterThan(0);
+    expect(reads.every((read) => read.weight === expectedWeight)).toBe(true);
+    if (position === 0.5) {
+      expect(reads.every((read) => read.family.includes("outfit"))).toBe(true);
+      expect(await isFontRendered(page, "Outfit", "500")).toBe(true);
+    }
+  }
+});
+
 // --- Criterion 17 (referent-vocabulary arm, widened to three-way at K) ---
 
 // The arm that would have red on I's shipped right end. At J it read only pos=0.5 and pos=1, so it
@@ -771,7 +806,7 @@ test("vibe vocabulary: layout and chrome channels at pos=0 vs pos=0.5 (criterion
 // behavior; boundary parity stays in the direct-set arm, where the values are set exactly.
 // Mutation: disable setPos's two classList.toggle calls and watch this arm red while the
 // direct-set parity arm stays green.
-test("reachability: production path — real slider input produces the class set (criterion 21)", async ({ page }) => {
+test("production-path-reachability: real slider input produces the class set (criterion 21)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const handle = page.locator(".spectrum .handle");
   const track = page.locator(".spectrum .track");
@@ -783,19 +818,19 @@ test("reachability: production path — real slider input produces the class set
 
   // Resting state, no input yet: kex, neither class on.
   let c = await classes();
-  console.log(`production reachability (rest): vibe=${c.vibe} win98=${c.win98}`);
+  console.log(`production-path-reachability (rest): vibe=${c.vibe} win98=${c.win98}`);
   expect(c).toEqual({ vibe: false, win98: false });
 
   // Keyboard: Home maps to pos 0 (vibe), End to pos 1 (win98) — setPos clamps both exactly.
   await handle.focus();
   await page.keyboard.press("Home");
   c = await classes();
-  console.log(`production reachability (keyboard Home): vibe=${c.vibe} win98=${c.win98}`);
+  console.log(`production-path-reachability (keyboard Home): vibe=${c.vibe} win98=${c.win98}`);
   expect(c).toEqual({ vibe: true, win98: false });
 
   await page.keyboard.press("End");
   c = await classes();
-  console.log(`production reachability (keyboard End): vibe=${c.vibe} win98=${c.win98}`);
+  console.log(`production-path-reachability (keyboard End): vibe=${c.vibe} win98=${c.win98}`);
   expect(c).toEqual({ vibe: false, win98: true });
 
   // Pointer: clicks 15px inside each track edge, through update()'s rect arithmetic — the same
@@ -807,13 +842,13 @@ test("reachability: production path — real slider input produces the class set
   // dress misplaces the next click under another.
   await track.click({ position: { x: 15, y: 18 } });
   c = await classes();
-  console.log(`production reachability (pointer near left edge): vibe=${c.vibe} win98=${c.win98}`);
+  console.log(`production-path-reachability (pointer near left edge): vibe=${c.vibe} win98=${c.win98}`);
   expect(c).toEqual({ vibe: true, win98: false });
 
   const box = await track.boundingBox();
   await track.click({ position: { x: box!.width - 15, y: 18 } });
   c = await classes();
-  console.log(`production reachability (pointer near right edge): vibe=${c.vibe} win98=${c.win98}`);
+  console.log(`production-path-reachability (pointer near right edge): vibe=${c.vibe} win98=${c.win98}`);
   expect(c).toEqual({ vibe: false, win98: true });
 });
 
@@ -832,7 +867,7 @@ test("reachability: production path — real slider input produces the class set
 // stayed green beside it; a second class doubles the ways to produce an artifact no reader can
 // reach.
 
-test("reachability: direct-set driver parity at each sampled state (criterion 21, not production)", async ({ page }) => {
+test("direct-set-driver-parity at each sampled state (criterion 21, not production)", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
 
@@ -851,7 +886,7 @@ test("reachability: direct-set driver parity at each sampled state (criterion 21
       document.documentElement.classList.contains("win98"),
     );
 
-    console.log(`reachability driver parity (pos=${p}): vibe=${classes} win98=${win98}`);
+    console.log(`direct-set-driver-parity (pos=${p}): vibe=${classes} win98=${win98}`);
 
     if (p <= 0.25) {
       expect(classes).toBe(true);

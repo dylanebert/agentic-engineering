@@ -22,11 +22,12 @@ import { playwrightVersion } from "./playwright-version";
 // input (keyboard on the handle, pointer clicks on the track) and reads the resulting classes,
 // and the original direct-set coverage kept under a parity name — it proves only that the gate
 // drivers' own class toggles match the documented thresholds, not that production reaches them.
-// Seventeen arms total, by name: page-varies, page-reduced-motion, page-contrast-sweep,
+// Eighteen arms total, by name: page-varies, page-reduced-motion, page-contrast-sweep,
 // fill-distinguishable, end-labels-bound, end-descriptors-bound, font-application,
-// referent-vocabulary, vibe-vocabulary, reachability-driver-parity, reachability-production,
-// missing-asset-404, neutral-hierarchy, readable-measure, selected-desktop-measure,
-// emphasis-and-rhythm, non-interference. Display-gated like shot.ts; WSL branch stages onto
+// secondary-display-weight, referent-vocabulary, vibe-vocabulary, direct-set-driver-parity,
+// production-path-reachability, missing-asset-404, neutral-hierarchy, readable-measure,
+// selected-desktop-measure, emphasis-and-rhythm, non-interference. Display-gated like shot.ts;
+// WSL branch stages onto
 // Windows TEMP and runs through PowerShell.
 
 const repo = join(import.meta.dir, "..");

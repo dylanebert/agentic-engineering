@@ -43,8 +43,9 @@ test.beforeAll(async () => {
     try {
       body = await readFile(join(dist, path));
     } catch {
-      path = "index.html";
-      body = await readFile(join(dist, path));
+      res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+      res.end(`missing asset: ${path}`);
+      return;
     }
     const type = types[path.slice(path.lastIndexOf("."))] ?? "application/octet-stream";
     res.writeHead(200, { "content-type": type });
@@ -60,6 +61,12 @@ test.afterAll(async () => {
   await new Promise<void>((resolve, reject) =>
     server.close((err) => (err ? reject(err) : resolve())),
   );
+});
+
+test("server: text oracle missing assets return 404, not an index.html fallback", async ({ request }) => {
+  const response = await request.get(`${url}missing-asset.probe`);
+  console.log(`text-oracle missing-asset probe: status=${response.status()}`);
+  expect(response.status()).toBe(404);
 });
 
 // Voice ban list (oracle 3). Zero hits required.
