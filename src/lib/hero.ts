@@ -1,8 +1,15 @@
 import { minimalLight, OrbitPlugin, run } from "@dylanebert/shallot";
 
+const scene = `<scene>
+  <a ambient-light="color: 0xffffff; intensity: 0.8" />
+  <a directional-light="direction: -0.4 -1 -0.55; color: 0xffffff; intensity: 1.1" />
+  <a id="camera" camera="clear-color: 0xffffff" sear glaze="tonemap: 1" transform orbit="distance: 4; yaw: 0.6; pitch: 0.3; target: @cube" />
+  <a id="cube" part transform="scale: 1.4" color="rgba: 0.32 0.4 0.48" />
+</scene>`;
+
 export function startHero(container: HTMLElement) {
   return run({
-    scene: `${import.meta.env.BASE_URL}scenes/hero.scene`,
+    scene,
     plugins: [OrbitPlugin],
     loading: minimalLight(container),
     pixelRatio: "auto",
