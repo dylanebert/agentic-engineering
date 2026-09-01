@@ -163,7 +163,6 @@
   --dek-font-size: 15px;
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
-  --display-font-weight: 500;
   /* end template region */
   /* Scoped consumers: body, .page, .title, .section, and strong consume the copyable
      typography, measure, and rhythm tokens above. Continuously interpolated heading/emphasis
@@ -229,7 +228,6 @@ html.vibe {
   --dek-font-size: 15px;
   --label-font-size: 13px;
   --aside-font-size: 14.4px;
-  --display-font-weight: 400;
   /* end template region */
   /* Scoped consumers: this dress overrides the same body, .page, .title, .section, and strong
      consumers; its continuously interpolated color aliases stay outside the copyable boundary. */
@@ -296,7 +294,6 @@ html.win98 {
   --dek-font-size: 11px;
   --label-font-size: 11px;
   --aside-font-size: 11px;
-  --display-font-weight: 400;
   /* end template region */
   /* Scoped consumers: this dress overrides the same body, .page, .title, .section, and strong
      consumers; its chrome and color aliases remain outside the copyable boundary. */
