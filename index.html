@@ -9,6 +9,36 @@
       content="Agentic engineering: directing agents to make software, and why checking the work is the hard part."
     />
     <link rel="canonical" href="https://dylanebert.com/agentic-engineering/" />
+    <script>
+      ;((h, o, u, n, d) => {
+        h = h[d] = h[d] || { q: [], onReady: (callback) => h.q.push(callback) }
+        d = o.createElement(u)
+        d.async = true
+        d.src = n
+        d.crossOrigin = 'anonymous'
+        n = o.getElementsByTagName(u)[0]
+        n.parentNode.insertBefore(d, n)
+      })(
+        window,
+        document,
+        'script',
+        'https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js',
+        'DD_RUM',
+      )
+      window.DD_RUM.onReady(() => {
+        window.DD_RUM.init({
+          applicationId: 'a5ffefd9-8f32-49dd-b8ae-ff31988e6bfe',
+          clientToken: 'pube2bd4a743b9fd4d05457e14b56fa53c5',
+          site: 'datadoghq.com',
+          service: 'agentic-engineering',
+          env: /(^|\.)dylanebert\.com$/.test(location.hostname) ? 'prod' : 'local',
+          sessionSampleRate: 100,
+          sessionReplaySampleRate: 0,
+          trackLongTasks: true,
+          defaultPrivacyLevel: 'mask-user-input',
+        })
+      })
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
