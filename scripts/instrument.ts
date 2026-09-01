@@ -14,8 +14,8 @@ import { playwrightVersion } from "./playwright-version";
 
 // Self-terminating instrument self-test. Stages the variance + reduced-motion specs and their
 // harness modules into a work dir with @playwright/test, runs playwright, exits. It also runs the
-// committed S5 selection, S7 source-shape, and S8 server/font mutation witnesses against the
-// built page. Display-gated.
+// committed typography, measure, selection, source-shape, server, font, and golden mutation
+// witnesses against the built page. Display-gated.
 
 const repo = join(import.meta.dir, "..");
 const documentedExclusions = new Set(["--heading-bg", "--heading-text-transform"]);
