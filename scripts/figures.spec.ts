@@ -1,5 +1,5 @@
 import { createServer, type Server } from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { perceptualDelta } from "./png";
@@ -38,6 +38,68 @@ test.beforeAll(async () => {
   url = `http://127.0.0.1:${address.port}${base}`;
 });
 test.afterAll(async () => { await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())); });
+
+// --- Sequence shell contracts ---
+
+test("hero controls: real buttons advance and retreat", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const position = page.locator(".hero output");
+  await expect(position).toHaveText("1 of 8");
+  await page.getByRole("button", { name: "Next slide" }).click();
+  await expect(position).toHaveText("2 of 8");
+  await page.getByRole("button", { name: "Previous slide" }).click();
+  await expect(position).toHaveText("1 of 8");
+});
+
+test("hero keyboard: arrow keys operate the focused sequence", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const hero = page.getByRole("button", { name: "Next slide" });
+  await hero.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.locator(".hero output")).toHaveText("2 of 8");
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator(".hero output")).toHaveText("1 of 8");
+});
+
+test("hero caption: current slide and caption remain bound", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.getByRole("button", { name: "Next slide" }).click();
+  const caption = page.locator(".hero figcaption");
+  await expect(caption).toHaveAttribute("data-caption-index", "1");
+  await expect(caption).toHaveText("Placeholder caption for scene 1, slide 2, with enough placeholder copy to occupy a second line.");
+  await expect(page.locator('.hero .slide.current')).toHaveAttribute("data-slide", "2");
+});
+
+test("hero reduced motion: every slide is fully disclosed at rest", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(url, { waitUntil: "networkidle" });
+  const slides = page.locator(".hero .slide");
+  await expect(slides).toHaveCount(8);
+  for (let index = 0; index < 8; index += 1) await expect(slides.nth(index)).toBeVisible();
+  const moving = await page.locator(".hero").evaluate((hero) =>
+    hero.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length,
+  );
+  expect(moving).toBe(0);
+});
+
+test("hero layout: advancing does not shift the shell", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const hero = page.locator(".hero");
+  const before = await hero.boundingBox();
+  await page.getByRole("button", { name: "Next slide" }).click();
+  const after = await hero.boundingBox();
+  expect(after).toEqual(before);
+});
+
+test("hero substrate: package and dist contain no Shallot or typegpu", async () => {
+  const packageText = await readFile(join(root, "package.json"), "utf8");
+  expect(packageText.toLowerCase()).not.toContain("shallot");
+  expect(packageText.toLowerCase()).not.toContain("typegpu");
+  const assets = await readdir(join(dist, "assets"));
+  const built = (await Promise.all(assets.map((asset) => readFile(join(dist, "assets", asset), "utf8").catch(() => "")))).join("\n").toLowerCase();
+  expect(built).not.toContain("shallot");
+  expect(built).not.toContain("typegpu");
+});
 
 // --- Server contract: missing assets 404 (no SPA fallback masking) ---
 
