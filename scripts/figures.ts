@@ -51,12 +51,14 @@ function prepWork(workDir: string): void {
   for (const f of readdirSync(workDir)) {
     if (f.endsWith(".spec.ts")) rmSync(join(workDir, f), { force: true });
   }
-  for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
+  for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts", "prose-capture.txt"]) {
     cpSync(join(import.meta.dir, f), join(workDir, f));
   }
   // The figure arms read the manifest as an external expectation rather than off the page they
   // are checking, so the declaration module is staged beside the spec.
   cpSync(join(import.meta.dir, "../src/lib/figures.ts"), join(workDir, "manifest.ts"));
+  // The palette declaration is the role-binding arm's external expectation, staged the same way.
+  cpSync(join(import.meta.dir, "../src/lib/vocabulary.ts"), join(workDir, "vocabulary.ts"));
   writeFileSync(join(workDir, "package.json"), pkg);
   rmSync(join(workDir, "dist"), { recursive: true, force: true });
   cpSync(join(repo, "dist"), join(workDir, "dist"), { recursive: true });

@@ -4,6 +4,9 @@ import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { perceptualDelta } from "./png";
 import { figures } from "./manifest";
+import { assertVaries } from "./variance";
+import { assertReducedMotion } from "./reduced";
+import { grammar } from "./vocabulary";
 
 // Figure gate for the neutral article template. The sequence-shell arms retired with the
 // WebGPU hero in S1, together with the real-tree vocabulary arm whose subject went with it
@@ -433,4 +436,101 @@ test("figures: every figure label is a substring of its section's prose", async 
       expect(read.prose, `label "${label}" is not in ${read.id}'s section prose`).toContain(label);
     }
   }
+});
+
+
+// --- S4 motion and prose binding arms ---
+//
+// Every figure's motion is a CSS function of one number: `--phase`, 0 to 1 over the cycle,
+// published on the figure element by Figure.svelte and pinned at 1 — the fully drawn resting
+// state — under reduced motion. So a figure can be read at any point of its cycle by setting
+// that property, which is what the variance driver below does.
+
+const figureSelector = (id: string): string => `figure[data-figure-id="${id}"]`;
+
+const phaseDriver = (id: string, steps: number) => async (page: import("@playwright/test").Page, step: number) => {
+  if (step === 0) await page.goto(url, { waitUntil: "networkidle" });
+  await page.locator(figureSelector(id)).evaluate((element, value) => {
+    (element as HTMLElement).style.setProperty("--phase", value);
+  }, String(step / (steps - 1)));
+};
+
+// Perceptual variance over a JND for what moves (taste.md: one assertion per claim kind). The
+// three recorded failures this catches are inert variants that passed every other oracle, so the
+// read is over rendered pixels, not over the CSS that produced them.
+// Mutation: pin the spectrum halo and underline opacity at 1 and adjacent cycle states are
+// perceptually identical — red (instrument.ts, "spectrum emphasis motion").
+test("figures: the spectrum's middle position varies perceptibly across its cycle", async ({ page }) => {
+  const steps = 3;
+  const result = await assertVaries(page, figureSelector("spectrum-axis"), phaseDriver("spectrum-axis", steps), steps);
+  console.log(`spectrum variance: steps=${result.steps} failures=${JSON.stringify(result.failures)}`);
+  expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
+});
+
+// Mutation: pin the loop's stage fills at full opacity and the cycle no longer advances — red
+// (instrument.ts, "loop advance motion").
+test("figures: the loop's advance varies perceptibly across its cycle", async ({ page }) => {
+  const steps = 5;
+  const result = await assertVaries(page, figureSelector("stage-loop"), phaseDriver("stage-loop", steps), steps);
+  console.log(`loop variance: steps=${result.steps} failures=${JSON.stringify(result.failures)}`);
+  expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
+});
+
+// Reduced-motion rest (spec validation 7). Each figure is fully drawn and byte-stable: no
+// animation in flight, consecutive frames pixel-identical, and the subtree non-trivial. The
+// phase read is the "fully drawn" half — at rest the cycle sits at its end, not at its start,
+// so every part the motion reveals is present.
+// Mutation: delete Figure.svelte's `if (reduced) return;` and the clock ticks under reduced
+// motion, so the frames differ — red (instrument.ts, "reduced-motion rest").
+test("figures: reduced-motion rest is fully drawn and byte-stable", async ({ page }) => {
+  for (const entry of figures) {
+    const selector = figureSelector(entry.id);
+    const result = await assertReducedMotion(page, selector, async (target, step) => {
+      if (step === 0) await target.goto(url, { waitUntil: "networkidle" });
+    }, 1);
+    const phase = await page.locator(selector).evaluate((element) =>
+      getComputedStyle(element).getPropertyValue("--phase").trim(),
+    );
+    console.log(`reduced rest ${entry.id}: phase=${phase} failures=${JSON.stringify(result.failures)}`);
+    expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
+    expect(Number(phase)).toBe(1);
+  }
+});
+
+// The role palette bound both ways (spec validation 6), read off the rendered tree: every
+// declared color role colors a prose span and a part inside a figure. The declaration module is
+// staged beside this spec, so the expectation is external to the page.
+// Mutation: drop the context spans from App.svelte and the context role is bound in the figures
+// only — red (instrument.ts, "role bound in the prose").
+test("figures: every color role is bound to both a prose span and a figure part", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const bound = await page.evaluate(() => {
+    const read = (selector: string): string[] =>
+      [...document.querySelectorAll(selector)]
+        .map((node) => node.getAttribute("data-role") ?? "")
+        .filter((role) => role.length > 0);
+    return {
+      prose: read(".page .section p .term[data-role], .page .section li .term[data-role]"),
+      figures: read("figure [data-role]"),
+    };
+  });
+  const roles = Object.keys(grammar.colors);
+  console.log(`role binding: prose=${JSON.stringify([...new Set(bound.prose)])} figures=${JSON.stringify([...new Set(bound.figures)])}`);
+  for (const role of roles) {
+    expect(bound.prose, `role ${role} colors no prose span`).toContain(role);
+    expect(bound.figures, `role ${role} colors no figure part`).toContain(role);
+  }
+});
+
+// The spans are a color binding, not an edit: the rendered text of the whole page must still be
+// byte-identical to the capture taken at S2 close, before any span existed. This is an exact
+// textContent comparison — no normalization — so a single changed character reds.
+// Mutation: change one sentence of App.svelte and the comparison reds (instrument.ts,
+// "rendered text byte-identity").
+test("figures: rendered text is byte-identical to the committed prose capture", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const rendered = await page.evaluate(() => document.querySelector(".page")?.textContent ?? "");
+  const captured = await readFile(join(root, "prose-capture.txt"), "utf8");
+  console.log(`prose capture: rendered=${rendered.length} chars captured=${captured.length} chars`);
+  expect(rendered).toBe(captured);
 });

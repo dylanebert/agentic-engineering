@@ -26,15 +26,15 @@
   <section class="section" id="spectrum">
     <h2>the spectrum</h2>
     <p>
-      You may have heard of vibe coding. You tell an agent "make me some
+      You may have heard of <span class="term" data-role="vibe">vibe coding</span>. You tell an agent "make me some
       software," and some software comes out. It might be good. It might be bad.
       And in my experience a model given no direction reaches for the same few
       colors, so it's probably purple.
     </p>
     <p>
-      That's one end of a spectrum. The other end is 100% organic human code,
+      That's one end of a spectrum. The other end is 100% <span class="term" data-role="prose">organic human code</span>,
       every line typed by a person. Those are not your only two options. A whole
-      space sits between them, and agentic engineering lives there: you direct
+      space sits between them, and <span class="term" data-role="agentic">agentic engineering</span> lives there: you direct
       the work, and you check each step.
     </p>
 
@@ -55,7 +55,7 @@
     </p>
     <p>
       An agent wrote some code. That part is easy now. Does it work? Is it fast?
-      Is it secure? Is it how you wanted it? Verifiability is how well you can
+      Is it secure? Is it how you wanted it? <span class="term" data-role="verify">Verifiability</span> is how well you can
       answer those questions, and it is the hard part.
     </p>
     <p>
@@ -75,7 +75,7 @@
   <section class="section" id="context-engineering">
     <h2>context engineering</h2>
     <p>
-      The second principle is context engineering: give an agent just enough
+      The second principle is <span class="term" data-role="context">context engineering</span>: give an agent just enough
       context to complete a task, and no more than that. It sounds like a
       platitude. The discipline is in the second half.
     </p>
@@ -96,7 +96,7 @@
     <h2>the loop</h2>
     <p>
       Put the two principles together. Say the job is a todo list app. In the
-      first conversation, don't implement anything. Write a spec instead: what
+      first conversation, don't implement anything. Write a <span class="term" data-role="context">spec</span> instead: what
       the thing is, and how the work breaks into stages small enough to check
       one at a time.
     </p>
@@ -151,7 +151,7 @@
   <section class="section" id="closing">
     <h2>in practice</h2>
     <p>
-      Applying these principles is agentic engineering. A spec, small stages, a
+      Applying these principles is <span class="term" data-role="agentic">agentic engineering</span>. A spec, small stages, a
       fresh conversation for each, and a check before the next one opens.
     </p>
     <p>
@@ -241,6 +241,29 @@
   .section p {
     margin-top: var(--paragraph-margin-top);
     color: var(--text-dim);
+  }
+
+  /* Color roles bound to the prose (src/lib/vocabulary.ts). A term the page names as a concept
+     carries the same role its figure part carries, so the two readings are one vocabulary; the
+     span changes color only, so the rendered text and its measure are untouched. */
+  .term[data-role="vibe"] {
+    color: var(--role-vibe);
+  }
+
+  .term[data-role="agentic"] {
+    color: var(--role-agentic);
+  }
+
+  .term[data-role="verify"] {
+    color: var(--role-verify);
+  }
+
+  .term[data-role="context"] {
+    color: var(--role-context);
+  }
+
+  .term[data-role="prose"] {
+    color: var(--role-prose);
   }
 
   .kinds {
