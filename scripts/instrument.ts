@@ -30,6 +30,7 @@ function stage(): void {
   // pass so a mutation of the declaration reaches the arms the same way a mutation of the page
   // does.
   cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
+  cpSync(join(repo, "src/lib/vocabulary.ts"), join(work, "vocabulary.ts"));
 }
 
 function cssMutation(label: string, needle: string, replacement: string, grep: string): void {
@@ -73,7 +74,7 @@ rmSync(join(repo, "dist"), { recursive: true, force: true });
 run(["bun", "run", "build"], repo);
 mkdirSync(work, { recursive: true });
 for (const file of readdirSync(work)) if (file.endsWith(".spec.ts")) rmSync(join(work, file));
-for (const file of ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
+for (const file of ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts", "prose-capture.txt"]) {
   cpSync(join(import.meta.dir, file), join(work, file));
 }
 writeFileSync(join(work, "package.json"), JSON.stringify({ name: "agentic-engineering-instrument", private: true, dependencies: { "@playwright/test": playwrightVersion } }));
@@ -152,6 +153,53 @@ sourceMutation(
   'verify: { label: "verify", color: "verify"',
   'verify: { label: "validate", color: "verify"',
   "substring of its section",
+);
+
+// S4 motion and binding arms. Each mutation reaches the assertion its arm is named for.
+sourceMutation(
+  "spectrum emphasis motion",
+  join(repo, "src/lib/SpectrumAxis.svelte"),
+  "    opacity: var(--phase, 1);",
+  "    opacity: 1;",
+  "middle position varies",
+);
+sourceMutation(
+  "loop advance motion",
+  join(repo, "src/lib/StageLoop.svelte"),
+  "opacity: clamp(0, calc(var(--phase, 1) * 4 - var(--step)), 1);",
+  "opacity: 1;",
+  "loop's advance varies",
+);
+// The discriminating mutation here is the reduced-motion read itself, not the effect's early
+// return: with `reduced` still true the clock is bypassed anyway, so deleting the return alone
+// changes nothing observable and survived the first run of this witness.
+sourceMutation(
+  "reduced-motion rest",
+  join(repo, "src/lib/Figure.svelte"),
+  'const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;',
+  "const reduced = false;",
+  "reduced-motion rest",
+);
+sourceMutation(
+  "role bound in a prose span",
+  join(repo, "src/App.svelte"),
+  '<span class="term" data-role="vibe">vibe coding</span>',
+  "vibe coding",
+  "bound to both",
+);
+sourceMutation(
+  "role bound in a figure part",
+  join(repo, "src/lib/vocabulary.ts"),
+  'spec: { label: "spec", color: "context", ...shape }',
+  'spec: { label: "spec", color: "agentic", ...shape }',
+  "bound to both",
+);
+sourceMutation(
+  "rendered text byte-identity",
+  join(repo, "src/App.svelte"),
+  "Applying these principles is",
+  "Applying those principles is",
+  "byte-identical",
 );
 
 if (process.platform === "darwin") {

@@ -7,13 +7,11 @@ import { concepts, grammar, pageGround, type Concept } from "../src/lib/vocabula
  * thickness roles, at most two motion roles, at most five color roles, every color role naming
  * the concept it carries at 4.5:1 against the page ground, and no concept-local novelty.
  *
- * Owned red. One arm — `binding:` — is expected to fail until S4 mounts the color-role spans
- * on the prose and the matching parts in the figures. It runs on every pass and reports, but
- * its failures are routed through OWNED_RED below and never reach the exit code, so the rest
- * of the suite still exits 0. S4 deletes the arm's name from OWNED_RED and the arm starts
- * gating. Every other arm is a hard failure and is mutation-proved in place at the bottom.
+ * The `binding:` arm was S1's owned red — a role earns its place only once it colors a prose
+ * span in App.svelte *and* a part inside a figure component, which needed S4's spans and figure
+ * motion to satisfy. S4 landed both, so the arm gates like every other one here and OWNED_RED
+ * is gone. Every arm is mutation-proved in place at the bottom.
  */
-const OWNED_RED = ["binding:"];
 
 const repo = join(import.meta.dir, "..");
 
@@ -79,33 +77,59 @@ export function violations({ grammar, concepts, ground }: Vocabulary): string[] 
 }
 
 // The binding arm reads the authored tree, not the declaration module: a role earns its place
-// only if it colors a prose span in App.svelte *and* a part inside a figure component.
-function bindingFailures(): string[] {
-  const roles = (source: string): Set<string> =>
-    new Set([...source.matchAll(/data-role="([^"]+)"/g)].map((match) => match[1]));
-  const prose = roles(readFileSync(join(repo, "src/App.svelte"), "utf8"));
-  const lib = join(repo, "src/lib");
-  const figures = new Set<string>();
-  for (const file of readdirSync(lib)) {
-    if (!file.endsWith(".svelte") || file === "Figure.svelte") continue;
-    for (const role of roles(readFileSync(join(lib, file), "utf8"))) figures.add(role);
-  }
+// only if it colors a prose span in App.svelte *and* a part inside a figure component. The read
+// and the predicate are separate so the predicate can be replayed against mutated role sets the
+// way the grammar predicate is, without writing to the tree.
+export type Binding = { prose: Set<string>; figures: Set<string> };
+
+export function bindingViolations({ prose, figures }: Binding): string[] {
   const missing = Object.keys(grammar.colors).filter((role) => !prose.has(role) || !figures.has(role));
   return missing.length === 0
     ? []
     : [`binding: every role appears in both a prose span and a figure part (missing ${missing.join(", ")})`];
 }
 
-const production: Vocabulary = { grammar, concepts, ground: pageGround };
-const owned = (failure: string): boolean => OWNED_RED.some((prefix) => failure.startsWith(prefix));
+// A component's `<style>` block names every role it has a rule for, whether or not any element
+// carries it, so both reads strip the style block first: the first mutation run of this arm
+// survived on the CSS selectors alone. The prose side reads the span the binding is about, not a
+// bare attribute.
+const markup = (source: string): string => source.replace(/<style[\s\S]*?<\/style>/g, "");
 
-const productionFailures = [...violations(production), ...bindingFailures()];
-for (const failure of productionFailures.filter(owned)) {
-  console.log(`vocabulary oracle: OWNED RED (until S4) ${failure}`);
+function readBinding(): Binding {
+  const spans = (source: string): Set<string> =>
+    new Set(
+      [...markup(source).matchAll(/<span class="term" data-role="([^"]+)"/g)].map((m) => m[1]),
+    );
+  // A figure part's role is often bound through the concept it draws (`data-role={node.role}`
+  // over a `concepts.spec`-derived entry), so the read resolves that indirection: the roles a
+  // component carries are its literal `data-role` values plus the declared color of every
+  // concept it names. figures.spec.ts asserts the same property against the rendered tree,
+  // where the binding is a fact rather than a source shape.
+  const parts = (source: string): Set<string> => {
+    const body = markup(source);
+    const roles = new Set([...body.matchAll(/data-role="([^"{]+)"/g)].map((m) => m[1]));
+    for (const match of body.matchAll(/concepts\.([a-zA-Z]+)/g)) {
+      const concept = concepts[match[1] as keyof typeof concepts];
+      if (concept) roles.add(concept.color);
+    }
+    return roles;
+  };
+  const prose = spans(readFileSync(join(repo, "src/App.svelte"), "utf8"));
+  const lib = join(repo, "src/lib");
+  const figures = new Set<string>();
+  for (const file of readdirSync(lib)) {
+    if (!file.endsWith(".svelte") || file === "Figure.svelte") continue;
+    for (const role of parts(readFileSync(join(lib, file), "utf8"))) figures.add(role);
+  }
+  return { prose, figures };
 }
-const hard = productionFailures.filter((failure) => !owned(failure));
-if (hard.length > 0) {
-  console.error(hard.join("\n"));
+
+const production: Vocabulary = { grammar, concepts, ground: pageGround };
+const productionBinding = readBinding();
+
+const productionFailures = [...violations(production), ...bindingViolations(productionBinding)];
+if (productionFailures.length > 0) {
+  console.error(productionFailures.join("\n"));
   process.exit(1);
 }
 
@@ -141,5 +165,33 @@ mutant("concept-local color novelty", (copy) => { copy.concepts.human.color = "h
 mutant("concept-local shape novelty", (copy) => { copy.concepts.agentic.primitive = "triangle"; }, "primitive family:");
 mutant("concept-local motion novelty", (copy) => { copy.concepts.verify.motion = "verify-spin"; }, "motion:");
 
+/**
+ * Binding mutation record (2026-09-02): deleting every `data-role="context"` span from
+ * src/App.svelte, and separately moving the `spec` concept off the context role in
+ * vocabulary.ts (which is what colors the loop figure's spec node), each returned exit 1 on
+ * `binding: … (missing context)`; restoring each returned 0. An earlier pair of attempts
+ * survived — the read was matching role names inside the `<style>` blocks — which is why the
+ * read strips them.
+ * The replays below keep both directions — a role bound in the figures but not the prose, and a
+ * role bound in the prose but not the figures — durable at every gate run.
+ */
+function bindingMutant(name: string, change: (copy: Binding) => void): void {
+  const copy: Binding = {
+    prose: new Set(productionBinding.prose),
+    figures: new Set(productionBinding.figures),
+  };
+  change(copy);
+  const failures = bindingViolations(copy);
+  if (!failures.some((failure) => failure.startsWith("binding:"))) {
+    console.error(`mutation survived: ${name}; failures=${failures.join(" | ") || "none"}`);
+    process.exitCode = 1;
+    return;
+  }
+  console.log(`mutation rejected: ${name} -> binding:`);
+}
+
+bindingMutant("role dropped from the prose", (copy) => { copy.prose.delete("context"); });
+bindingMutant("role dropped from the figures", (copy) => { copy.figures.delete("vibe"); });
+
 if (process.exitCode) process.exit(process.exitCode);
-console.log("vocabulary oracle: shared grammar and 9 mutation arms passed");
+console.log("vocabulary oracle: shared grammar, role binding, and 11 mutation arms passed");

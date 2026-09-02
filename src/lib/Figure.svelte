@@ -33,6 +33,13 @@
   // At rest under reduced motion the figure sits one full cycle in: fully drawn, never ticking.
   const elapsed = $derived(reduced ? loop : clock);
 
+  // The cycle position, 0 to 1, published as a custom property on the figure element. Every
+  // figure's motion is a CSS function of this one number, which is what lets a figure be read
+  // at an arbitrary point of its cycle: the variance arm sets `--phase` on the element and the
+  // rendered state follows. Under reduced motion it is written once, at 1 — the fully drawn
+  // resting state — and never again, so nothing overwrites a driven read.
+  const phase = $derived(elapsed / loop);
+
   $effect(() => {
     if (reduced) return;
     let raf = 0;
@@ -66,6 +73,7 @@
   aria-label={label}
   data-figure={label}
   data-figure-id={id}
+  style:--phase={phase}
 >
   {@render children({ elapsed, reduced })}
 </figure>
