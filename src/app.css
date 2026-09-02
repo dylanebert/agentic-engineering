@@ -26,6 +26,11 @@
   --accent: #3a5a80;
   --accent-strong: #294564;
   --surface-2: color-mix(in srgb, var(--bg) 70%, var(--border));
+  --role-prose: #363c44;
+  --role-vibe: #6b3fa0;
+  --role-agentic: #1f6f5c;
+  --role-verify: #9a3412;
+  --role-context: #3a5a80;
   --pos: 0.5;
   --snap1: clamp(0, (var(--pos) - 0.25) * 1000, 1);
   --snap2: clamp(0, (var(--pos) - 0.75) * 1000, 1);

@@ -22,7 +22,6 @@
     "shot": "bun run scripts/shot.ts",
     "shot:update": "bun run scripts/shot.ts --update-snapshots",
     "instrument": "bun run scripts/instrument.ts",
-    "equivalence": "bun run scripts/equivalence.ts",
     "figures": "bun run scripts/figures.ts",
     "oracle-text": "bun run scripts/oracle-text.ts",
     "oracle-vocabulary": "bun run scripts/vocabulary.oracle.ts"

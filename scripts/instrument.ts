@@ -79,15 +79,6 @@ run(["bun", "install", "--silent"], work);
 run(["bunx", "playwright", "install", "chromium"], work);
 run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "instrument.spec.ts"], work);
 
-mustRed(
-  "retired dress visible",
-  ["bun", "run", "equivalence"],
-  repo,
-  { EQ_MUTATE_RETIRED_DRESS: "visible" },
-);
-run(["bun", "run", "equivalence"], repo);
-console.log("instrument: retired dress deletion restored green");
-
 const figureSpec = join(work, "figures.spec.ts");
 const figureSource = readFileSync(figureSpec, "utf8");
 writeFileSync(figureSpec, figureSource.replace("res.writeHead(404", "res.writeHead(200"));
@@ -107,14 +98,6 @@ sourceMutation(
   "Changed article text is the practice of directing agents",
   "non-interference",
 );
-
-const heroSource = join(repo, "src/lib/HeroFigure.svelte");
-sourceMutation("hero real controls", heroSource, "onclick={() => move(1)}", "onclick={() => move(0)}", "real buttons");
-sourceMutation("hero keyboard", heroSource, "move(1);", "move(0);", "arrow keys");
-sourceMutation("hero caption binding", heroSource, "{current.caption}", "{slides[0].caption}", "caption remain bound");
-sourceMutation("hero reduced-motion rest", heroSource, "@media (prefers-reduced-motion: reduce)", "@media (prefers-reduced-motion: no-preference)", "every slide is fully disclosed");
-sourceMutation("hero layout stability", heroSource, "min-height: 3lh", "min-height: 0", "does not shift");
-sourceMutation("hero DOM substrate", heroSource, "Agentic engineering scene sequence", "Agentic engineering Shallot scene sequence", "package and dist");
 
 const selected = readFileSync(figureSpec, "utf8");
 writeFileSync(figureSpec, selected.replace("const selected = readMaximum(548);", "const selected = readMaximum(549);"));

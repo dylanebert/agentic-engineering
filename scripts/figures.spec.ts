@@ -4,9 +4,11 @@ import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { perceptualDelta } from "./png";
 
-// Figure gate for the neutral article template. The twelve arms retired in S1 belonged to
-// the deleted spectrum or its undriven page-dress axis; the six arms below retain the
-// server, typography, readable-measure, emphasis, rhythm, and non-interference contracts.
+// Figure gate for the neutral article template. The sequence-shell arms retired with the
+// WebGPU hero in S1, together with the real-tree vocabulary arm whose subject went with it
+// (the role binding is the vocabulary oracle's owned red until S4). What remains: the
+// substrate arm, the server contract, typography, readable measure, emphasis, rhythm, and
+// non-interference.
 
 const root = __dirname;
 const dist = join(root, "dist");
@@ -39,59 +41,7 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => { await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve())); });
 
-// --- Sequence shell contracts ---
-
-test("hero controls: real buttons advance and retreat", async ({ page }) => {
-  await page.goto(url, { waitUntil: "networkidle" });
-  const position = page.locator(".hero output");
-  await expect(position).toHaveText("1 of 8");
-  await page.getByRole("button", { name: "Next slide" }).click();
-  await expect(position).toHaveText("2 of 8");
-  await page.getByRole("button", { name: "Previous slide" }).click();
-  await expect(position).toHaveText("1 of 8");
-});
-
-test("hero keyboard: arrow keys operate the focused sequence", async ({ page }) => {
-  await page.goto(url, { waitUntil: "networkidle" });
-  const hero = page.getByRole("button", { name: "Next slide" });
-  await hero.focus();
-  await page.keyboard.press("ArrowRight");
-  await expect(page.locator(".hero output")).toHaveText("2 of 8");
-  await page.keyboard.press("ArrowLeft");
-  await expect(page.locator(".hero output")).toHaveText("1 of 8");
-});
-
-test("hero caption: current slide and caption remain bound", async ({ page }) => {
-  await page.goto(url, { waitUntil: "networkidle" });
-  await page.getByRole("button", { name: "Next slide" }).click();
-  const caption = page.locator(".hero figcaption");
-  await expect(caption).toHaveAttribute("data-caption-index", "1");
-  await expect(caption).toHaveText("Placeholder caption for scene 1, slide 2, with enough placeholder copy to occupy a second line.");
-  await expect(page.locator('.hero .slide.current')).toHaveAttribute("data-slide", "2");
-});
-
-test("hero reduced motion: every slide is fully disclosed at rest", async ({ page }) => {
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.goto(url, { waitUntil: "networkidle" });
-  const slides = page.locator(".hero .slide");
-  await expect(slides).toHaveCount(8);
-  for (let index = 0; index < 8; index += 1) await expect(slides.nth(index)).toBeVisible();
-  const moving = await page.locator(".hero").evaluate((hero) =>
-    hero.getAnimations({ subtree: true }).filter((animation) => animation.playState === "running").length,
-  );
-  expect(moving).toBe(0);
-});
-
-test("hero layout: advancing does not shift the shell", async ({ page }) => {
-  await page.goto(url, { waitUntil: "networkidle" });
-  const hero = page.locator(".hero");
-  const before = await hero.boundingBox();
-  await page.getByRole("button", { name: "Next slide" }).click();
-  const after = await hero.boundingBox();
-  expect(after).toEqual(before);
-});
-
-test("hero substrate: package and dist contain no Shallot or typegpu", async () => {
+test("substrate: package and dist contain no Shallot or typegpu", async () => {
   const packageText = await readFile(join(root, "package.json"), "utf8");
   expect(packageText.toLowerCase()).not.toContain("shallot");
   expect(packageText.toLowerCase()).not.toContain("typegpu");
@@ -101,68 +51,12 @@ test("hero substrate: package and dist contain no Shallot or typegpu", async () 
   expect(built).not.toContain("typegpu");
 });
 
-// This arm reads the vocabulary emitted by the built Svelte tree, not the declaration module.
-// Each mutation changes that real DOM tree and is rejected by the same reader as production.
-test("hero vocabulary: real tree obeys the shared grammar and rejects novelty", async ({ page }) => {
-  await page.goto(url, { waitUntil: "networkidle" });
-  const results = await page.locator(".hero .stage").evaluate((stage) => {
-    type Grammar = {
-      primitiveFamily: string;
-      thickness: Record<string, string>;
-      colors: Record<string, { token: string; semantic: string }>;
-      motion: Record<string, string>;
-    };
-    const read = (): string[] => {
-      const grammar = JSON.parse((stage as HTMLElement).dataset.heroGrammar ?? "null") as Grammar | null;
-      const concepts = [...stage.querySelectorAll<HTMLElement>("[data-concept]")];
-      if (!grammar || concepts.length === 0) return ["population"];
-      const failures: string[] = [];
-      const primitives = new Set(concepts.map((node) => node.dataset.primitive));
-      if (primitives.size !== 1 || !primitives.has(grammar.primitiveFamily)) failures.push("primitive");
-      if (Object.keys(grammar.thickness).length > 2 || concepts.some((node) => !(node.dataset.thickness! in grammar.thickness))) failures.push("thickness");
-      const accents = Object.values(grammar.colors).filter((color) => color.semantic !== "page-neutral");
-      if (accents.length > 1 || accents.some((color) => color.semantic.trim() === "") || concepts.some((node) => !(node.dataset.color! in grammar.colors))) failures.push("color");
-      if (Object.keys(grammar.motion).length > 2 || concepts.some((node) => !(node.dataset.motion! in grammar.motion))) failures.push("motion");
-      if (concepts.some((node) => !node.dataset.label?.trim())) failures.push("label");
-      return failures;
-    };
-    const originalGrammar = (stage as HTMLElement).dataset.heroGrammar!;
-    const concept = (id: string) => stage.querySelector<HTMLElement>(`[data-concept="${id}"]`)!;
-    const mutations: Array<[string, string, () => void]> = [
-      ["mixed primitive family", "primitive", () => { concept("vibe").dataset.primitive = "circle"; }],
-      ["concept-local shape", "primitive", () => { concept("agentic").dataset.primitive = "triangle"; }],
-      ["concept-local color", "color", () => { concept("human").dataset.color = "human-blue"; }],
-      ["concept-local motion", "motion", () => { concept("verify").dataset.motion = "verify-spin"; }],
-      ["third thickness role", "thickness", () => { const g = JSON.parse(originalGrammar); g.thickness.detail = "2px"; (stage as HTMLElement).dataset.heroGrammar = JSON.stringify(g); }],
-      ["second accent", "color", () => { const g = JSON.parse(originalGrammar); g.colors.warning = { token: "--warning", semantic: "warning" }; (stage as HTMLElement).dataset.heroGrammar = JSON.stringify(g); }],
-      ["third motion role", "motion", () => { const g = JSON.parse(originalGrammar); g.motion.orbit = "orbit"; (stage as HTMLElement).dataset.heroGrammar = JSON.stringify(g); }],
-    ];
-    const baseline = read();
-    const mutationReads = mutations.map(([name, expected, mutate]) => {
-      (stage as HTMLElement).dataset.heroGrammar = originalGrammar;
-      for (const node of stage.querySelectorAll<HTMLElement>("[data-concept]")) {
-        node.dataset.primitive = "rounded-rectangle";
-        node.dataset.color = "ink";
-        node.dataset.motion = "reveal";
-      }
-      mutate();
-      return { name, expected, failures: read() };
-    });
-    return { baseline, mutationReads };
-  });
-  expect(results.baseline).toEqual([]);
-  for (const mutation of results.mutationReads) {
-    console.log(`real-tree mutation rejected: ${mutation.name} -> ${mutation.failures.join(",")}`);
-    expect(mutation.failures).toContain(mutation.expected);
-  }
-});
-
 // --- Server contract: missing assets 404 (no SPA fallback masking) ---
 
 // The figures server is the gate's only view of the built page; a fallback that serves
 // index.html for a missing asset turns a broken script/stylesheet/font request into a 200
 // carrying HTML. This arm pins the server's missing-asset 404 behavior — nothing broader:
-// traversal handling is the equivalence server's own concern and is not claimed here.
+// traversal handling is not claimed here.
 // Mutation: revert the catch to the old `path = "index.html"` fallback and the probed status
 // reads 200 — red.
 test("server: missing assets return 404, not an index.html fallback", async ({ request }) => {
