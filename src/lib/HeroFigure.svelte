@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { heroConcepts, heroGrammar } from "./hero";
+
   const slides = [
     { scene: 1, slide: 1, label: "Scene 1 placeholder", caption: "Placeholder caption for scene 1, slide 1." },
     { scene: 1, slide: 2, label: "Scene 1 placeholder", caption: "Placeholder caption for scene 1, slide 2, with enough placeholder copy to occupy a second line." },
@@ -31,7 +33,24 @@
 <figure class="hero" aria-labelledby="hero-title">
   <h2 id="hero-title" class="sr-only">Agentic engineering scene sequence</h2>
 
-  <div class="stage" role="group" aria-label={`Scene ${current.scene}, slide ${current.slide}`}>
+  <div
+    class="stage"
+    role="group"
+    aria-label={`Scene ${current.scene}, slide ${current.slide}`}
+    data-hero-grammar={JSON.stringify(heroGrammar)}
+  >
+    <div class="vocabulary" hidden aria-hidden="true">
+      {#each Object.entries(heroConcepts) as [id, concept]}
+        <span
+          data-concept={id}
+          data-label={concept.label}
+          data-primitive={concept.primitive}
+          data-thickness={concept.thickness}
+          data-color={concept.color}
+          data-motion={concept.motion}
+        ></span>
+      {/each}
+    </div>
     {#each slides as item, itemIndex}
       <section
         class="slide"
@@ -58,6 +77,7 @@
 
 <style>
   .hero {
+    --hero-active-step: var(--text);
     width: 100%;
     margin: 28px 0 0;
     outline-offset: 6px;

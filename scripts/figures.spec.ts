@@ -101,6 +101,62 @@ test("hero substrate: package and dist contain no Shallot or typegpu", async () 
   expect(built).not.toContain("typegpu");
 });
 
+// This arm reads the vocabulary emitted by the built Svelte tree, not the declaration module.
+// Each mutation changes that real DOM tree and is rejected by the same reader as production.
+test("hero vocabulary: real tree obeys the shared grammar and rejects novelty", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const results = await page.locator(".hero .stage").evaluate((stage) => {
+    type Grammar = {
+      primitiveFamily: string;
+      thickness: Record<string, string>;
+      colors: Record<string, { token: string; semantic: string }>;
+      motion: Record<string, string>;
+    };
+    const read = (): string[] => {
+      const grammar = JSON.parse((stage as HTMLElement).dataset.heroGrammar ?? "null") as Grammar | null;
+      const concepts = [...stage.querySelectorAll<HTMLElement>("[data-concept]")];
+      if (!grammar || concepts.length === 0) return ["population"];
+      const failures: string[] = [];
+      const primitives = new Set(concepts.map((node) => node.dataset.primitive));
+      if (primitives.size !== 1 || !primitives.has(grammar.primitiveFamily)) failures.push("primitive");
+      if (Object.keys(grammar.thickness).length > 2 || concepts.some((node) => !(node.dataset.thickness! in grammar.thickness))) failures.push("thickness");
+      const accents = Object.values(grammar.colors).filter((color) => color.semantic !== "page-neutral");
+      if (accents.length > 1 || accents.some((color) => color.semantic.trim() === "") || concepts.some((node) => !(node.dataset.color! in grammar.colors))) failures.push("color");
+      if (Object.keys(grammar.motion).length > 2 || concepts.some((node) => !(node.dataset.motion! in grammar.motion))) failures.push("motion");
+      if (concepts.some((node) => !node.dataset.label?.trim())) failures.push("label");
+      return failures;
+    };
+    const originalGrammar = (stage as HTMLElement).dataset.heroGrammar!;
+    const concept = (id: string) => stage.querySelector<HTMLElement>(`[data-concept="${id}"]`)!;
+    const mutations: Array<[string, string, () => void]> = [
+      ["mixed primitive family", "primitive", () => { concept("vibe").dataset.primitive = "circle"; }],
+      ["concept-local shape", "primitive", () => { concept("agentic").dataset.primitive = "triangle"; }],
+      ["concept-local color", "color", () => { concept("human").dataset.color = "human-blue"; }],
+      ["concept-local motion", "motion", () => { concept("verify").dataset.motion = "verify-spin"; }],
+      ["third thickness role", "thickness", () => { const g = JSON.parse(originalGrammar); g.thickness.detail = "2px"; (stage as HTMLElement).dataset.heroGrammar = JSON.stringify(g); }],
+      ["second accent", "color", () => { const g = JSON.parse(originalGrammar); g.colors.warning = { token: "--warning", semantic: "warning" }; (stage as HTMLElement).dataset.heroGrammar = JSON.stringify(g); }],
+      ["third motion role", "motion", () => { const g = JSON.parse(originalGrammar); g.motion.orbit = "orbit"; (stage as HTMLElement).dataset.heroGrammar = JSON.stringify(g); }],
+    ];
+    const baseline = read();
+    const mutationReads = mutations.map(([name, expected, mutate]) => {
+      (stage as HTMLElement).dataset.heroGrammar = originalGrammar;
+      for (const node of stage.querySelectorAll<HTMLElement>("[data-concept]")) {
+        node.dataset.primitive = "rounded-rectangle";
+        node.dataset.color = "ink";
+        node.dataset.motion = "reveal";
+      }
+      mutate();
+      return { name, expected, failures: read() };
+    });
+    return { baseline, mutationReads };
+  });
+  expect(results.baseline).toEqual([]);
+  for (const mutation of results.mutationReads) {
+    console.log(`real-tree mutation rejected: ${mutation.name} -> ${mutation.failures.join(",")}`);
+    expect(mutation.failures).toContain(mutation.expected);
+  }
+});
+
 // --- Server contract: missing assets 404 (no SPA fallback masking) ---
 
 // The figures server is the gate's only view of the built page; a fallback that serves

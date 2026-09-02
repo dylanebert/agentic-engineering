@@ -11,6 +11,14 @@ import { playwrightVersion } from "./playwright-version";
 // Windows TEMP and runs through PowerShell.
 
 const repo = join(import.meta.dir, "..");
+
+const vocabulary = Bun.spawnSync(["bun", "run", "oracle-vocabulary"], {
+  cwd: repo,
+  stdout: "inherit",
+  stderr: "inherit",
+});
+if (vocabulary.exitCode !== 0) process.exit(vocabulary.exitCode);
+
 const isWsl =
   process.platform === "linux" && existsSync("/proc/sys/fs/binfmt_misc/WSLInterop");
 
