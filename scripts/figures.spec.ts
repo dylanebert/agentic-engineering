@@ -56,7 +56,7 @@ test("substrate: package and dist contain no Shallot or typegpu", async () => {
 // The figures server is the gate's only view of the built page; a fallback that serves
 // index.html for a missing asset turns a broken script/stylesheet/font request into a 200
 // carrying HTML. This arm pins the server's missing-asset 404 behavior — nothing broader:
-// traversal handling is the equivalence server's own concern and is not claimed here.
+// traversal handling is not claimed here.
 // Mutation: revert the catch to the old `path = "index.html"` fallback and the probed status
 // reads 200 — red.
 test("server: missing assets return 404, not an index.html fallback", async ({ request }) => {

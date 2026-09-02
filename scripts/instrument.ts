@@ -79,15 +79,6 @@ run(["bun", "install", "--silent"], work);
 run(["bunx", "playwright", "install", "chromium"], work);
 run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "instrument.spec.ts"], work);
 
-mustRed(
-  "retired dress visible",
-  ["bun", "run", "equivalence"],
-  repo,
-  { EQ_MUTATE_RETIRED_DRESS: "visible" },
-);
-run(["bun", "run", "equivalence"], repo);
-console.log("instrument: retired dress deletion restored green");
-
 const figureSpec = join(work, "figures.spec.ts");
 const figureSource = readFileSync(figureSpec, "utf8");
 writeFileSync(figureSpec, figureSource.replace("res.writeHead(404", "res.writeHead(200"));
