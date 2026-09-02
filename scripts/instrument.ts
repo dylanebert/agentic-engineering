@@ -12,8 +12,13 @@ function run(command: string[], cwd: string): void {
   if (result.exitCode !== 0) throw new Error(`instrument: '${command.join(" ")}' failed (exit ${result.exitCode})`);
 }
 
-function mustRed(label: string, command: string[], cwd: string): void {
-  const result = Bun.spawnSync(command, { cwd, stdout: "inherit", stderr: "inherit" });
+function mustRed(label: string, command: string[], cwd: string, env?: Record<string, string>): void {
+  const result = Bun.spawnSync(command, {
+    cwd,
+    stdout: "inherit",
+    stderr: "inherit",
+    env: env ? { ...process.env, ...env } : process.env,
+  });
   if (result.exitCode === 0) throw new Error(`instrument: ${label} mutation unexpectedly passed`);
   console.log(`instrument: ${label} mutation red as required`);
 }
@@ -73,6 +78,15 @@ stage();
 run(["bun", "install", "--silent"], work);
 run(["bunx", "playwright", "install", "chromium"], work);
 run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "instrument.spec.ts"], work);
+
+mustRed(
+  "retired dress visible",
+  ["bun", "run", "equivalence"],
+  repo,
+  { EQ_MUTATE_RETIRED_DRESS: "visible" },
+);
+run(["bun", "run", "equivalence"], repo);
+console.log("instrument: retired dress deletion restored green");
 
 const figureSpec = join(work, "figures.spec.ts");
 const figureSource = readFileSync(figureSpec, "utf8");
