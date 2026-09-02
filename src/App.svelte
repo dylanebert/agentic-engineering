@@ -23,8 +23,8 @@
     <p>
       You may have heard of vibe coding. You tell an agent "make me some
       software," and some software comes out. It might be good. It might be bad.
-      It's probably purple. In my experience, a model given no direction
-      reaches for the same few colors, and purple is one of them.
+      And in my experience a model given no direction reaches for the same few
+      colors, so it's probably purple.
     </p>
     <p>
       That's one end of a spectrum. The other end is 100% organic human code,
@@ -43,8 +43,8 @@
     <h2>verifiability</h2>
     <p>
       Agentic engineering is young. Most of it is still "just try things and
-      see what happens." I've done enough of it, across enough projects, to
-      watch two principles form. This is the first.
+      see what happens." Two principles have come up often enough that I'll
+      claim them. This is the first.
     </p>
     <p>
       An agent wrote some code. That part is easy now. Does it work? Is it fast?
@@ -149,13 +149,14 @@
       The weak point is the spec. Everything downstream inherits it, and a spec
       that is wrong just gets built correctly, stage by stage, with every check
       passing. Writing it is still the part I do by hand. The details keep
-      moving; the shape has held so far.
+      moving; spec, then stages, then a check on each has held so far.
     </p>
     <p>
       A second companion page,
-      <a href="/taste-loops/">taste-loops</a>, covers the part you can't hand to
-      a machine or a second agent: the final judge is you, so the checking has
-      to be fast enough that you keep doing it.
+      <a href="/taste-loops/">taste-loops</a>, is about the loops where taste is
+      the check. It covers the part you can't hand to a machine or a second
+      agent: the final judge is you, so the checking has to be fast enough that
+      you keep doing it.
     </p>
     <p class="aside">
       check out the
