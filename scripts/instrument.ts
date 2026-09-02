@@ -108,14 +108,6 @@ sourceMutation(
   "non-interference",
 );
 
-const heroSource = join(repo, "src/lib/HeroFigure.svelte");
-sourceMutation("hero real controls", heroSource, "onclick={() => move(1)}", "onclick={() => move(0)}", "real buttons");
-sourceMutation("hero keyboard", heroSource, "move(1);", "move(0);", "arrow keys");
-sourceMutation("hero caption binding", heroSource, "{current.caption}", "{slides[0].caption}", "caption remain bound");
-sourceMutation("hero reduced-motion rest", heroSource, "@media (prefers-reduced-motion: reduce)", "@media (prefers-reduced-motion: no-preference)", "every slide is fully disclosed");
-sourceMutation("hero layout stability", heroSource, "min-height: 3lh", "min-height: 0", "does not shift");
-sourceMutation("hero DOM substrate", heroSource, "Agentic engineering scene sequence", "Agentic engineering Shallot scene sequence", "package and dist");
-
 const selected = readFileSync(figureSpec, "utf8");
 writeFileSync(figureSpec, selected.replace("const selected = readMaximum(548);", "const selected = readMaximum(549);"));
 try {

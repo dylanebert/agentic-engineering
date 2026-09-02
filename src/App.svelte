@@ -1,7 +1,3 @@
-<script lang="ts">
-  import HeroFigure from "./lib/HeroFigure.svelte";
-</script>
-
 <article class="page">
   <header class="head">
     <div class="meta">
@@ -11,8 +7,6 @@
     <h1 class="title">agentic engineering</h1>
     <p class="dek">for beginners</p>
   </header>
-
-  <HeroFigure />
 
   <section class="section">
     <h2>agentic engineering</h2>
