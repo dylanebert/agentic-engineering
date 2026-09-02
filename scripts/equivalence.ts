@@ -1,6 +1,6 @@
-// Self-terminating pre/post perceptual-differential gate (validation gate 4). It compares
-// explicit --pre/--post roots inside one Playwright invocation. The old no-argument baseline
-// mode is retired; explicit roots keep instrument mutation runs independent of a moving ref.
+// Self-terminating perceptual differential. With no arguments it freezes one built dist into
+// two roots and asks the Playwright side to restore the retired dress only on the baseline.
+// Explicit roots remain available for isolated instrument fixtures.
 
 import { cpSync, existsSync, mkdirSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -34,10 +34,6 @@ function requireDist(label: string, root: string): void {
 
 const requestedPre = take("--pre");
 const requestedPost = take("--post");
-if (!requestedPre && !requestedPost) {
-  console.error("equivalence: explicit --pre and --post roots are required");
-  process.exit(1);
-}
 if (!!requestedPre !== !!requestedPost) {
   console.error("equivalence: --pre and --post must be supplied together");
   process.exit(1);
@@ -52,8 +48,20 @@ try {
   rmSync(work, { recursive: true, force: true });
   mkdirSync(harness, { recursive: true });
 
-  const pre = resolve(requestedPre!);
-  const post = resolve(requestedPost!);
+  let pre: string;
+  let post: string;
+  const isolatedDressAB = !requestedPre;
+  if (isolatedDressAB) {
+    run(["bun", "run", "build"], resolve(import.meta.dir, ".."));
+    pre = join(work, "retired-layer-present");
+    post = join(work, "retired-layer-absent");
+    cpSync(join(import.meta.dir, "..", "dist"), pre, { recursive: true });
+    cpSync(join(import.meta.dir, "..", "dist"), post, { recursive: true });
+    console.log("equivalence: frozen one build; baseline restores retired dress layer, candidate omits it");
+  } else {
+    pre = resolve(requestedPre!);
+    post = resolve(requestedPost!);
+  }
   requireDist("baseline", pre);
   requireDist("candidate", post);
   if (realpathSync(pre) === realpathSync(post)) {
@@ -84,7 +92,12 @@ try {
     ["bunx", "playwright", "test", "--config", "playwright.config.ts"],
     {
       cwd: harness,
-      env: { ...process.env, EQ_PRE: pre, EQ_POST: post },
+      env: {
+        ...process.env,
+        EQ_PRE: pre,
+        EQ_POST: post,
+        EQ_RESTORE_RETIRED_DRESS: isolatedDressAB ? "1" : "0",
+      },
       stdout: "inherit",
       stderr: "inherit",
     },

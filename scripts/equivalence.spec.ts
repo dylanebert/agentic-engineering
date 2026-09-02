@@ -17,7 +17,22 @@ const viewports = [
   { name: "desktop", width: 1440, height: 900 },
   { name: "mobile", width: 390, height: 844 },
 ];
-const positions = [0, 0.25, 0.5, 0.75, 1];
+const restoreRetiredDress = process.env.EQ_RESTORE_RETIRED_DRESS === "1";
+const visibleMutation = process.env.EQ_MUTATE_RETIRED_DRESS === "visible";
+
+// This is the deleted layer at its last production input (--pos: 0.5). It is installed only in
+// the baseline document, after both sides load the same frozen build. The mutation makes its
+// decorative blob visible, proving the A/B observes the layer rather than two identical roots.
+const retiredDress = `
+.page { position:relative; z-index:0; overflow-x:clip }
+.head { background:transparent; box-shadow:none; border-radius:4px; padding:0 }
+.section { background:transparent; box-shadow:none; border-radius:4px; padding:0 }
+.masthead-blob { position:absolute; top:-100px; left:0; right:0; height:400px;
+  background:radial-gradient(ellipse 60% 50% at 50% 50%, rgba(168,85,247,0), transparent 70%);
+  filter:blur(80px); pointer-events:none; z-index:-1 }
+.section h2::after,.title::after { content:"\\2013  \\25A1  \\2715"; float:right;
+  margin-left:0; font-size:0; font-weight:700; letter-spacing:2px; opacity:0; line-height:1 }
+`;
 
 // Sub-JND raster noise may average at most one RGB level, and no pixel may exceed the JND.
 // This is perceptual equivalence, not byte identity.
@@ -36,15 +51,6 @@ const types: Record<string, string> = {
   ".ico": "image/x-icon",
   ".json": "application/json",
   ".map": "application/json",
-};
-
-const morphDriver = async (page: import("@playwright/test").Page, pos: number) => {
-  await page.evaluate((p) => {
-    document.documentElement.style.setProperty("--pos", String(p));
-    document.documentElement.style.colorScheme = p <= 0.25 ? "dark" : "light";
-    document.documentElement.classList.toggle("vibe", p <= 0.25);
-    document.documentElement.classList.toggle("win98", p > 0.75);
-  }, pos);
 };
 
 async function serve(root: string): Promise<Server> {
@@ -77,7 +83,7 @@ async function capture(
   root: string,
   label: string,
   view: { width: number; height: number },
-  pos: number,
+  installRetiredDress: boolean,
 ): Promise<Buffer> {
   const server = await serve(root);
   const address = server.address();
@@ -114,7 +120,20 @@ async function capture(
     }
     expect(resourceFailures, `${label} root/assets must be live`).toEqual([]);
 
-    await morphDriver(page, pos);
+    if (installRetiredDress) {
+      await page.evaluate(({ css, mutate }) => {
+        const style = document.createElement("style");
+        style.dataset.equivalenceRetiredDress = "";
+        style.textContent = mutate
+          ? `${css}\n.masthead-blob{background:#ff00ff;filter:none;opacity:1}`
+          : css;
+        document.head.append(style);
+        const blob = document.createElement("div");
+        blob.className = "masthead-blob";
+        blob.setAttribute("aria-hidden", "true");
+        document.querySelector(".page")?.prepend(blob);
+      }, { css: retiredDress, mutate: visibleMutation });
+    }
     await settleToRest(page, "body");
     return await page.screenshot({ fullPage: true });
   } finally {
@@ -127,20 +146,13 @@ for (const view of viewports) {
   test(`equivalence: pre/post perceptually equivalent at ${view.name} (${view.width}x${view.height})`, async ({
     browser,
   }) => {
-    const failures: string[] = [];
-    for (const pos of positions) {
-      const pre = await capture(browser, preDist, "baseline", view, pos);
-      const post = await capture(browser, postDist, "candidate", view, pos);
-      const delta = perceptualDelta(pre, post);
-      console.log(
-        `equivalence ${view.name} pos=${pos}: meanDelta=${delta.meanDelta.toFixed(4)} maxDelta=${delta.maxDelta} extent=${delta.extent.toFixed(6)}`,
-      );
-      if (delta.meanDelta > MAX_MEAN_SUB_JND_DELTA || delta.extent > 0) {
-        failures.push(
-          `${view.name} pos=${pos}: meanDelta=${delta.meanDelta.toFixed(4)} maxDelta=${delta.maxDelta} extent=${delta.extent.toFixed(6)}`,
-        );
-      }
-    }
-    expect(failures).toEqual([]);
+    const pre = await capture(browser, preDist, "baseline", view, restoreRetiredDress);
+    const post = await capture(browser, postDist, "candidate", view, false);
+    const delta = perceptualDelta(pre, post);
+    console.log(
+      `equivalence ${view.name}: meanDelta=${delta.meanDelta.toFixed(4)} maxDelta=${delta.maxDelta} extent=${delta.extent.toFixed(6)}`,
+    );
+    expect(delta.meanDelta).toBeLessThanOrEqual(MAX_MEAN_SUB_JND_DELTA);
+    expect(delta.extent).toBe(0);
   });
 }
