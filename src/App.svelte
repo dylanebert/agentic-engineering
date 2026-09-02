@@ -55,8 +55,8 @@
     </p>
     <p>
       Agentic engineering is young. Most of it is still "just try things and
-      see what happens." Two principles have come up often enough that I'll
-      claim them, and this is the first.
+      see what happens." Two principles have come up often enough in my own
+      work that I'll claim them, and this is the first.
     </p>
     <p>
       The cost is lopsided. Writing a screen of code takes an agent seconds.
@@ -157,14 +157,14 @@
     <p>
       The weak point is the spec. Everything downstream inherits it, and a spec
       that is wrong just gets built correctly, stage by stage, with every check
-      passing. Writing it is still the part I do by hand. The details keep
+      passing. Writing it is still the part I do by hand. My own habits keep
       moving; spec, then stages, then a check on each has held so far.
     </p>
     <p>
       A second companion page,
-      <a href="/taste-loops/">taste-loops</a>, is about the loops where taste is
-      the check. It covers the part you can't hand to a machine or a second
-      agent: the final judge is you, so the checking has to be fast enough that
+      <a href="/taste-loops/">taste-loops</a>, is about the part you can't hand
+      to a machine or a second agent, where your own judgment, taste, is the
+      check. The final judge is you, so the checking has to be fast enough that
       you keep doing it.
     </p>
     <p class="aside">

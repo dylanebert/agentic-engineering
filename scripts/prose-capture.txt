@@ -11,8 +11,8 @@ dylan ebert · august 2026 agentic engineering for beginners agentic engineering
       the boilerplate around a design you already settled. Where you sit is a
       choice you make per task, not a stance you hold forever. verifiability Writing the code is no longer the hard part. An agent wrote some code.
       Does it work? Is it fast? Is it secure? Is it how you wanted it? Verifiability is how well you can answer those questions. Agentic engineering is young. Most of it is still "just try things and
-      see what happens." Two principles have come up often enough that I'll
-      claim them, and this is the first. The cost is lopsided. Writing a screen of code takes an agent seconds.
+      see what happens." Two principles have come up often enough in my own
+      work that I'll claim them, and this is the first. The cost is lopsided. Writing a screen of code takes an agent seconds.
       Reading that screen closely enough to trust it takes you minutes. Give the
       agent more to do and your reading is the first thing to break, so most of
       the practice is about making the checking cheaper. I go further on a companion page, verifiability. It covers why checking sets
@@ -45,8 +45,8 @@ dylan ebert · august 2026 agentic engineering for beginners agentic engineering
       the judgment call, and the verifiability page is where I work out how far the cheap ones can be pushed. in practice In practice, agentic engineering is a spec, small stages, a fresh
       conversation for each, and a check before the next one opens. The weak point is the spec. Everything downstream inherits it, and a spec
       that is wrong just gets built correctly, stage by stage, with every check
-      passing. Writing it is still the part I do by hand. The details keep
-      moving; spec, then stages, then a check on each has held so far. A second companion page, taste-loops, is about the loops where taste is
-      the check. It covers the part you can't hand to a machine or a second
-      agent: the final judge is you, so the checking has to be fast enough that
+      passing. Writing it is still the part I do by hand. My own habits keep
+      moving; spec, then stages, then a check on each has held so far. A second companion page, taste-loops, is about the part you can't hand
+      to a machine or a second agent, where your own judgment, taste, is the
+      check. The final judge is you, so the checking has to be fast enough that
       you keep doing it. check out the video version.
