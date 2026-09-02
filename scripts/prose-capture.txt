@@ -5,9 +5,9 @@ dylan ebert · august 2026 agentic engineering for beginners agentic engineering
       software," and some software comes out. It might be good. It might be bad.
       And in my experience a model given no direction reaches for the same few
       colors, so it's probably purple. The other end is 100% organic human code,
-      every line typed by a person. Those are not your only two options. A whole
-      space sits between them, and agentic engineering lives there: you direct
-      the work, and you check each step. vibe codingagentic engineeringhuman code The space is wide. You can hand over a feature, a single function, or only
+      every line typed by a person. Those are not your only two options. Between
+      vibe coding and human code is a whole space, and agentic engineering lives
+      there: you direct the work, and you check each step. vibe codingagentic engineeringhuman code The space is wide. You can hand over a feature, a single function, or only
       the boilerplate around a design you already settled. Where you sit is a
       choice you make per task, not a stance you hold forever. verifiability Writing the code is no longer the hard part. An agent wrote some code.
       Does it work? Is it fast? Is it secure? Is it how you wanted it? Verifiability is how well you can answer those questions. Agentic engineering is young. Most of it is still "just try things and
@@ -28,8 +28,8 @@ dylan ebert · august 2026 agentic engineering for beginners agentic engineering
       first conversation, don't implement anything. Write a spec instead: what
       the thing is, and how the work breaks into stages small enough to check
       one at a time. Then open a new conversation and do the next stage of the spec. Verify
-      that stage. If the check fails, fix it before you go on. Then repeat, in a
-      loop, until the spec is done. repeatspecstageverify The spec is the thing crossing between conversations. It carries the
+      that stage. If the check fails, fix it before you go on. Then repeat:
+      stage, verify, stage again, until the spec is done. repeatspecstageverify The spec is the thing crossing between conversations. It carries the
       stages, what each stage needs, and what done means, so a fresh
       conversation picks up cold. The stage boundary is where errors stop too: a
       mistake caught at stage three doesn't become the floor for stage four. how you verify The word doing the work in that loop is "verify." In practice it is a mix

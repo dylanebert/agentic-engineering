@@ -122,8 +122,8 @@ sourceMutation(
 sourceMutation(
   "figure claim against its lead-in paragraph",
   join(repo, "src/lib/figures.ts"),
-  'claim: "A whole space sits between them, and agentic engineering lives there"',
-  'claim: "A whole space sits between them, and vibe coding lives there"',
+  'claim: "Between vibe coding and human code is a whole space, and agentic engineering lives there"',
+  'claim: "Between vibe coding and human code is a whole space, and vibe coding lives there"',
   "quoted claim",
 );
 sourceMutation(

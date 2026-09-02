@@ -24,14 +24,14 @@ export const figures = [
     id: "spectrum-axis",
     section: "spectrum",
     paragraph: 1,
-    claim: "A whole space sits between them, and agentic engineering lives there",
+    claim: "Between vibe coding and human code is a whole space, and agentic engineering lives there",
     kind: "axis",
   },
   {
     id: "stage-loop",
     section: "loop",
     paragraph: 1,
-    claim: "Then repeat, in a loop, until the spec is done.",
+    claim: "Then repeat: stage, verify, stage again, until the spec is done.",
     kind: "loop",
   },
 ] satisfies readonly FigureEntry[];
