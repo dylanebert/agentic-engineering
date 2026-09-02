@@ -8,141 +8,155 @@
     <p class="dek">for beginners</p>
   </header>
 
-  <section class="section">
+  <section class="section" id="definition">
     <h2>agentic engineering</h2>
     <p>
-      Agentic engineering is the practice of directing agents to make software
-      and checking that what comes back is right. It's a practice you get better
-      at.
-    </p>
-    <p>
-      Everyone is still in the "just try things and see what happens" phase, but
-      I've tried enough to be sure of one part: the hard part moved from writing
-      the code to checking it.
+      Agentic engineering is directing agents to make software. You say what you
+      want, an agent writes the code, and you decide whether what came back is
+      right. This page is the written version of my video on the subject,
+      linked at the bottom, with the details and examples it had no room for.
     </p>
   </section>
 
-  <section class="section">
+  <section class="section" id="spectrum">
     <h2>the spectrum</h2>
     <p>
       You may have heard of vibe coding. You tell an agent "make me some
-      software," and software comes out. It might be good. It might be bad.
-      It's probably purple, the color a
-      model picks by default.
+      software," and some software comes out. It might be good. It might be bad.
+      And in my experience a model given no direction reaches for the same few
+      colors, so it's probably purple.
     </p>
     <p>
-      That's one end of a spectrum. The other is 100% organic human code, every
-      line written by hand. These aren't your only two options. The whole space
-      between, where you stay in the loop, direct the work, and check each step,
-      is where agentic engineering lives.
+      That's one end of a spectrum. The other end is 100% organic human code,
+      every line typed by a person. Those are not your only two options. A whole
+      space sits between them, and agentic engineering lives there: you direct
+      the work, and you check each step.
+    </p>
+    <p>
+      The space is wide. You can hand over a feature, a single function, or only
+      the boilerplate around a design you already settled. Where you sit is a
+      choice you make per task, not a stance you hold forever.
     </p>
   </section>
 
-  <section class="section">
+  <section class="section" id="verifiability">
     <h2>verifiability</h2>
     <p>
-      The first principle is verifiability: how well you can tell whether code
-      does what you wanted. An agent wrote some code. Does it work? Is it fast?
-      Is it secure? Is it how you want it to be? Those questions are the work.
+      Agentic engineering is young. Most of it is still "just try things and
+      see what happens." Two principles have come up often enough that I'll
+      claim them. This is the first.
     </p>
     <p>
-      How well you can answer them is the task's verifiability, and it's the
-      hard part. Everything else exists to raise it or hold its cost down. A
-      loop catches errors early. A spec says what done means. A fresh
-      conversation keeps the context clean.
+      An agent wrote some code. That part is easy now. Does it work? Is it fast?
+      Is it secure? Is it how you wanted it? Verifiability is how well you can
+      answer those questions, and it is the hard part.
     </p>
     <p>
-      The
-      <a href="/verifiability/">verifiability page</a>
-      goes deeper on why checking is the bottleneck of development speed and
-      what makes a proxy, a cheaper stand-in for a full review, worth trusting.
-      The short version: you get two of scalability (how widely you can check),
-      faithfulness (whether the check tracks what you want), and robustness
-      (whether it holds under change), never three.
+      The cost is lopsided. Writing a screen of code takes an agent seconds.
+      Reading that screen closely enough to trust it takes you minutes. Give the
+      agent more to do and your reading is the first thing to break, so most of
+      the practice is about making the checking cheaper.
+    </p>
+    <p>
+      I go further on a companion page,
+      <a href="/verifiability/">verifiability</a>. It covers why checking sets
+      the pace of development, and when a cheap check is worth trusting in place
+      of an expensive one: a test suite, say, instead of reading the diff.
     </p>
   </section>
 
-  <section class="section">
+  <section class="section" id="context-engineering">
     <h2>context engineering</h2>
     <p>
       The second principle is context engineering: give an agent just enough
-      context to complete a task, and no more than it needs. It sounds simple.
-      The discipline is in the "no more."
+      context to complete a task, and no more than that. It sounds like a
+      platitude. The discipline is in the second half.
     </p>
     <p>
-      Too little and it guesses wrong. Too much and it loses the thread, or you
-      pay for noise that drowns the signal. The unit of work is one task with
-      the context it needs and nothing else. A fresh conversation per stage is
-      how you hold the line.
-    </p>
-  </section>
-
-  <section class="section">
-    <h2>the worked example</h2>
-    <p>
-      Put the two together. "Make a todo list app." In the first conversation,
-      don't implement anything. Write a spec breaking the work into stages,
-      each one small enough to verify on its own.
+      Too little context and the agent guesses, confidently. Too much and the
+      task sits buried under things it shouldn't be reading. A long
+      conversation is the usual way to get too much: deep into one, much of
+      what the agent can see is its own abandoned attempts.
     </p>
     <p>
-      Then, in a new conversation, do the next stage of the spec. Verify the
-      stage. If the check fails, fix it before moving on. Repeat, in a loop,
-      until the spec is done. Verification closes each stage before the next
-      opens, so errors stay in one stage rather than compounding across the
-      whole build.
-    </p>
-    <p>
-      The spec is what crosses between conversations. It holds the stages, what
-      each one requires, and what done means, so a fresh conversation can pick
-      up where the last left off.
+      So the unit of work is one task plus the context for that task. A fresh
+      conversation per unit is how you hold the line, and it is why the next
+      section starts by writing something down.
     </p>
   </section>
 
-  <section class="section">
-    <h2>the three verification types</h2>
+  <section class="section" id="loop">
+    <h2>the loop</h2>
     <p>
-      So how exactly do you verify? No single kind of verification is enough;
-      here it's a mix of three.
+      Put the two principles together. Say the job is a todo list app. In the
+      first conversation, don't implement anything. Write a spec instead: what
+      the thing is, and how the work breaks into stages small enough to check
+      one at a time.
     </p>
     <p>
-      Machine verification: typechecking and test suites. Fast, cheap,
-      objective, and only as correct as the assumptions you fed them. They
-      catch what you thought to check and miss what you didn't.
+      Then open a new conversation and do the next stage of the spec. Verify
+      that stage. If the check fails, fix it before you go on. Then repeat, in a
+      loop, until the spec is done.
     </p>
     <p>
-      Agent verification: another agent reviews the code. A fresh agent has no
-      stake in what it wrote and is built to hunt for what's wrong. It scales
-      with the diff in a way a person can't, covering more than a test suite
-      but less than your own judgment.
-    </p>
-    <p>
-      Human verification: your own feedback. The highest reach, how much of the
-      system a check can cover, and the most expensive. Taste, your sense of
-      what's good, lives here, because it has no cheaper proxy than you, and
-      you can't sample a point of view in parallel.
-    </p>
-    <p>
-      The three are priced by cost against reach. You spend machine
-      verification freely, agent verification where it earns its keep, and human
-      verification where nothing else can close the gap. The mix is the
-      judgment call, and it shifts with what's at stake.
+      The spec is the thing crossing between conversations. It carries the
+      stages, what each stage needs, and what done means, so a fresh
+      conversation picks up cold. The stage boundary is where errors stop too: a
+      mistake caught at stage three doesn't become the floor for stage four.
     </p>
   </section>
 
-  <section class="section">
-    <h2>going further</h2>
+  <section class="section" id="verification">
+    <h2>how you verify</h2>
     <p>
-      The practice is young and the principles are still moving, but the shape
-      holds: a loop, a spec, and verification at every step. The rest is getting
-      good at each one.
+      That's the basics. The hard part is the word "verify." In practice it is a
+      mix of three kinds of checking, and each one reaches somewhere the others
+      don't.
+    </p>
+    <ul class="kinds">
+      <li>
+        <strong>Machine verification.</strong> Typechecking and test suites.
+        Fast, cheap, and the same answer every run. They catch what you thought
+        to check.
+      </li>
+      <li>
+        <strong>Agent verification.</strong> A second agent reads the code. It
+        has no stake in having written it, and it will read more of the diff
+        than you have patience for.
+      </li>
+      <li>
+        <strong>Human verification.</strong> Your own feedback. The slowest and
+        most expensive, and still the last word on whether the thing is any
+        good.
+      </li>
+    </ul>
+    <p>
+      Machine checks run on every save. Agent review runs at the end of a stage.
+      My own reading runs where the other two can't reach. Picking the mix is
+      the judgment call, and
+      <a href="/verifiability/">the verifiability page</a>
+      is where I work out how far the cheap ones can be pushed.
+    </p>
+  </section>
+
+  <section class="section" id="closing">
+    <h2>in practice</h2>
+    <p>
+      Applying these principles is agentic engineering. A spec, small stages, a
+      fresh conversation for each, and a check before the next one opens.
     </p>
     <p>
-      For more, the
-      <a href="/verifiability/">verifiability page</a>
-      goes deeper on the hard part.
-      <a href="/taste-loops/">Taste-loops</a>
-      covers the part that isn't verifiable, where the only oracle, the final
-      judge, is you and the loop has to run at interaction speed.
+      The weak point is the spec. Everything downstream inherits it, and a spec
+      that is wrong just gets built correctly, stage by stage, with every check
+      passing. Writing it is still the part I do by hand. The details keep
+      moving; spec, then stages, then a check on each has held so far.
+    </p>
+    <p>
+      A second companion page,
+      <a href="/taste-loops/">taste-loops</a>, is about the loops where taste is
+      the check. It covers the part you can't hand to a machine or a second
+      agent: the final judge is you, so the checking has to be fast enough that
+      you keep doing it.
     </p>
     <p class="aside">
       check out the
@@ -218,6 +232,16 @@
   .section p {
     margin-top: var(--paragraph-margin-top);
     color: var(--text-dim);
+  }
+
+  .kinds {
+    margin-top: var(--paragraph-margin-top);
+    padding-left: 1.5em;
+    color: var(--text-dim);
+  }
+
+  .kinds li {
+    margin-top: 10px;
   }
 
   .aside {

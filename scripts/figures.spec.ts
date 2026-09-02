@@ -147,7 +147,13 @@ test("typography: neutral measure stays in the readable long-form band", async (
   expect(mobile.paddingRight).toBe(20);
 });
 
-test("typography: selected desktop measure is the widest passing local sweep", async ({ page }) => {
+// The measure is a constant (spec Out of scope: type and measure stay as shipped), so this arm
+// asserts the property that constant is chosen for: at the shipped 548px the longest rendered
+// line stays inside the readable band. The former "and 549px exceeds it" half asserted a
+// property of the specific character stream rather than of the measure, so every prose rewrite
+// moved it and no stage owned it; it reddened on the S2 rebuild at 74 characters. Its mutation
+// witness in scripts/instrument.ts now breaches the measure constant instead of the sweep width.
+test("typography: shipped desktop measure keeps the longest line inside the readable band", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   await page.evaluate(() => document.fonts.ready);
   const sweep = await page.evaluate(() => {
@@ -178,18 +184,15 @@ test("typography: selected desktop measure is the widest passing local sweep", a
       return Math.max(...lineLengths);
     };
     const selected = readMaximum(548);
-    const next = readMaximum(549);
     return {
       current: document.querySelector(".page")!.getBoundingClientRect().width,
       selected,
-      next,
     };
   });
-  console.log(`neutral measure selection: current=${sweep.current}px, 548px max=${sweep.selected}, 549px max=${sweep.next}`);
+  console.log(`neutral measure selection: current=${sweep.current}px, 548px max=${sweep.selected}`);
   expect(sweep.current).toBe(548);
   expect(sweep.selected).toBeLessThanOrEqual(75);
   expect(sweep.selected).toBeGreaterThanOrEqual(72);
-  expect(sweep.next).toBeGreaterThan(75);
 });
 
 test("typography: production strong emphasis and section rhythm are visible on the neutral canvas", async ({ page }) => {
@@ -256,7 +259,7 @@ test("non-interference: story text remains intact", async ({ page }) => {
   const result = await page.evaluate(() => ({
     text: (document.querySelector(".page") as HTMLElement).innerText,
   }));
-  expect(result.text).toContain("Agentic engineering is the practice of directing agents");
-  expect(result.text).toContain("the hard part moved from writing the code to checking it.");
-  expect(result.text).toContain("The three are priced by cost against reach.");
+  expect(result.text).toContain("Agentic engineering is directing agents to make software.");
+  expect(result.text).toContain("Verifiability is how well you can answer those questions");
+  expect(result.text).toContain("Applying these principles is agentic engineering.");
 });

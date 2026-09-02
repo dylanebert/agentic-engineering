@@ -94,18 +94,16 @@ cssMutation("strong emphasis", "--emphasis-font-weight: 600", "--emphasis-font-w
 sourceMutation(
   "story non-interference",
   join(repo, "src/App.svelte"),
-  "Agentic engineering is the practice of directing agents",
-  "Changed article text is the practice of directing agents",
+  "Agentic engineering is directing agents to make software.",
+  "Changed article text is directing agents to make software.",
   "non-interference",
 );
 
-const selected = readFileSync(figureSpec, "utf8");
-writeFileSync(figureSpec, selected.replace("const selected = readMaximum(548);", "const selected = readMaximum(549);"));
-try {
-  mustRed("selected desktop measure", ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", "selected desktop measure"], work);
-} finally {
-  writeFileSync(figureSpec, selected);
-}
+// The measure arm's witness breaches the production measure constant, not the spec's sweep
+// width: at 700px the rendered longest line leaves the readable band and the arm reds, which is
+// the property the arm exists to hold. The old witness mutated readMaximum(548) to 549 and, once
+// the prose-content-dependent tightness half was deleted, reddened nothing.
+cssMutation("selected desktop measure", "--measure: 548px", "--measure: 700px", "shipped desktop measure");
 
 if (process.platform === "darwin") {
   const css = readdirSync(join(work, "dist", "assets")).find((file) => file.endsWith(".css"));
