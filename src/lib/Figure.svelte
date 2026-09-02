@@ -11,11 +11,14 @@
   import type { Snippet } from "svelte";
 
   let {
+    id,
     label,
     loop = 4000,
     threshold = 0.2,
     children,
   }: {
+    /** The manifest entry's id (src/lib/figures.ts). The figure arms site each entry by it. */
+    id: string;
     label: string;
     loop?: number;
     threshold?: number;
@@ -57,7 +60,13 @@
   });
 </script>
 
-<figure class="figure" bind:this={root} aria-label={label} data-figure={label}>
+<figure
+  class="figure"
+  bind:this={root}
+  aria-label={label}
+  data-figure={label}
+  data-figure-id={id}
+>
   {@render children({ elapsed, reduced })}
 </figure>
 

@@ -1,3 +1,8 @@
+<script lang="ts">
+  import SpectrumAxis from "./lib/SpectrumAxis.svelte";
+  import StageLoop from "./lib/StageLoop.svelte";
+</script>
+
 <article class="page">
   <header class="head">
     <div class="meta">
@@ -32,6 +37,8 @@
       space sits between them, and agentic engineering lives there: you direct
       the work, and you check each step.
     </p>
+
+    <SpectrumAxis />
     <p>
       The space is wide. You can hand over a feature, a single function, or only
       the boilerplate around a design you already settled. Where you sit is a
@@ -98,6 +105,8 @@
       that stage. If the check fails, fix it before you go on. Then repeat, in a
       loop, until the spec is done.
     </p>
+
+    <StageLoop />
     <p>
       The spec is the thing crossing between conversations. It carries the
       stages, what each stage needs, and what done means, so a fresh

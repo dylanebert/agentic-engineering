@@ -26,6 +26,10 @@ function mustRed(label: string, command: string[], cwd: string, env?: Record<str
 function stage(): void {
   rmSync(join(work, "dist"), { recursive: true, force: true });
   cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
+  // The figure arms read the manifest as their external expectation; it is staged on every
+  // pass so a mutation of the declaration reaches the arms the same way a mutation of the page
+  // does.
+  cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
 }
 
 function cssMutation(label: string, needle: string, replacement: string, grep: string): void {
@@ -104,6 +108,51 @@ sourceMutation(
 // the property the arm exists to hold. The old witness mutated readMaximum(548) to 549 and, once
 // the prose-content-dependent tightness half was deleted, reddened nothing.
 cssMutation("selected desktop measure", "--measure: 548px", "--measure: 700px", "shipped desktop measure");
+
+// S3 figure arms. Each mutation below reaches the assertion the arm is named for: the
+// discriminating red, not a missing subject or a preempting error.
+sourceMutation(
+  "figure count against the manifest",
+  join(repo, "src/App.svelte"),
+  "\n    <StageLoop />\n",
+  "\n",
+  "declared site",
+);
+sourceMutation(
+  "figure claim against its lead-in paragraph",
+  join(repo, "src/lib/figures.ts"),
+  'claim: "A whole space sits between them, and agentic engineering lives there"',
+  'claim: "A whole space sits between them, and vibe coding lives there"',
+  "quoted claim",
+);
+sourceMutation(
+  "figcaption absence",
+  join(repo, "src/lib/Figure.svelte"),
+  "{@render children({ elapsed, reduced })}",
+  "{@render children({ elapsed, reduced })}\n  <figcaption>a caption</figcaption>",
+  "figcaption anywhere",
+);
+sourceMutation(
+  "no figure above the opening section",
+  join(repo, "src/App.svelte"),
+  '<h1 class="title">agentic engineering</h1>',
+  '<h1 class="title">agentic engineering</h1>\n    <SpectrumAxis />',
+  "figcaption anywhere",
+);
+sourceMutation(
+  "ordered geometry on the spectrum axis",
+  join(repo, "src/lib/SpectrumAxis.svelte"),
+  'x: 74, anchor: "middle" },\n    { role: "agentic", label: concepts.agentic.label, x: 274',
+  'x: 274, anchor: "middle" },\n    { role: "agentic", label: concepts.agentic.label, x: 74',
+  "order the prose states",
+);
+sourceMutation(
+  "figure label against its section's prose",
+  join(repo, "src/lib/vocabulary.ts"),
+  'verify: { label: "verify", color: "verify"',
+  'verify: { label: "validate", color: "verify"',
+  "substring of its section",
+);
 
 if (process.platform === "darwin") {
   const css = readdirSync(join(work, "dist", "assets")).find((file) => file.endsWith(".css"));

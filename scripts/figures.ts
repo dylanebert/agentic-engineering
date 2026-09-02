@@ -4,9 +4,10 @@ import { join } from "node:path";
 import { requireDisplay } from "./display";
 import { playwrightVersion } from "./playwright-version";
 
-// Self-terminating figure gate for the six neutral-template contracts: missing-asset-404,
-// neutral-hierarchy, readable-measure, selected-desktop-measure, emphasis-and-rhythm, and
-// story non-interference. The spectrum and page-dress arms retired when their production
+// Self-terminating figure gate. Six neutral-template contracts (missing-asset-404,
+// neutral-hierarchy, readable-measure, selected-desktop-measure, emphasis-and-rhythm, story
+// non-interference) plus the S3 figure arms: manifest siting, claim lead-in, register (zero
+// figcaptions, nothing above the opening section), ordered geometry, and label-in-prose. The spectrum and page-dress arms retired when their production
 // subject disappeared. Display-gated like shot.ts; WSL stages onto
 // Windows TEMP and runs through PowerShell.
 
@@ -53,6 +54,9 @@ function prepWork(workDir: string): void {
   for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
     cpSync(join(import.meta.dir, f), join(workDir, f));
   }
+  // The figure arms read the manifest as an external expectation rather than off the page they
+  // are checking, so the declaration module is staged beside the spec.
+  cpSync(join(import.meta.dir, "../src/lib/figures.ts"), join(workDir, "manifest.ts"));
   writeFileSync(join(workDir, "package.json"), pkg);
   rmSync(join(workDir, "dist"), { recursive: true, force: true });
   cpSync(join(repo, "dist"), join(workDir, "dist"), { recursive: true });

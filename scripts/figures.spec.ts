@@ -3,6 +3,7 @@ import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { perceptualDelta } from "./png";
+import { figures } from "./manifest";
 
 // Figure gate for the neutral article template. The sequence-shell arms retired with the
 // WebGPU hero in S1, together with the real-tree vocabulary arm whose subject went with it
@@ -262,4 +263,174 @@ test("non-interference: story text remains intact", async ({ page }) => {
   expect(result.text).toContain("Agentic engineering is directing agents to make software.");
   expect(result.text).toContain("Verifiability is how well you can answer those questions");
   expect(result.text).toContain("Applying these principles is agentic engineering.");
+});
+
+// --- S3 figure arms ---
+//
+// The manifest (src/lib/figures.ts, staged beside this spec as manifest.ts) is the external
+// expectation these arms read: the page is checked against the declaration, never against
+// itself. Each arm below carries the mutation that reds it, run once at S3 and recorded.
+
+// Mutation: delete the <StageLoop /> mount from App.svelte and the count reads 1 against the
+// manifest's 2 — red. Mutation: change an entry's paragraph index to 0 and the site read for
+// that figure moves to 0 against the declared 1 — red.
+test("figures: exactly the manifest's figures, each mounted at its declared site", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const reads = await page.evaluate(() => {
+    const sited = [...document.querySelectorAll("figure")].map((figure) => {
+      const section = figure.closest("section.section");
+      const previous = figure.previousElementSibling;
+      const paragraphs = section ? [...section.querySelectorAll(":scope > p")] : [];
+      return {
+        id: figure.getAttribute("data-figure-id"),
+        section: section?.id ?? null,
+        // The index of the paragraph the figure sits immediately after, among its section's own.
+        paragraph: previous === null ? -1 : paragraphs.indexOf(previous as HTMLParagraphElement),
+      };
+    });
+    return { sited, total: document.querySelectorAll("figure").length };
+  });
+  console.log(`figure sites: ${JSON.stringify(reads.sited)} total=${reads.total}`);
+  expect(reads.total).toBe(figures.length);
+  expect(reads.sited).toEqual(figures.map((entry) => ({ id: entry.id, section: entry.section, paragraph: entry.paragraph })));
+});
+
+// The paragraph before a figure does the caption's job, so it must actually carry the claim the
+// manifest quotes for that figure.
+// Mutation: mount the spectrum figure one paragraph later (after the "The space is wide"
+// paragraph) and its lead-in no longer contains the quoted claim — red.
+test("figures: each figure is immediately preceded by a paragraph carrying its quoted claim", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const leadIns = await page.evaluate(() => {
+    // The rendered text of a node, whitespace-collapsed the way a reader sees it.
+    const normalize = (text: string): string => text.replace(/\s+/g, " ").trim();
+    return [...document.querySelectorAll("figure")].map((figure) => {
+      const previous = figure.previousElementSibling;
+      return {
+        id: figure.getAttribute("data-figure-id"),
+        tag: previous?.tagName ?? null,
+        text: normalize(previous?.textContent ?? ""),
+      };
+    });
+  });
+  for (const entry of figures) {
+    const leadIn = leadIns.find((read) => read.id === entry.id);
+    console.log(`lead-in ${entry.id}: <${leadIn?.tag}> "${(leadIn?.text ?? "").slice(0, 60)}…"`);
+    expect(leadIn, `no figure mounted for manifest entry ${entry.id}`).toBeDefined();
+    expect(leadIn!.tag).toBe("P");
+    expect(leadIn!.text).toContain(entry.claim);
+  }
+});
+
+// Figure register (spec validation 5): the reference set carries no figcaptions, and no figure
+// stands above the prose it illustrates.
+// Mutation: add a <figcaption> inside Figure.svelte and the count reads 1 — red. Mutation: mount
+// a figure in the page header and the first figure no longer follows the opening section — red.
+// The two placement legs are the same property at two strengths: every section on this page
+// carries the .section class, so a figure above the opening section is necessarily outside every
+// section. The ordering leg is asserted first so the header mutation reds on the named property;
+// the containment leg is the stronger form and reds on the same input one assertion later.
+test("figures: no figcaption anywhere, and no figure above the opening section", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const register = await page.evaluate(() => {
+    const first = document.querySelector("figure");
+    const opening = document.querySelector(".page .section");
+    return {
+      figcaptions: document.querySelectorAll("figcaption").length,
+      orphans: [...document.querySelectorAll("figure")].filter((figure) => figure.closest("section.section") === null).length,
+      firstFollowsOpening:
+        first !== null &&
+        opening !== null &&
+        (opening.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0,
+      openingSection: opening?.id ?? null,
+    };
+  });
+  console.log(`figure register: figcaptions=${register.figcaptions} orphans=${register.orphans} firstFollowsOpening=${register.firstFollowsOpening} opening=${register.openingSection}`);
+  expect(register.figcaptions).toBe(0);
+  expect(register.firstFollowsOpening).toBe(true);
+  expect(register.orphans).toBe(0);
+});
+
+// Ordered geometry for what is arranged (taste.md, one assertion per claim-kind). The expected
+// orders come from the prose, not from the components: the spectrum runs vibe coding → agentic
+// engineering → human code, and the loop runs spec → stage → verify with a return edge spanning
+// back from the last node to the first.
+// Mutation: swap the agentic and vibe entries' x coordinates in SpectrumAxis.svelte and the
+// left-to-right label order reads agentic engineering, vibe coding, human code — red.
+const ORDERS: Record<string, readonly string[]> = {
+  "spectrum-axis": ["vibe coding", "agentic engineering", "human code"],
+  "stage-loop": ["spec", "stage", "verify"],
+};
+
+test("figures: arranged parts read left to right in the order the prose states", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const geometry = await page.evaluate(() => {
+    const normalize = (text: string): string => text.replace(/\s+/g, " ").trim();
+    const read: Record<string, { labels: string[]; span: { left: number; right: number } | null; nodes: { left: number; right: number }[] }> = {};
+    for (const figure of document.querySelectorAll("figure")) {
+      const id = figure.getAttribute("data-figure-id") ?? "";
+      const parts = [...figure.querySelectorAll('[data-figure-part="position"], [data-figure-part="node"]')].map((part) => {
+        const box = part.getBoundingClientRect();
+        return {
+          label: normalize(part.querySelector("[data-figure-label]")?.textContent ?? ""),
+          center: (box.left + box.right) / 2,
+          left: box.left,
+          right: box.right,
+        };
+      });
+      parts.sort((a, b) => a.center - b.center);
+      const edge = figure.querySelector('[data-figure-part="return-edge"]');
+      const edgeBox = edge?.getBoundingClientRect() ?? null;
+      read[id] = {
+        labels: parts.map((part) => part.label),
+        span: edgeBox === null ? null : { left: edgeBox.left, right: edgeBox.right },
+        nodes: parts.map((part) => ({ left: part.left, right: part.right })),
+      };
+    }
+    return read;
+  });
+  for (const entry of figures) {
+    const read = geometry[entry.id];
+    console.log(`ordered geometry ${entry.id}: ${JSON.stringify(read?.labels)}`);
+    expect(read, `no rendered figure for ${entry.id}`).toBeDefined();
+    expect(read.labels).toEqual([...ORDERS[entry.id]]);
+  }
+  // The loop's return edge runs back from the last node to the first, so it spans them both.
+  const loop = geometry["stage-loop"];
+  console.log(`return edge span: ${JSON.stringify(loop.span)} nodes=${JSON.stringify(loop.nodes)}`);
+  expect(loop.span).not.toBeNull();
+  expect(loop.span!.left).toBeLessThanOrEqual((loop.nodes[0].left + loop.nodes[0].right) / 2);
+  expect(loop.span!.right).toBeGreaterThanOrEqual((loop.nodes[2].left + loop.nodes[2].right) / 2);
+});
+
+// Content assertion for what is named: a figure may only use the words its own section's prose
+// uses, so a label cannot assert a term the reader has not been given. The comparison is
+// case-insensitive because the page's display register is lowercase while its prose sentences
+// are not ("Verify that stage" carries the loop's verify node).
+// Mutation: rename the verify concept's label to "validate" and the loop's label is absent from
+// the section's prose — red.
+test("figures: every figure label is a substring of its section's prose", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const reads = await page.evaluate(() => {
+    const normalize = (text: string): string => text.replace(/\s+/g, " ").trim();
+    return [...document.querySelectorAll("figure")].map((figure) => {
+      const section = figure.closest("section.section");
+      const prose = section === null
+        ? ""
+        : normalize([...section.querySelectorAll(":scope > p, :scope > ul")].map((node) => node.textContent ?? "").join(" "));
+      return {
+        id: figure.getAttribute("data-figure-id") ?? "",
+        prose: prose.toLowerCase(),
+        labels: [...figure.querySelectorAll("[data-figure-label]")].map((label) => normalize(label.textContent ?? "").toLowerCase()),
+      };
+    });
+  });
+  for (const read of reads) {
+    console.log(`labels ${read.id}: ${JSON.stringify(read.labels)}`);
+    expect(read.labels.length).toBeGreaterThan(0);
+    for (const label of read.labels) {
+      expect(label.length).toBeGreaterThan(0);
+      expect(read.prose, `label "${label}" is not in ${read.id}'s section prose`).toContain(label);
+    }
+  }
 });
