@@ -3,7 +3,6 @@
 </script>
 
 <article class="page">
-  <div class="masthead-blob" aria-hidden="true"></div>
   <header class="head">
     <div class="meta">
       <a class="byline" href="https://dylanebert.com">dylan ebert</a>
@@ -160,43 +159,9 @@
 
 <style>
   .page {
-    position: relative;
-    z-index: 0;
-    overflow-x: clip;
     max-width: var(--measure);
     margin: 0 auto;
     padding: 96px 24px 120px;
-  }
-
-  /* Blurred radial blob behind the masthead — a vibe-end decorative compositing surface (the
-     spec's "blurred radial blob behind the masthead"). Opacity is driven by (1 - --snap1) so it
-     is visible only at pos < 0.25 and transparent at kex/win98. overflow-x: clip on .page
-     contains the blur's horizontal spread so the blob cannot cause horizontal overflow (criterion
-     7's live hazard at pos=0). */
-  .masthead-blob {
-    position: absolute;
-    top: -100px;
-    left: 0;
-    right: 0;
-    height: 400px;
-    background: radial-gradient(
-      ellipse 60% 50% at 50% 50%,
-      rgba(168, 85, 247, calc((1 - var(--snap1)) * 0.35)),
-      transparent 70%
-    );
-    filter: blur(80px);
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  /* Page header chrome — at kex (snap2=0) the header is bare (transparent bevel and
-     background, no padding). At win98 (snap2=1) it reads as a raised window: outset bevel,
-     white client-area ground, interior padding, and the h1 title bar with a control box. */
-  .head {
-    background: var(--section-bg);
-    box-shadow: var(--chrome-bevel), var(--vibe-glow);
-    border-radius: var(--radius);
-    padding: var(--section-padding);
   }
 
   .meta {
@@ -226,7 +191,7 @@
     font-weight: var(--heading-font-weight);
     letter-spacing: var(--heading-letter-spacing);
     text-transform: var(--heading-text-transform);
-    color: color-mix(in srgb, #ffffff calc(var(--snap2) * 100%), var(--ink));
+    color: var(--ink);
     background: var(--heading-bg);
     padding: var(--heading-padding);
     margin-bottom: var(--heading-margin-bottom);
@@ -242,42 +207,18 @@
 
   .section {
     margin-top: var(--section-margin-top);
-    /* Three-way background: vibe glass surface (rgba(255,255,255,0.1)) at snap1=0, kex transparent,
-     win98 opaque white at snap2=1. The vibe glow shadow is present at snap1=0 and transparent
-     elsewhere. At kex (snap1=1, snap2=0) both are transparent, so no visual change. */
-    background: var(--section-bg);
-    box-shadow: var(--chrome-bevel), var(--vibe-glow);
-    border-radius: var(--radius);
-    padding: var(--section-padding);
   }
 
   .section h2 {
     font-family: var(--display);
     font-size: var(--heading-font-size);
     font-weight: var(--heading-font-weight);
-    /* The h2's own tracking token — -0.025em at vibe, none at kex and win98 (matching 0eef6f6
-       where the h2 had no letter-spacing). The .title (h1) keeps --heading-letter-spacing, which
-       is -0.02em at kex — that value was present in 0eef6f6's .title and is unchanged here. */
     letter-spacing: var(--h2-letter-spacing);
     text-transform: var(--heading-text-transform);
     color: var(--heading-color);
     background: var(--heading-bg);
     padding: var(--heading-padding);
     margin-bottom: var(--heading-margin-bottom);
-  }
-
-  /* Win98 title-bar control box: the three right-side buttons (minimize, maximize, close)
-     that make a title bar read as a window. Only visible at snap2=1 (transparent at kex). */
-  .section h2::after,
-  .title::after {
-    content: "\2013  \25A1  \2715";
-    float: right;
-    margin-left: calc(var(--snap2) * 8px);
-    font-size: calc(var(--snap2) * 9px);
-    font-weight: 700;
-    letter-spacing: 2px;
-    opacity: var(--snap2);
-    line-height: 1;
   }
 
   .section p {
