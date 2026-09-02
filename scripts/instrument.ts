@@ -94,8 +94,8 @@ cssMutation("strong emphasis", "--emphasis-font-weight: 600", "--emphasis-font-w
 sourceMutation(
   "story non-interference",
   join(repo, "src/App.svelte"),
-  "Agentic engineering is the practice of directing agents",
-  "Changed article text is the practice of directing agents",
+  "Agentic engineering is directing agents to make software.",
+  "Changed article text is directing agents to make software.",
   "non-interference",
 );
 

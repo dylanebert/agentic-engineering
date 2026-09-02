@@ -154,3 +154,45 @@ test("rendered text: voice ban list, em-dash cap, novelty grep", async ({ page }
 
   console.log(`rendered-text oracle (all positions): ban=${totalBan} emdash=${totalEmdash} novelty=${totalNovelty}`);
 });
+
+// Figure manifest arm (spec validation 2). The manifest is staged beside this spec as
+// manifest.json by scripts/oracle-text.ts. Two properties: the page's section order is the
+// manuscript's beat order as declared in src/lib/figures.ts, and every figure's quoted claim
+// is a substring of the paragraph the manifest declares as its lead-in. Substring against the
+// rendered paragraph, so a claim can't drift from the prose it is read off without reddening.
+type Manifest = {
+  figures: { id: string; section: string; paragraph: number; claim: string; kind: string }[];
+  sectionOrder: string[];
+};
+
+test("figure manifest: section order is the beat order, each claim sits in its declared paragraph", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+
+  const manifest = JSON.parse(await readFile(join(root, "manifest.json"), "utf8")) as Manifest;
+
+  const sections = await page.evaluate(() =>
+    [...document.querySelectorAll("section[id]")].map((s) => s.id),
+  );
+  console.log(`manifest: page sections ${sections.join(", ")}`);
+  expect(sections).toEqual(manifest.sectionOrder);
+
+  for (const figure of manifest.figures) {
+    const paragraphs = await page.evaluate((id) => {
+      const section = document.getElementById(id);
+      if (section === null) return null;
+      return [...section.querySelectorAll(":scope > p")].map((p) => (p as HTMLElement).innerText);
+    }, figure.section);
+    expect(paragraphs, `section #${figure.section} is missing`).not.toBeNull();
+    const list = paragraphs as string[];
+    expect(list.length, `#${figure.section} has ${list.length} paragraphs`).toBeGreaterThan(
+      figure.paragraph,
+    );
+    const paragraph = list[figure.paragraph].replace(/\s+/g, " ").trim();
+    console.log(`manifest: ${figure.id} lead-in "${paragraph.slice(0, 60)}…"`);
+    expect(paragraph, `${figure.id}: claim not in its declared paragraph`).toContain(figure.claim);
+  }
+});

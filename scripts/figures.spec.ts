@@ -256,7 +256,7 @@ test("non-interference: story text remains intact", async ({ page }) => {
   const result = await page.evaluate(() => ({
     text: (document.querySelector(".page") as HTMLElement).innerText,
   }));
-  expect(result.text).toContain("Agentic engineering is the practice of directing agents");
-  expect(result.text).toContain("the hard part moved from writing the code to checking it.");
-  expect(result.text).toContain("The three are priced by cost against reach.");
+  expect(result.text).toContain("Agentic engineering is directing agents to make software.");
+  expect(result.text).toContain("Verifiability is how well you can answer those questions");
+  expect(result.text).toContain("Applying these principles is agentic engineering.");
 });
