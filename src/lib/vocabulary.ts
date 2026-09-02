@@ -1,6 +1,9 @@
 // The page's shared visual vocabulary: one primitive family, two thickness roles, two motion
 // roles, and at most five color roles. Each color role names the concept it carries, and every
-// concept in the article draws its color from a declared role — no concept-local novelty.
+// concept in the article draws its color from a declared role — no concept-local novelty. A
+// concept's label is the word the page's own prose uses for it, lowercased: a figure label is
+// checked as a substring of its section's prose (scripts/figures.spec.ts), so the label and the
+// prose cannot drift apart without a gate seeing it.
 // Hex values are the composited page colors, checked against the page ground at 4.5:1 by
 // scripts/vocabulary.oracle.ts.
 
@@ -45,12 +48,12 @@ const shape = {
 } as const;
 
 export const concepts = {
-  vibe: { label: "Vibe", color: "vibe", ...shape },
-  human: { label: "Human", color: "prose", ...shape },
-  agentic: { label: "Agentic", color: "agentic", ...shape },
-  verifiability: { label: "Verifiability", color: "verify", ...shape },
-  context: { label: "Context engineering", color: "context", ...shape },
-  spec: { label: "Spec", color: "agentic", ...shape },
-  stage: { label: "Stage", color: "agentic", ...shape },
-  verify: { label: "Verify", color: "verify", ...shape },
+  vibe: { label: "vibe coding", color: "vibe", ...shape },
+  human: { label: "human code", color: "prose", ...shape },
+  agentic: { label: "agentic engineering", color: "agentic", ...shape },
+  verifiability: { label: "verifiability", color: "verify", ...shape },
+  context: { label: "context engineering", color: "context", ...shape },
+  spec: { label: "spec", color: "agentic", ...shape },
+  stage: { label: "stage", color: "agentic", ...shape },
+  verify: { label: "verify", color: "verify", ...shape },
 } satisfies Record<string, Concept>;
