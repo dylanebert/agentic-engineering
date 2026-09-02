@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { heroGrammar } from "./hero";
+  import { heroConcepts, heroGrammar } from "./hero";
 
   const slides = [
     { scene: 1, slide: 1, label: "Scene 1 placeholder", caption: "Placeholder caption for scene 1, slide 1." },
@@ -37,11 +37,20 @@
     class="stage"
     role="group"
     aria-label={`Scene ${current.scene}, slide ${current.slide}`}
-    data-primitive-family={heroGrammar.primitiveFamily}
-    data-thickness-roles={Object.keys(heroGrammar.thickness).join(" ")}
-    data-color-roles={Object.keys(heroGrammar.colors).join(" ")}
-    data-motion-roles={Object.keys(heroGrammar.motion).join(" ")}
+    data-hero-grammar={JSON.stringify(heroGrammar)}
   >
+    <div class="vocabulary" hidden aria-hidden="true">
+      {#each Object.entries(heroConcepts) as [id, concept]}
+        <span
+          data-concept={id}
+          data-label={concept.label}
+          data-primitive={concept.primitive}
+          data-thickness={concept.thickness}
+          data-color={concept.color}
+          data-motion={concept.motion}
+        ></span>
+      {/each}
+    </div>
     {#each slides as item, itemIndex}
       <section
         class="slide"
