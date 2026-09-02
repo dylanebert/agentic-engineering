@@ -265,7 +265,7 @@ test("non-interference: story text remains intact", async ({ page }) => {
   }));
   expect(result.text).toContain("Agentic engineering is directing agents to make software.");
   expect(result.text).toContain("Verifiability is how well you can answer those questions");
-  expect(result.text).toContain("Applying these principles is agentic engineering.");
+  expect(result.text).toContain("agentic engineering is a spec, small stages");
 });
 
 // --- S3 figure arms ---

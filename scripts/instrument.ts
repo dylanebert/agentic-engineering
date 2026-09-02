@@ -197,8 +197,8 @@ sourceMutation(
 sourceMutation(
   "rendered text byte-identity",
   join(repo, "src/App.svelte"),
-  "Applying these principles is",
-  "Applying those principles is",
+  "is a spec, small stages",
+  "is a spec, small phases",
   "byte-identical",
 );
 

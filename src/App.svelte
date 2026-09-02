@@ -16,23 +16,23 @@
   <section class="section" id="definition">
     <h2>agentic engineering</h2>
     <p>
-      Agentic engineering is directing agents to make software. You say what you
-      want, an agent writes the code, and you decide whether what came back is
-      right. This page is the written version of my video on the subject,
-      linked at the bottom, with the details and examples it had no room for.
+      Agentic engineering is directing agents to make software. This page is the
+      written version of my video on the subject, with the details and examples
+      it had no room for. You say what you want, an agent writes the code, and
+      you decide whether what came back is right.
     </p>
   </section>
 
   <section class="section" id="spectrum">
     <h2>the spectrum</h2>
     <p>
-      You may have heard of <span class="term" data-role="vibe">vibe coding</span>. You tell an agent "make me some
+      One end of the spectrum is <span class="term" data-role="vibe">vibe coding</span>. You tell an agent "make me some
       software," and some software comes out. It might be good. It might be bad.
       And in my experience a model given no direction reaches for the same few
       colors, so it's probably purple.
     </p>
     <p>
-      That's one end of a spectrum. The other end is 100% <span class="term" data-role="prose">organic human code</span>,
+      The other end is 100% <span class="term" data-role="prose">organic human code</span>,
       every line typed by a person. Those are not your only two options. A whole
       space sits between them, and <span class="term" data-role="agentic">agentic engineering</span> lives there: you direct
       the work, and you check each step.
@@ -49,14 +49,14 @@
   <section class="section" id="verifiability">
     <h2>verifiability</h2>
     <p>
-      Agentic engineering is young. Most of it is still "just try things and
-      see what happens." Two principles have come up often enough that I'll
-      claim them. This is the first.
+      Writing the code is no longer the hard part. An agent wrote some code.
+      Does it work? Is it fast? Is it secure? Is it how you wanted it?
+      <span class="term" data-role="verify">Verifiability</span> is how well you can answer those questions.
     </p>
     <p>
-      An agent wrote some code. That part is easy now. Does it work? Is it fast?
-      Is it secure? Is it how you wanted it? <span class="term" data-role="verify">Verifiability</span> is how well you can
-      answer those questions, and it is the hard part.
+      Agentic engineering is young. Most of it is still "just try things and
+      see what happens." Two principles have come up often enough that I'll
+      claim them, and this is the first.
     </p>
     <p>
       The cost is lopsided. Writing a screen of code takes an agent seconds.
@@ -118,8 +118,8 @@
   <section class="section" id="verification">
     <h2>how you verify</h2>
     <p>
-      That's the basics. The hard part is the word "verify." In practice it is a
-      mix of three kinds of checking, and each one reaches somewhere the others
+      The word doing the work in that loop is "verify." In practice it is a mix
+      of three kinds of checking, and each one reaches somewhere the others
       don't.
     </p>
     <ul class="kinds">
@@ -151,8 +151,8 @@
   <section class="section" id="closing">
     <h2>in practice</h2>
     <p>
-      Applying these principles is <span class="term" data-role="agentic">agentic engineering</span>. A spec, small stages, a
-      fresh conversation for each, and a check before the next one opens.
+      In practice, <span class="term" data-role="agentic">agentic engineering</span> is a spec, small stages, a fresh
+      conversation for each, and a check before the next one opens.
     </p>
     <p>
       The weak point is the spec. Everything downstream inherits it, and a spec
