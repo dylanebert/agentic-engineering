@@ -35,7 +35,6 @@
 <div class="overture" bind:this={root} data-overture-id="spectrum-overture" style:--phase={phase} aria-hidden="true">
   <div class="skin human" data-overture-state="human" data-role="prose">
     <svg viewBox="0 0 176 176" aria-hidden="true">
-      <path class="back" d="M48 48 92 27 139 52 95 75Z M48 48 95 75 94 129 47 102Z M95 75 139 52 139 105 94 129Z" />
       <path d="M48 48 92 27 139 52 139 105 94 129 47 102Z M48 48 95 75 139 52 M95 75 94 129" />
     </svg>
   </div>
@@ -75,7 +74,6 @@
 
   svg { width: 176px; height: 176px; overflow: visible; }
   svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-  .human .back { fill: currentColor; fill-opacity: 0.06; stroke-width: 1; }
   .vibe svg { filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 18px currentColor); }
   .vibe path { stroke-width: 2.5; }
 
@@ -90,8 +88,10 @@
   }
 
   @media (max-width: 560px) {
-    .overture { min-height: 150px; margin: 32px 0 46px; }
-    svg { width: 112px; height: 112px; }
-    pre { width: 112px; font-size: 5.09px; }
+    .overture {
+      min-height: 176px;
+      margin: 32px 0 46px;
+      overflow: hidden;
+    }
   }
 </style>

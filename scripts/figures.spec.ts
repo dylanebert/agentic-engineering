@@ -309,6 +309,25 @@ test("overture: reduced motion rests on a stable agentic captured-cell state", a
   expect(read.width).toBeGreaterThanOrEqual(176);
 });
 
+test("overture: captured cells keep the H0 minimum width at the mobile measure", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(url, { waitUntil: "networkidle" });
+  const width = await page.locator('[data-overture-state="agentic"] pre').evaluate((element) => element.getBoundingClientRect().width);
+  console.log(`overture mobile captured-cell width: ${width}`);
+  expect(width).toBeGreaterThanOrEqual(176);
+});
+
+test("overture: geometry uses strokes without area fill or tint", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const fills = await page.locator('[data-overture-id="spectrum-overture"] path').evaluateAll((paths) => paths.map((path) => ({
+    fill: getComputedStyle(path).fill,
+    opacity: getComputedStyle(path).fillOpacity,
+  })));
+  console.log(`overture geometry fills: ${JSON.stringify(fills)}`);
+  expect(fills.every(({ fill, opacity }) => fill === "none" || opacity === "0")).toBe(true);
+});
+
 test("overture: captured pose varies perceptibly across phase", async ({ page }) => {
   const steps = 3;
   const result = await assertVaries(page, '[data-overture-id="spectrum-overture"]', async (target, step) => {

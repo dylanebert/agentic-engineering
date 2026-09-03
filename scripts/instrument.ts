@@ -125,6 +125,20 @@ sourceMutation(
   'aria-hidden="true">\n  <div data-figure-label>forbidden</div>\n  <div class="skin human"',
   "exactly one unlabeled overture",
 );
+sourceMutation(
+  "overture mobile cell minimum",
+  join(repo, "src/lib/Overture.svelte"),
+  "@media (max-width: 560px) {\n    .overture {",
+  "@media (max-width: 560px) {\n    pre { width: 112px; }\n    .overture {",
+  "captured cells keep the H0 minimum width",
+);
+sourceMutation(
+  "overture no area fill",
+  join(repo, "src/lib/Overture.svelte"),
+  "svg path { fill: none;",
+  "svg path { fill: currentColor;",
+  "geometry uses strokes without area fill or tint",
+);
 
 // S3 figure arms. Each mutation below reaches the assertion the arm is named for: the
 // discriminating red, not a missing subject or a preempting error.
