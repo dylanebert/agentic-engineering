@@ -562,13 +562,11 @@ test("figures: the loop's return edge lands on the stage node, not the spec", as
   expect(read!.end.x).toBeLessThanOrEqual(stage!.right);
 });
 
-// Content assertion for what is named: a figure may only use the words its own section's prose
-// uses, so a label cannot assert a term the reader has not been given. The comparison is
-// case-insensitive because the page's display register is lowercase while its prose sentences
-// are not ("Verify that stage" carries the loop's verify node).
-// Mutation: rename the verify concept's label to "validate" and the loop's label is absent from
-// the section's prose — red.
-test("figures: every figure label is a substring of its section's prose", async ({ page }) => {
+// Content assertion for what is named: a figure may only use words in its quoted claim, so the
+// progressive disclosure has finished before the figure appears. The loop also declares its
+// return action as "repeat". Comparison is case-insensitive because labels use lowercase.
+// Mutation: rename the verify label to "validate", or remove "repeat" from the claim — red.
+test("figures: every figure label and return action is a substring of its claim", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const reads = await page.evaluate(() => {
     const normalize = (text: string): string => text.replace(/\s+/g, " ").trim();
@@ -585,12 +583,17 @@ test("figures: every figure label is a substring of its section's prose", async 
     });
   });
   for (const read of reads) {
-    console.log(`labels ${read.id}: ${JSON.stringify(read.labels)}`);
+    const entry = figures.find((figure) => figure.id === read.id);
+    expect(entry, `no manifest entry for ${read.id}`).toBeDefined();
+    const claim = entry!.claim.toLowerCase();
+    console.log(`claim labels ${read.id}: ${JSON.stringify(read.labels)} repeat=${claim.includes("repeat")}`);
     expect(read.labels.length).toBeGreaterThan(0);
     for (const label of read.labels) {
       expect(label.length).toBeGreaterThan(0);
-      expect(read.prose, `label "${label}" is not in ${read.id}'s section prose`).toContain(label);
+      expect(claim, `label "${label}" is not in ${read.id}'s claim`).toContain(label);
     }
+    expect(claim).toContain("repeat");
+    expect(read.prose).toContain(entry!.claim.toLowerCase());
   }
 });
 

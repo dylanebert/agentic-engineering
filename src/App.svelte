@@ -46,8 +46,8 @@
     <section class="principle" id="verifiability">
       <h3>1. verifiability</h3>
       <p>
-        Writing code is no longer the hard part. An agent wrote some code. But does it work? Is it
-        fast? Is it secure? Is it what was asked for?
+        Writing code is no longer the hard part. An agent writes some code. But does it work? Is it
+        fast? Is it secure? Is it what the task asks for?
         <span class="term" data-role="verify">Verifiability</span> is how well those questions can
         be answered, and it is the hard part.
       </p>
@@ -71,13 +71,17 @@
   <section class="section" id="loop">
     <h2>the loop</h2>
     <p>
-      Put the two principles together. Say the job is a todo list app. The first conversation writes
-      no code: it produces a <span class="term" data-role="context">spec</span>, one file naming
-      what the thing is and how the work splits into stages small enough to check one at a time.
+      The two principles meet in a loop. Say the job is a todo list app. The first conversation
+      writes no code. It produces a <span class="term" data-role="context">spec</span>, one file
+      naming what the software is and what done means.
     </p>
     <p>
-      Each stage then gets its own conversation. Do the stage, verify the stage, fix any failure
-      before moving on. Then repeat: stage, verify, stage again, until the spec is done.
+      The spec splits the work into small stages. Each <span class="term" data-role="agentic">stage</span>
+      gets a fresh conversation that implements only that part of the spec.
+    </p>
+    <p>
+      Verification closes each stage before the next conversation opens. Then repeat: implement a
+      stage, verify it, implement the next, until the spec is done.
     </p>
 
     <StageLoop />
@@ -92,8 +96,7 @@
   <section class="section" id="verification">
     <h2>but how do you verify?</h2>
     <p>
-      In practice, verifying is three kinds of checking, and each kind reaches somewhere the other
-      two do not.
+      Verification takes three forms, and each one reaches somewhere the other two do not.
     </p>
     <ul class="kinds">
       <li>
@@ -105,12 +108,12 @@
         having written it, and it will read the whole diff without getting bored.
       </li>
       <li>
-        <strong>Human verification.</strong> My own feedback. Slowest, most expensive, and still
-        the last word on whether the thing is any good.
+        <strong>Human verification.</strong> A person's feedback. Slowest, most expensive, and still
+        the last word on whether the software is any good.
       </li>
     </ul>
     <p>
-      Machine checks run on every save. Agent review runs at the end of a stage. My own reading runs
+      Machine checks run on every save. Agent review runs at the end of a stage. Human review runs
       where the other two cannot reach, and picking the mix is the judgment call.
     </p>
   </section>
@@ -118,14 +121,12 @@
   <section class="section" id="closing">
     <h2>in practice</h2>
     <p>
-      One spec, small stages, a fresh conversation for each, and a check before the next one opens.
-      Verifiability is why the check comes first; context engineering is why the conversation is
-      fresh.
+      <span class="term" data-role="agentic">Agentic engineering</span> is one spec,
+      small stages, a fresh conversation for each, and a check before the next one opens.
     </p>
     <p>
-      The application of these principles is
-      <span class="term" data-role="agentic">agentic engineering</span>. My own habits keep moving,
-      and this loop is the part holding steady so far.
+      The application of these principles is agentic engineering. Verifiability closes each stage;
+      context engineering keeps its work focused. Together they make the loop hold.
     </p>
     <p class="aside">
       This page is the written version of my

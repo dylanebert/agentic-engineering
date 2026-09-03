@@ -152,8 +152,8 @@ sourceMutation(
 sourceMutation(
   "figure claim against its lead-in paragraph",
   join(repo, "src/lib/figures.ts"),
-  'claim: "Then repeat: stage, verify, stage again, until the spec is done."',
-  'claim: "Then repeat: spec, verify, spec again, until the spec is done."',
+  'claim: "Then repeat: implement a stage, verify it, implement the next, until the spec is done."',
+  'claim: "Then repeat: implement a task, validate it, implement the next, until the work is done."',
   "quoted claim",
 );
 sourceMutation(
@@ -185,11 +185,11 @@ sourceMutation(
   "lands on the stage node",
 );
 sourceMutation(
-  "figure label against its section's prose",
+  "figure label against its claim",
   join(repo, "src/lib/vocabulary.ts"),
   'verify: { label: "verify", color: "verify"',
   'verify: { label: "validate", color: "verify"',
-  "substring of its section",
+  "substring of its claim",
 );
 
 // H2 motion arms. Each mutation removes one of the loop's three independent channels; all three

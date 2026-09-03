@@ -6,8 +6,8 @@
 // text, and declares its label policy. The paragraph before a figure does the caption's job; there
 // are no figcaptions.
 //
-// H2 retires the duplicated spectrum axis after H1 moved that vocabulary into the overture. The
-// loop keeps the S5(c) lead-in decision and return-edge geometry claim intact.
+// H2 retires the duplicated spectrum axis after H1 moved that vocabulary into the overture. P2
+// moves the loop after the full spec → stage → verify disclosure; its return geometry stays intact.
 
 export type FigureKind = "loop";
 export type LabelPolicy = "none" | "required";
@@ -30,8 +30,8 @@ export const figures = [
   {
     id: "stage-loop",
     section: "loop",
-    paragraph: 1,
-    claim: "Then repeat: stage, verify, stage again, until the spec is done.",
+    paragraph: 2,
+    claim: "Then repeat: implement a stage, verify it, implement the next, until the spec is done.",
     kind: "loop",
     labels: "required",
   },
