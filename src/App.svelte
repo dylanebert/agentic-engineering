@@ -1,4 +1,5 @@
 <script lang="ts">
+  import Overture from "./lib/Overture.svelte";
   import SpectrumAxis from "./lib/SpectrumAxis.svelte";
   import StageLoop from "./lib/StageLoop.svelte";
 </script>
@@ -11,6 +12,8 @@
     </div>
     <h1 class="title">agentic engineering</h1>
   </header>
+
+  <Overture />
 
   <section class="section" id="definition">
     <p>Agentic engineering is directing agents to make software.</p>

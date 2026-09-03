@@ -49,8 +49,13 @@ test("substrate: package and dist contain no Shallot or typegpu", async () => {
   const packageText = await readFile(join(root, "package.json"), "utf8");
   expect(packageText.toLowerCase()).not.toContain("shallot");
   expect(packageText.toLowerCase()).not.toContain("typegpu");
-  const assets = await readdir(join(dist, "assets"));
-  const built = (await Promise.all(assets.map((asset) => readFile(join(dist, "assets", asset), "utf8").catch(() => "")))).join("\n").toLowerCase();
+  const readTree = async (path: string): Promise<string[]> => {
+    const entries = await readdir(path, { withFileTypes: true });
+    return (await Promise.all(entries.map((entry) => entry.isDirectory()
+      ? readTree(join(path, entry.name))
+      : readFile(join(path, entry.name), "utf8").catch(() => "")))).flat();
+  };
+  const built = (await readTree(dist)).join("\n").toLowerCase();
   expect(built).not.toContain("shallot");
   expect(built).not.toContain("typegpu");
 });
@@ -266,6 +271,54 @@ test("non-interference: story text remains intact", async ({ page }) => {
   expect(result.text).toContain("Agentic engineering is directing agents to make software.");
   expect(result.text).toContain("Verifiability is how well those questions can be answered");
   expect(result.text).toContain("The application of these principles is agentic engineering.");
+});
+
+// --- H1 overture register ---
+
+test("overture: exactly one unlabeled overture sits above the opening", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const read = await page.evaluate(() => {
+    const overtures = [...document.querySelectorAll("[data-overture-id]")];
+    const opening = document.querySelector("section.section");
+    return {
+      count: overtures.length,
+      states: overtures[0] ? [...overtures[0].querySelectorAll("[data-overture-state]")].map((node) => node.getAttribute("data-overture-state")) : [],
+      labels: overtures[0]?.querySelectorAll("[data-figure-label], figcaption").length ?? -1,
+      above: overtures[0] && opening ? (overtures[0].compareDocumentPosition(opening) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 : false,
+      roles: overtures[0] ? [...overtures[0].querySelectorAll("[data-overture-state]")].map((node) => node.getAttribute("data-role")) : [],
+    };
+  });
+  console.log(`overture register: ${JSON.stringify(read)}`);
+  expect(read).toEqual({ count: 1, states: ["human", "agentic", "vibe"], labels: 0, above: true, roles: ["prose", "agentic", "vibe"] });
+});
+
+test("overture: reduced motion rests on a stable agentic captured-cell state", async ({ page }) => {
+  const result = await assertReducedMotion(page, '[data-overture-id="spectrum-overture"]', async (target, step) => {
+    if (step === 0) await target.goto(url, { waitUntil: "networkidle" });
+  }, 1);
+  const read = await page.locator('[data-overture-id="spectrum-overture"]').evaluate((element) => ({
+    phase: getComputedStyle(element).getPropertyValue("--phase").trim(),
+    cells: element.querySelector("pre")?.textContent?.split("\n") ?? [],
+    width: element.querySelector("pre")?.getBoundingClientRect().width ?? 0,
+  }));
+  console.log(`overture reduced rest: phase=${read.phase} cells=${read.cells[0]?.length}x${read.cells.length} width=${read.width}`);
+  expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
+  expect(Number(read.phase)).toBe(1);
+  expect(read.cells).toHaveLength(14);
+  expect(read.cells.every((row) => row.length === 22)).toBe(true);
+  expect(read.width).toBeGreaterThanOrEqual(176);
+});
+
+test("overture: captured pose varies perceptibly across phase", async ({ page }) => {
+  const steps = 3;
+  const result = await assertVaries(page, '[data-overture-id="spectrum-overture"]', async (target, step) => {
+    if (step === 0) await target.goto(url, { waitUntil: "networkidle" });
+    await target.locator('[data-overture-id="spectrum-overture"]').evaluate((element, value) => {
+      (element as HTMLElement).style.setProperty("--phase", value);
+    }, String(step / (steps - 1)));
+  }, steps);
+  console.log(`overture variance: failures=${JSON.stringify(result.failures)}`);
+  expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
 });
 
 // --- S3 figure arms ---
