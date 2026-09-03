@@ -23,8 +23,12 @@ function sectionIds(): string[] {
   return [...app.matchAll(/<section\b[^>]*\bid="([^"]+)"/g)].map((m) => m[1]);
 }
 
+function appSource(): string {
+  return readFileSync(join(repo, "src/App.svelte"), "utf8");
+}
+
 function sectionLevels(): Map<string, "section" | "subsection"> {
-  const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
+  const app = appSource();
   const levels = new Map<string, "section" | "subsection">();
   for (const match of app.matchAll(/<section\b[^>]*\bclass="([^"]+)"[^>]*\bid="([^"]+)"/g)) {
     levels.set(match[2], match[1].split(/\s+/).includes("principle") ? "subsection" : "section");
@@ -40,6 +44,34 @@ describe("figure manifest", () => {
   test("section ids are unique", () => {
     const ids = sectionIds();
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  // P1's hierarchy and spacing are one structural change: the spectrum has exactly three direct
+  // paragraphs led by its role terms, no setup paragraph or point headings, and its paragraph gap
+  // remains less than 1 / 2.5 of the declared section gap. Mutations: restore a point h3, prepend
+  // the setup paragraph, move a term after prose, or raise the local margin to 21px — red.
+  test("P1 keeps the repaired spectrum, principles, and verification structure", () => {
+    const app = appSource();
+    const spectrum = app.match(/<section class="section" id="spectrum">([\s\S]*?)<\/section>/)?.[1];
+    expect(spectrum).toBeDefined();
+    expect(spectrum?.match(/<h3\b/g) ?? []).toHaveLength(0);
+    const paragraphs = [...(spectrum?.matchAll(/<p>\s*([\s\S]*?)<\/p>/g) ?? [])].map(
+      (match) => match[1],
+    );
+    expect(paragraphs).toHaveLength(3);
+    expect(paragraphs.map((paragraph) => paragraph.match(/^<span class="term" data-role="([^"]+)">/)?.[1]))
+      .toEqual(["vibe", "prose", "agentic"]);
+    expect(app).toContain('<h2>principles of agentic engineering</h2>');
+    expect(app).toContain('<h2>but how do you verify?</h2>');
+    expect(app).not.toContain('class="point"');
+    expect(app).not.toContain('href="/verifiability/"');
+
+    const paragraphGap = Number(app.match(/#spectrum p \{\s*margin-top: ([\d.]+)px;/)?.[1]);
+    const styles = readFileSync(join(repo, "src/app.css"), "utf8");
+    const sectionGap = Number(styles.match(/--section-margin-top: ([\d.]+)px;/)?.[1]);
+    expect(Number.isFinite(paragraphGap)).toBe(true);
+    expect(Number.isFinite(sectionGap)).toBe(true);
+    expect(sectionGap).toBeGreaterThan(2.5 * paragraphGap);
   });
 
   test("every beat anchor is a verbatim manuscript line, in the manuscript's order", () => {
