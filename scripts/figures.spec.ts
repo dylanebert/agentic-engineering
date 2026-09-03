@@ -614,6 +614,53 @@ const phaseDriver = (id: string, steps: number) => async (page: import("@playwri
   }, String(step / (steps - 1)));
 };
 
+test("figures: every loop connector meets its node edges and remains visible", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const read = await page.locator(figureSelector("stage-loop")).evaluate((element) => {
+    const point = (line: SVGLineElement, end: "start" | "end") => {
+      const matrix = line.getScreenCTM()!;
+      const x = end === "start" ? line.x1.baseVal.value : line.x2.baseVal.value;
+      const y = end === "start" ? line.y1.baseVal.value : line.y2.baseVal.value;
+      return new DOMPoint(x, y).matrixTransform(matrix);
+    };
+    const nodes = [...element.querySelectorAll<SVGRectElement>("rect.node")].map((node) => node.getBoundingClientRect());
+    const lines = [...element.querySelectorAll<SVGLineElement>("line.edge")];
+    const gaps = [
+      Math.abs(point(lines[0], "start").x - nodes[0].right),
+      Math.abs(point(lines[0], "end").x - nodes[1].left),
+      Math.abs(point(lines[1], "start").x - nodes[1].right),
+      Math.abs(point(lines[1], "end").x - nodes[2].left),
+    ];
+    const phases = [0, 0.25, 0.5, 0.75, 1];
+    const visibility = phases.map((phase) => {
+      (element as HTMLElement).style.setProperty("--phase", String(phase));
+      return [...element.querySelectorAll<SVGGeometryElement>(".edge.base")].map((edge) => {
+        const style = getComputedStyle(edge);
+        return { opacity: Number(style.opacity), width: Number(style.strokeWidth.replace("px", "")) };
+      });
+    });
+    return { gaps, visibility };
+  });
+  console.log(`loop connector geometry: ${JSON.stringify(read)}`);
+  expect(Math.max(...read.gaps)).toBeLessThanOrEqual(0.5);
+  expect(read.visibility.flat().every(({ opacity, width }) => opacity > 0 && width > 0)).toBe(true);
+});
+
+test("figures: the loop indicator approaches nodes at non-constant speed", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const distances = await page.locator(figureSelector("stage-loop")).evaluate((element) => {
+    const positions: { x: number; y: number }[] = [];
+    for (let index = 0; index <= 20; index += 1) {
+      (element as HTMLElement).style.setProperty("--phase", String(index / 40));
+      const box = element.querySelector<SVGCircleElement>('[data-figure-part="unit"]')!.getBoundingClientRect();
+      positions.push({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
+    }
+    return positions.slice(1).map((position, index) => Math.hypot(position.x - positions[index].x, position.y - positions[index].y));
+  });
+  console.log(`loop indicator phase distances: ${distances.map((distance) => distance.toFixed(3)).join(",")}`);
+  expect(Math.max(...distances) - Math.min(...distances)).toBeGreaterThan(0.5);
+});
+
 // Perceptual variance over a JND for the one traveling unit. The structural reads beside it pin
 // the three distinct channels: position advances spec → stage → verify → stage, occupied nodes
 // gain an emphasis stroke, and the return edge reveals by dash offset.
@@ -625,10 +672,14 @@ test("figures: one unit travels spec to stage to verify to stage with stroke emp
     const read = await page.locator(figureSelector("stage-loop")).evaluate((element, value) => {
       (element as HTMLElement).style.setProperty("--phase", String(value));
       const unit = element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect();
-      const emphasis = [...element.querySelectorAll<SVGElement>(".emphasis")].map((node) => ({
-        node: node.dataset.node,
-        opacity: Number(getComputedStyle(node).opacity),
-      }));
+      const emphasis = [...element.querySelectorAll<SVGElement>(".emphasis")].map((node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          node: node.dataset.node,
+          opacity: Number(getComputedStyle(node).opacity),
+          center: { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+        };
+      });
       const edge = getComputedStyle(element.querySelector('[data-figure-part="return-edge"]')!);
       const fills = [...element.querySelectorAll("rect, circle, path, line")].map((node) => getComputedStyle(node).fill);
       return { unit: { x: unit.x + unit.width / 2, y: unit.y + unit.height / 2 }, emphasis, dash: parseFloat(edge.strokeDashoffset), fills };
@@ -638,6 +689,10 @@ test("figures: one unit travels spec to stage to verify to stage with stroke emp
   console.log(`loop channels: ${JSON.stringify(reads)}`);
   expect(reads.every((read) => read.fills.every((fill) => fill === "none"))).toBe(true);
   expect(reads.map((read) => read.emphasis.find((node) => node.opacity > 0.9)?.node)).toEqual(["spec", "stage", "verify", "stage"]);
+  for (const read of reads.slice(0, 3)) {
+    const landed = read.emphasis.find((node) => node.opacity > 0.9)!;
+    expect(Math.hypot(read.unit.x - landed.center.x, read.unit.y - landed.center.y)).toBeLessThanOrEqual(0.5);
+  }
   expect(reads[0].unit.x).toBeLessThan(reads[1].unit.x);
   expect(reads[1].unit.x).toBeLessThan(reads[2].unit.x);
   expect(reads[3].unit.x).toBeLessThan(reads[2].unit.x);
@@ -669,12 +724,14 @@ test("figures: reduced-motion rest is fully drawn and byte-stable", async ({ pag
         .filter((node) => Number(getComputedStyle(node).opacity) > 0.9)
         .map((node) => node.dataset.node),
       returnDash: parseFloat(getComputedStyle(element.querySelector('[data-figure-part="return-edge"]')!).strokeDashoffset),
+      indicatorExtent: element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect().width,
     }));
     console.log(`reduced rest ${entry.id}: ${JSON.stringify(rest)} failures=${JSON.stringify(result.failures)}`);
     expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
     expect(Number(rest.phase)).toBe(1);
     expect(rest.occupied).toEqual(["stage"]);
     expect(rest.returnDash).toBe(0);
+    expect(rest.indicatorExtent).toBe(0);
   }
 });
 
