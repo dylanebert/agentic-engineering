@@ -68,9 +68,12 @@
     transform: translateY(calc((1 - var(--focus)) * 8px)) scale(calc(0.92 + var(--focus) * 0.08));
   }
 
-  .human { --focus: clamp(0, calc(1 - var(--phase) * 3), 1); color: var(--role-prose); }
-  .agentic { --focus: clamp(0, calc((var(--phase) - 0.66) * 3), 1); color: var(--role-agentic); }
-  .vibe { --focus: clamp(0, calc(var(--phase) * 3), calc((1 - var(--phase)) * 3)); color: var(--role-vibe); }
+  .human { --offset: 0.333333; color: var(--role-prose); }
+  .agentic { --offset: 0; color: var(--role-agentic); }
+  .vibe { --offset: 0.666667; color: var(--role-vibe); }
+  .human, .agentic, .vibe {
+    --focus: clamp(0, calc(1 - 3 * abs(mod(calc(var(--phase) - var(--offset) + 0.5), 1) - 0.5)), 1);
+  }
 
   svg { width: 176px; height: 176px; overflow: visible; }
   svg path { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }

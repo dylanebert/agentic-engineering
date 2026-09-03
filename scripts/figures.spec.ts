@@ -340,6 +340,58 @@ test("overture: captured pose varies perceptibly across phase", async ({ page })
   expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
 });
 
+// Mutation: restore vibe's uncapped triangular expression and its sampled scale exceeds the
+// phase-1 maximum (1.04 > 1), red.
+test("overture: sampled visual values never exceed the phase-1 rest-state maxima", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const read = await page.locator('[data-overture-id="spectrum-overture"]').evaluate((element) => {
+    const states = [...element.querySelectorAll<HTMLElement>("[data-overture-state]")];
+    const sample = (phase: number) => {
+      (element as HTMLElement).style.setProperty("--phase", String(phase));
+      return states.map((state) => {
+        const style = getComputedStyle(state);
+        const matrix = new DOMMatrixReadOnly(style.transform);
+        return { opacity: Number(style.opacity), scale: matrix.a, translateY: matrix.f };
+      });
+    };
+    const rest = sample(1);
+    const maxima = {
+      opacity: Math.max(...rest.map((value) => value.opacity)),
+      scale: Math.max(...rest.map((value) => value.scale)),
+      translateY: Math.max(...rest.map((value) => value.translateY)),
+    };
+    const sampled = Array.from({ length: 121 }, (_, index) => sample(index / 120)).flat();
+    return { maxima, sampled };
+  });
+  console.log(`overture visual maxima: ${JSON.stringify(read.maxima)}`);
+  for (const value of read.sampled) {
+    expect(value.opacity).toBeLessThanOrEqual(read.maxima.opacity + 1e-4);
+    expect(value.scale).toBeLessThanOrEqual(read.maxima.scale + 1e-4);
+    expect(value.translateY).toBeLessThanOrEqual(read.maxima.translateY + 1e-4);
+  }
+});
+
+// Mutation: skew agentic's --offset from 0 to 0.001 and its sampled >=0.9 count drops below
+// both sibling states, red.
+test("overture: agentic high-emphasis dwell is not less than any other state", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const dwell = await page.locator('[data-overture-id="spectrum-overture"]').evaluate((element) => {
+    const states = [...element.querySelectorAll<HTMLElement>("[data-overture-state]")];
+    const counts = Object.fromEntries(states.map((state) => [state.dataset.overtureState!, 0]));
+    for (let index = 0; index < 600; index += 1) {
+      (element as HTMLElement).style.setProperty("--phase", String(index / 600));
+      for (const state of states) {
+        const focus = (Number(getComputedStyle(state).opacity) - 0.58) / 0.42;
+        if (focus >= 0.9 - 1e-6) counts[state.dataset.overtureState!] += 1;
+      }
+    }
+    return counts;
+  });
+  console.log(`overture >=0.9 dwell samples: ${JSON.stringify(dwell)}`);
+  expect(dwell.agentic).toBeGreaterThanOrEqual(dwell.human);
+  expect(dwell.agentic).toBeGreaterThanOrEqual(dwell.vibe);
+});
+
 // --- S3 figure arms ---
 //
 // The manifest (src/lib/figures.ts, staged beside this spec as manifest.ts) is the external
