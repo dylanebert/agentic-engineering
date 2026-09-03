@@ -110,6 +110,36 @@ sourceMutation(
 // the prose-content-dependent tightness half was deleted, reddened nothing.
 cssMutation("selected desktop measure", "--measure: 548px", "--measure: 700px", "shipped desktop measure");
 
+// H1 overture arms: register and label policy are partitioned from explanatory figures.
+sourceMutation(
+  "overture mount and placement",
+  join(repo, "src/App.svelte"),
+  "\n  <Overture />\n",
+  "\n",
+  "exactly one unlabeled overture",
+);
+sourceMutation(
+  "overture zero-label policy",
+  join(repo, "src/lib/Overture.svelte"),
+  'aria-hidden="true">\n  <div class="skin human"',
+  'aria-hidden="true">\n  <div data-figure-label>forbidden</div>\n  <div class="skin human"',
+  "exactly one unlabeled overture",
+);
+sourceMutation(
+  "overture mobile cell minimum",
+  join(repo, "src/lib/Overture.svelte"),
+  "@media (max-width: 560px) {\n    .overture {",
+  "@media (max-width: 560px) {\n    pre { width: 112px; }\n    .overture {",
+  "captured cells keep the H0 minimum width",
+);
+sourceMutation(
+  "overture no area fill",
+  join(repo, "src/lib/Overture.svelte"),
+  "svg path { fill: none;",
+  "svg path { fill: currentColor;",
+  "geometry uses strokes without area fill or tint",
+);
+
 // S3 figure arms. Each mutation below reaches the assertion the arm is named for: the
 // discriminating red, not a missing subject or a preempting error.
 sourceMutation(
