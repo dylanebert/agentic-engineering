@@ -20,7 +20,7 @@
 
   <section class="section" id="spectrum">
     <h2>the spectrum</h2>
-    <p>Two ends bracket the work. The interesting ground sits between them.</p>
+    <p>Two ways of making software sit at opposite ends of a spectrum.</p>
 
     <h3 class="point" data-role="vibe">vibe coding</h3>
     <p>
@@ -49,8 +49,8 @@
   <section class="section" id="principles">
     <h2>principles</h2>
     <p>
-      The practice is young. Most of it is still just trying things and seeing what happens, but
-      enough things have been tried to name two principles.
+      The practice is young. Most of it is still just trying things and seeing what happens, but I
+      have seen enough to name two principles.
     </p>
 
     <section class="principle" id="verifiability">
@@ -72,7 +72,7 @@
       <p>
         <span class="term" data-role="context">Context engineering</span> is giving an agent just
         enough context to complete a task, and no more. Too little and it guesses, confidently. Too
-        much and the task sits buried under everything else in the window.
+        much and the task sits buried under everything else in the context window.
       </p>
       <p>
         A long conversation is the usual way to get too much. Deep into one, much of what the agent
@@ -106,8 +106,8 @@
   <section class="section" id="verification">
     <h2>how do you verify?</h2>
     <p>
-      The hard part of the loop is verifying. In practice it is three kinds of checking, and each
-      kind reaches somewhere the other two do not.
+      In practice, verifying is three kinds of checking, and each kind reaches somewhere the other
+      two do not.
     </p>
     <ul class="kinds">
       <li>

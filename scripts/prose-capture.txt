@@ -1,11 +1,25 @@
 dylan ebert · august 2026
 agentic engineering
+                      
+          ----        
+ //---------------    
+  |//--/ttttttt\\---\\
+  |\\\\t/----------/||
+  ||\\\------------/||
+  ||l\-------vvvvvv/| 
+   |\l||vvvvvvvvvvv|| 
+   |\l|||vvvvvvvvvv|| 
+   \\\l||vvvvvvvvv/|  
+    \\\||vvvvvvv/-//  
+     \\\|vvv//-----   
+      \\-/------      
+       \----          
 
 Agentic engineering is directing agents to make software.
 
 the spectrum
 
-Two ends bracket the work. The interesting ground sits between them.
+Two ways of making software sit at opposite ends of a spectrum.
 
 vibe coding
 
@@ -19,12 +33,9 @@ agentic engineering
 
 Those are not the only two options. Between vibe coding and human code is a whole space, and agentic engineering lives there: the work is directed, and every step is checked.
 
-vibe coding
-agentic engineering
-human code
 principles
 
-The practice is young. Most of it is still just trying things and seeing what happens, but enough things have been tried to name two principles.
+The practice is young. Most of it is still just trying things and seeing what happens, but I have seen enough to name two principles.
 
 1. verifiability
 
@@ -34,7 +45,7 @@ A companion page, verifiability, goes further: why checking sets the pace of dev
 
 2. context engineering
 
-Context engineering is giving an agent just enough context to complete a task, and no more. Too little and it guesses, confidently. Too much and the task sits buried under everything else in the window.
+Context engineering is giving an agent just enough context to complete a task, and no more. Too little and it guesses, confidently. Too much and the task sits buried under everything else in the context window.
 
 A long conversation is the usual way to get too much. Deep into one, much of what the agent can see is its own abandoned attempts. So the unit of work is one task plus its context, and each unit gets a fresh conversation.
 
@@ -53,7 +64,7 @@ The spec is the one thing crossing between conversations. It carries the stages,
 
 how do you verify?
 
-The hard part of the loop is verifying. In practice it is three kinds of checking, and each kind reaches somewhere the other two do not.
+In practice, verifying is three kinds of checking, and each kind reaches somewhere the other two do not.
 
 Machine verification. Typechecking and test suites. Fast, cheap, the same answer every run. They catch what the checks were written to catch.
 Agent verification. A second agent reads the code. It has no stake in having written it, and it will read the whole diff without getting bored.
