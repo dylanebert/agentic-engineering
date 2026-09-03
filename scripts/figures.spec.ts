@@ -357,7 +357,8 @@ test("figures: no figcaption anywhere, and no figure above the opening section",
 // Ordered geometry for what is arranged (taste.md, one assertion per claim-kind). The expected
 // orders come from the prose, not from the components: the spectrum runs vibe coding → agentic
 // engineering → human code, and the loop runs spec → stage → verify with a return edge spanning
-// back from the last node to the first.
+// back from the last node to the middle one: the spec is written once, so only stage and verify
+// are inside the repeat.
 // Mutation: swap the agentic and vibe entries' x coordinates in SpectrumAxis.svelte and the
 // left-to-right label order reads agentic engineering, vibe coding, human code — red.
 const ORDERS: Record<string, readonly string[]> = {
@@ -398,12 +399,47 @@ test("figures: arranged parts read left to right in the order the prose states",
     expect(read, `no rendered figure for ${entry.id}`).toBeDefined();
     expect(read.labels).toEqual([...ORDERS[entry.id]]);
   }
-  // The loop's return edge runs back from the last node to the first, so it spans them both.
+  // The loop's return edge runs back from the last node to the middle one, so it spans them both
+  // and stops short of the first: the spec is not inside the repeat.
   const loop = geometry["stage-loop"];
   console.log(`return edge span: ${JSON.stringify(loop.span)} nodes=${JSON.stringify(loop.nodes)}`);
   expect(loop.span).not.toBeNull();
-  expect(loop.span!.left).toBeLessThanOrEqual((loop.nodes[0].left + loop.nodes[0].right) / 2);
+  expect(loop.span!.left).toBeGreaterThan(loop.nodes[0].right);
   expect(loop.span!.right).toBeGreaterThanOrEqual((loop.nodes[2].left + loop.nodes[2].right) / 2);
+});
+
+// Claim fidelity for the loop's one asserted ordering (criterion 12): the prose writes the spec
+// once and then says "repeat: stage, verify, stage again", so the arrow closing the cycle has to
+// land on `stage`. Terminating it at `spec` would publicly assert a structure the prose does not
+// claim, and the span check above is too coarse to see it. This arm reads the path's own final
+// point, transformed into client space, and requires it inside the stage node's horizontal
+// extent.
+// Mutation: move the return edge's last two x coordinates back to 88 in StageLoop.svelte and the
+// endpoint lands on the spec node — red.
+test("figures: the loop's return edge lands on the stage node, not the spec", async ({ page }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const read = await page.evaluate(() => {
+    const normalize = (text: string): string => text.replace(/\s+/g, " ").trim();
+    const figure = document.querySelector('figure[data-figure-id="stage-loop"]');
+    if (figure === null) return null;
+    const edge = figure.querySelector('[data-figure-part="return-edge"]');
+    if (!(edge instanceof SVGGeometryElement)) return null;
+    const matrix = edge.getScreenCTM();
+    if (matrix === null) return null;
+    const local = edge.getPointAtLength(edge.getTotalLength());
+    const point = new DOMPoint(local.x, local.y).matrixTransform(matrix);
+    const nodes = [...figure.querySelectorAll('[data-figure-part="node"]')].map((part) => {
+      const box = part.getBoundingClientRect();
+      return { label: normalize(part.querySelector("[data-figure-label]")?.textContent ?? ""), left: box.left, right: box.right };
+    });
+    return { end: { x: point.x, y: point.y }, nodes };
+  });
+  console.log(`return edge endpoint: ${JSON.stringify(read)}`);
+  expect(read, "no rendered stage-loop return edge").not.toBeNull();
+  const stage = read!.nodes.find((node) => node.label === "stage");
+  expect(stage, "no stage node in the loop figure").toBeDefined();
+  expect(read!.end.x).toBeGreaterThanOrEqual(stage!.left);
+  expect(read!.end.x).toBeLessThanOrEqual(stage!.right);
 });
 
 // Content assertion for what is named: a figure may only use the words its own section's prose

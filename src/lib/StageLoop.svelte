@@ -1,11 +1,13 @@
 <script lang="ts">
   // The loop figure: three nodes in the order the prose does them — spec, then stage, then
-  // verify — and a return edge carrying the paragraph's own word for it, "repeat". The motion
-  // role is `reveal`: across a cycle the fill advances spec, then stage, then verify, then the
-  // return edge, which is the order the paragraph states. At the end of the cycle — which is
-  // also the reduced-motion resting state — the whole circuit is drawn. Every moving value is a
-  // CSS function of `--phase` on the figure element (Figure.svelte), so the figure can be read
-  // at any point of its cycle. Primitive and colors are the shared vocabulary's: the spec node
+  // verify — and a return edge carrying the paragraph's own word for it, "repeat". The spec is
+  // written once, so the return edge lands on `stage`, not on `spec`: the paragraph says
+  // "repeat: stage, verify, stage again, until the spec is done", and only those two are in the
+  // cycle. The motion role is `reveal`: across a cycle the fill advances spec, then stage, then
+  // verify, then the return edge back into stage. At the end of the cycle, which is also the
+  // reduced-motion resting state, the whole circuit is drawn. Every moving value is a CSS
+  // function of `--phase` on the figure element (Figure.svelte), so the figure can be read at
+  // any point of its cycle. Primitive and colors are the shared vocabulary's: the spec node
   // carries the context role, since the spec is the context that crosses conversations.
 
   import Figure from "./Figure.svelte";
@@ -23,7 +25,7 @@
   const top = 12;
 </script>
 
-<Figure id="stage-loop" label="the loop: spec, stage, verify, repeat">
+<Figure id="stage-loop" label="the loop: one spec, then stage and verify on repeat">
   {#snippet children()}
     <svg class="loop" viewBox="0 0 548 132" role="presentation">
       <defs>
@@ -46,9 +48,9 @@
       <path
         class="edge return"
         data-figure-part="return-edge"
-        d="M 460 {top + height} L 460 100 L 88 100 L 88 {top + height}"
+        d="M 460 {top + height} L 460 100 L 274 100 L 274 {top + height}"
       />
-      <text class="label" data-figure-label data-role="prose" x="274" y="122" text-anchor="middle"
+      <text class="label" data-figure-label data-role="prose" x="367" y="122" text-anchor="middle"
         >repeat</text
       >
 

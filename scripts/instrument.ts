@@ -122,8 +122,8 @@ sourceMutation(
 sourceMutation(
   "figure claim against its lead-in paragraph",
   join(repo, "src/lib/figures.ts"),
-  'claim: "A whole space sits between them, and agentic engineering lives there"',
-  'claim: "A whole space sits between them, and vibe coding lives there"',
+  'claim: "Between vibe coding and human code is a whole space, and agentic engineering lives there"',
+  'claim: "Between vibe coding and human code is a whole space, and vibe coding lives there"',
   "quoted claim",
 );
 sourceMutation(
@@ -146,6 +146,13 @@ sourceMutation(
   'x: 74, anchor: "middle" },\n    { role: "agentic", label: concepts.agentic.label, x: 274',
   'x: 274, anchor: "middle" },\n    { role: "agentic", label: concepts.agentic.label, x: 74',
   "order the prose states",
+);
+sourceMutation(
+  "return edge lands on the stage node",
+  join(repo, "src/lib/StageLoop.svelte"),
+  "L 460 100 L 274 100 L 274 {top + height}",
+  "L 460 100 L 88 100 L 88 {top + height}",
+  "lands on the stage node",
 );
 sourceMutation(
   "figure label against its section's prose",

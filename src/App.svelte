@@ -33,9 +33,9 @@
     </p>
     <p>
       The other end is 100% <span class="term" data-role="prose">organic human code</span>,
-      every line typed by a person. Those are not your only two options. A whole
-      space sits between them, and <span class="term" data-role="agentic">agentic engineering</span> lives there: you direct
-      the work, and you check each step.
+      every line typed by a person. Those are not your only two options. Between
+      vibe coding and human code is a whole space, and <span class="term" data-role="agentic">agentic engineering</span> lives
+      there: you direct the work, and you check each step.
     </p>
 
     <SpectrumAxis />
@@ -102,8 +102,8 @@
     </p>
     <p>
       Then open a new conversation and do the next stage of the spec. Verify
-      that stage. If the check fails, fix it before you go on. Then repeat, in a
-      loop, until the spec is done.
+      that stage. If the check fails, fix it before you go on. Then repeat:
+      stage, verify, stage again, until the spec is done.
     </p>
 
     <StageLoop />
