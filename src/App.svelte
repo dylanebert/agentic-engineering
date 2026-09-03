@@ -10,166 +10,140 @@
       <span class="sep">·</span> august 2026
     </div>
     <h1 class="title">agentic engineering</h1>
-    <p class="dek">for beginners</p>
   </header>
 
   <section class="section" id="definition">
-    <h2>agentic engineering</h2>
-    <p>
-      Agentic engineering is directing agents to make software. This page is the
-      written version of my video on the subject, with the details and examples
-      it had no room for. You say what you want, an agent writes the code, and
-      you decide whether what came back is right.
-    </p>
+    <p>Agentic engineering is directing agents to make software.</p>
   </section>
 
   <section class="section" id="spectrum">
     <h2>the spectrum</h2>
+    <p>Two ends bracket the work. The interesting ground sits between them.</p>
+
+    <h3 class="point" data-role="vibe">vibe coding</h3>
     <p>
-      One end of the spectrum is <span class="term" data-role="vibe">vibe coding</span>. You tell an agent "make me some
-      software," and some software comes out. It might be good. It might be bad.
-      And in my experience a model given no direction reaches for the same few
-      colors, so it's probably purple.
+      One end is <span class="term" data-role="vibe">vibe coding</span>. Tell an agent "make me
+      some software," and software comes out. It might be good. It might be bad. And it's probably
+      <span class="term" data-role="vibe">purple</span>: a model given no direction reaches for the
+      same few defaults every time.
     </p>
+
+    <h3 class="point" data-role="prose">human code</h3>
     <p>
-      The other end is 100% <span class="term" data-role="prose">organic human code</span>,
-      every line typed by a person. Those are not your only two options. Between
-      vibe coding and human code is a whole space, and <span class="term" data-role="agentic">agentic engineering</span> lives
-      there: you direct the work, and you check each step.
+      The other end is <span class="term" data-role="prose">human code</span>, every line typed by
+      a person. Slower per line, and the intent behind each one is known. For work where the design
+      is the hard part and the typing is incidental, it stays the right trade.
+    </p>
+
+    <h3 class="point" data-role="agentic">agentic engineering</h3>
+    <p>
+      Those are not the only two options. Between vibe coding and human code is a whole space, and
+      <span class="term" data-role="agentic">agentic engineering</span> lives there: the work is
+      directed, and every step is checked.
     </p>
 
     <SpectrumAxis />
-    <p>
-      The space is wide. You can hand over a feature, a single function, or only
-      the boilerplate around a design you already settled. Where you sit is a
-      choice you make per task, not a stance you hold forever.
-    </p>
   </section>
 
-  <section class="section" id="verifiability">
-    <h2>verifiability</h2>
+  <section class="section" id="principles">
+    <h2>principles</h2>
     <p>
-      Writing the code is no longer the hard part. An agent wrote some code.
-      Does it work? Is it fast? Is it secure? Is it how you wanted it?
-      <span class="term" data-role="verify">Verifiability</span> is how well you can answer those questions.
+      The practice is young. Most of it is still just trying things and seeing what happens, but
+      enough things have been tried to name two principles.
     </p>
-    <p>
-      Agentic engineering is young. Most of it is still "just try things and
-      see what happens." Two principles have come up often enough in my own
-      work that I'll claim them, and this is the first.
-    </p>
-    <p>
-      The cost is lopsided. Writing a screen of code takes an agent seconds.
-      Reading that screen closely enough to trust it takes you minutes. Give the
-      agent more to do and your reading is the first thing to break, so most of
-      the practice is about making the checking cheaper.
-    </p>
-    <p>
-      I go further on a companion page,
-      <a href="/verifiability/">verifiability</a>. It covers why checking sets
-      the pace of development, and when a cheap check is worth trusting in place
-      of an expensive one: a test suite, say, instead of reading the diff.
-    </p>
-  </section>
 
-  <section class="section" id="context-engineering">
-    <h2>context engineering</h2>
-    <p>
-      The second principle is <span class="term" data-role="context">context engineering</span>: give an agent just enough
-      context to complete a task, and no more than that. It sounds like a
-      platitude. The discipline is in the second half.
-    </p>
-    <p>
-      Too little context and the agent guesses, confidently. Too much and the
-      task sits buried under things it shouldn't be reading. A long
-      conversation is the usual way to get too much: deep into one, much of
-      what the agent can see is its own abandoned attempts.
-    </p>
-    <p>
-      So the unit of work is one task plus the context for that task. A fresh
-      conversation per unit is how you hold the line, and it is why the next
-      section starts by writing something down.
-    </p>
+    <section class="principle" id="verifiability">
+      <h3>1. verifiability</h3>
+      <p>
+        Writing code is no longer the hard part. An agent wrote some code. But does it work? Is it
+        fast? Is it secure? Is it what was asked for?
+        <span class="term" data-role="verify">Verifiability</span> is how well those questions can
+        be answered, and it is the hard part.
+      </p>
+      <p>
+        A companion page, <a href="/verifiability/">verifiability</a>, goes further: why checking
+        sets the pace of development, and when a cheap check can stand in for an expensive one.
+      </p>
+    </section>
+
+    <section class="principle" id="context-engineering">
+      <h3>2. context engineering</h3>
+      <p>
+        <span class="term" data-role="context">Context engineering</span> is giving an agent just
+        enough context to complete a task, and no more. Too little and it guesses, confidently. Too
+        much and the task sits buried under everything else in the window.
+      </p>
+      <p>
+        A long conversation is the usual way to get too much. Deep into one, much of what the agent
+        can see is its own abandoned attempts. So the unit of work is one task plus its context, and
+        each unit gets a fresh conversation.
+      </p>
+    </section>
   </section>
 
   <section class="section" id="loop">
     <h2>the loop</h2>
     <p>
-      Put the two principles together. Say the job is a todo list app. In the
-      first conversation, don't implement anything. Write a <span class="term" data-role="context">spec</span> instead: what
-      the thing is, and how the work breaks into stages small enough to check
-      one at a time.
+      Put the two principles together. Say the job is a todo list app. The first conversation writes
+      no code: it produces a <span class="term" data-role="context">spec</span>, one file naming
+      what the thing is and how the work splits into stages small enough to check one at a time.
     </p>
     <p>
-      Then open a new conversation and do the next stage of the spec. Verify
-      that stage. If the check fails, fix it before you go on. Then repeat:
-      stage, verify, stage again, until the spec is done.
+      Each stage then gets its own conversation. Do the stage, verify the stage, fix any failure
+      before moving on. Then repeat: stage, verify, stage again, until the spec is done.
     </p>
 
     <StageLoop />
     <p>
-      The spec is the thing crossing between conversations. It carries the
-      stages, what each stage needs, and what done means, so a fresh
-      conversation picks up cold. The stage boundary is where errors stop too: a
-      mistake caught at stage three doesn't become the floor for stage four.
+      The spec is the one thing crossing between conversations. It carries the stages, what each
+      stage needs, and what done means, so a cold conversation can pick the work up. Stage
+      boundaries also stop errors: a mistake caught at stage three does not become the floor for
+      stage four.
     </p>
   </section>
 
   <section class="section" id="verification">
-    <h2>how you verify</h2>
+    <h2>how do you verify?</h2>
     <p>
-      The word doing the work in that loop is "verify." In practice it is a mix
-      of three kinds of checking, and each one reaches somewhere the others
-      don't.
+      The hard part of the loop is verifying. In practice it is three kinds of checking, and each
+      kind reaches somewhere the other two do not.
     </p>
     <ul class="kinds">
       <li>
-        <strong>Machine verification.</strong> Typechecking and test suites.
-        Fast, cheap, and the same answer every run. They catch what you thought
-        to check.
+        <strong>Machine verification.</strong> Typechecking and test suites. Fast, cheap, the same
+        answer every run. They catch what the checks were written to catch.
       </li>
       <li>
-        <strong>Agent verification.</strong> A second agent reads the code. It
-        has no stake in having written it, and it will read more of the diff
-        than you have patience for.
+        <strong>Agent verification.</strong> A second agent reads the code. It has no stake in
+        having written it, and it will read the whole diff without getting bored.
       </li>
       <li>
-        <strong>Human verification.</strong> Your own feedback. The slowest and
-        most expensive, and still the last word on whether the thing is any
-        good.
+        <strong>Human verification.</strong> My own feedback. Slowest, most expensive, and still
+        the last word on whether the thing is any good.
       </li>
     </ul>
     <p>
-      Machine checks run on every save. Agent review runs at the end of a stage.
-      My own reading runs where the other two can't reach. Picking the mix is
-      the judgment call, and
-      <a href="/verifiability/">the verifiability page</a>
-      is where I work out how far the cheap ones can be pushed.
+      Machine checks run on every save. Agent review runs at the end of a stage. My own reading runs
+      where the other two cannot reach, and picking the mix is the judgment call.
     </p>
   </section>
 
   <section class="section" id="closing">
     <h2>in practice</h2>
     <p>
-      In practice, <span class="term" data-role="agentic">agentic engineering</span> is a spec, small stages, a fresh
-      conversation for each, and a check before the next one opens.
+      One spec, small stages, a fresh conversation for each, and a check before the next one opens.
+      Verifiability is why the check comes first; context engineering is why the conversation is
+      fresh.
     </p>
     <p>
-      The weak point is the spec. Everything downstream inherits it, and a spec
-      that is wrong just gets built correctly, stage by stage, with every check
-      passing. Writing it is still the part I do by hand. My own habits keep
-      moving; spec, then stages, then a check on each has held so far.
-    </p>
-    <p>
-      A second companion page,
-      <a href="/taste-loops/">taste-loops</a>, is about the part you can't hand
-      to a machine or a second agent, where your own judgment, taste, is the
-      check. The final judge is you, so the checking has to be fast enough that
-      you keep doing it.
+      The application of these principles is
+      <span class="term" data-role="agentic">agentic engineering</span>. My own habits keep moving,
+      and this loop is the part holding steady so far.
     </p>
     <p class="aside">
-      check out the
-      <a href="https://www.youtube.com/c/IndividualKex">video version</a>.
+      This page is the written version of my
+      <a href="https://www.youtube.com/c/IndividualKex">video</a> on the subject,<br /> with the details
+      and examples it had no room for.
     </p>
   </section>
 </article>
@@ -214,14 +188,6 @@
     margin-bottom: var(--heading-margin-bottom);
   }
 
-  .dek {
-    font-family: var(--display);
-    font-size: var(--dek-font-size);
-    font-weight: var(--display-font-weight);
-    color: var(--text-muted);
-    margin-top: 10px;
-  }
-
   .section {
     margin-top: var(--section-margin-top);
   }
@@ -236,6 +202,43 @@
     background: var(--heading-bg);
     padding: var(--heading-padding);
     margin-bottom: var(--heading-margin-bottom);
+  }
+
+  /* The second heading tier: the spectrum's three points and the two numbered principles. Same
+     display family, weight and lowercase register as h2, one step down in size, so the page gains
+     a tier without a new type identity (spec Out of scope: the type and measure stay as shipped). */
+  .section h3 {
+    font-family: var(--display);
+    font-size: var(--body-font-size);
+    font-weight: var(--heading-font-weight);
+    letter-spacing: var(--h2-letter-spacing);
+    text-transform: var(--heading-text-transform);
+    color: var(--heading-color);
+    margin-top: 26px;
+    margin-bottom: 2px;
+  }
+
+  /* A spectrum point's heading carries the same role color its prose span and its figure part
+     carry (src/lib/vocabulary.ts), which is what makes the block structure read as the page's
+     one vocabulary. The role's *prose* binding is still the span inside the paragraph: the
+     rendered-tree arm reads `.term[data-role]` inside p and li only, so a heading can never
+     satisfy the binding on its own. */
+  .point[data-role="vibe"] {
+    color: var(--role-vibe);
+  }
+
+  .point[data-role="agentic"] {
+    color: var(--role-agentic);
+  }
+
+  .point[data-role="prose"] {
+    color: var(--role-prose);
+  }
+
+  /* The two principles are subsections of one section, not sections of their own: they carry the
+     beats the manuscript numbers, and the manifest declares them at subsection level. */
+  .principle {
+    margin-top: 26px;
   }
 
   .section p {

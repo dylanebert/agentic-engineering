@@ -1,10 +1,11 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
-import { beats, figures, sectionOrder } from "../src/lib/figures";
+import { beats, figures, overture, sectionOrder } from "../src/lib/figures";
+import { grammar } from "../src/lib/vocabulary";
 
 // Structural half of the figure-manifest arm (spec validation 2). The rendered half lives in
-// scripts/oracle-text.spec.ts, which needs a browser to read the built page; these three
+// scripts/oracle-text.spec.ts, which needs a browser to read the built page; these five
 // properties are decidable from the source and the manuscript alone:
 //
 //   1. the page declares its sections in the manuscript's beat order,
@@ -20,6 +21,15 @@ const manuscript = join(repo, "../../manuscripts/agentic-engineering/script.txt"
 function sectionIds(): string[] {
   const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
   return [...app.matchAll(/<section\b[^>]*\bid="([^"]+)"/g)].map((m) => m[1]);
+}
+
+function sectionLevels(): Map<string, "section" | "subsection"> {
+  const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
+  const levels = new Map<string, "section" | "subsection">();
+  for (const match of app.matchAll(/<section\b[^>]*\bclass="([^"]+)"[^>]*\bid="([^"]+)"/g)) {
+    levels.set(match[2], match[1].split(/\s+/).includes("principle") ? "subsection" : "section");
+  }
+  return levels;
 }
 
 describe("figure manifest", () => {
@@ -49,11 +59,46 @@ describe("figure manifest", () => {
   test("exactly the two declared figures, each sited in a real section", () => {
     expect(figures.length).toBe(2);
     expect(figures.map((f) => f.kind).sort()).toEqual(["axis", "loop"]);
+    expect(figures.map((f) => f.labels)).toEqual(["required", "required"]);
     expect(new Set(figures.map((f) => f.id)).size).toBe(figures.length);
     for (const figure of figures) {
       expect(sectionIds()).toContain(figure.section);
       expect(figure.paragraph).toBeGreaterThanOrEqual(0);
       expect(figure.claim.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  // Criterion 2 anchors a beat to a section *or subsection*: R1 grouped the two numbered principles
+  // under one Principles section, so the level is part of the declaration and not an implementation
+  // detail. Mutation: give #verifiability `class="section"` and its declared subsection level no
+  // longer matches — red.
+  test("each beat sits at the level the manifest declares", () => {
+    const levels = sectionLevels();
+    expect([...levels.keys()]).toEqual([...sectionOrder]);
+    for (const beat of beats) {
+      expect(levels.get(beat.section), `no section carries id ${beat.section}`).toBeDefined();
+      expect(levels.get(beat.section), `${beat.section} level`).toBe(beat.level);
+    }
+  });
+
+  // The overture's declaration half (criteria 5 and 8). H1 mounts it and replaces the source
+  // substring read below with a rendered read; what is decidable now is the declaration: exactly
+  // three states left to right, each on a declared role and keyed to a term the prose spends, no
+  // labels, no claim, no beat, and a rest state on agentic.
+  // Mutation: add a fourth state, or set `labels: "required"`, and this arm reds.
+  test("the overture declares three unlabeled states, each named later in the prose", () => {
+    expect(overture.kind).toBe("overture");
+    expect(overture.labels).toBe("none");
+    expect(overture.site).toBe("above-opening");
+    expect(overture.rest).toBe("agentic");
+    expect(overture.states.map((state) => state.state)).toEqual(["human", "agentic", "vibe"]);
+    expect(beats.some((beat) => beat.section === overture.id)).toBe(false);
+    expect(figures.some((figure) => figure.id === overture.id)).toBe(false);
+    const roles = Object.keys(grammar.colors);
+    const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
+    for (const state of overture.states) {
+      expect(roles, `overture role ${state.role}`).toContain(state.role);
+      expect(app, `overture term "${state.term}" is not in the prose`).toContain(state.term);
     }
   });
 });

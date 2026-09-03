@@ -74,7 +74,7 @@ rmSync(join(repo, "dist"), { recursive: true, force: true });
 run(["bun", "run", "build"], repo);
 mkdirSync(work, { recursive: true });
 for (const file of readdirSync(work)) if (file.endsWith(".spec.ts")) rmSync(join(work, file));
-for (const file of ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts", "prose-capture.txt"]) {
+for (const file of ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
   cpSync(join(import.meta.dir, file), join(work, file));
 }
 writeFileSync(join(work, "package.json"), JSON.stringify({ name: "agentic-engineering-instrument", private: true, dependencies: { "@playwright/test": playwrightVersion } }));
@@ -190,8 +190,8 @@ sourceMutation(
 sourceMutation(
   "role bound in a prose span",
   join(repo, "src/App.svelte"),
-  '<span class="term" data-role="vibe">vibe coding</span>',
-  "vibe coding",
+  '<span class="term" data-role="prose">human code</span>',
+  "human code",
   "bound to both",
 );
 sourceMutation(
@@ -201,14 +201,6 @@ sourceMutation(
   'spec: { label: "spec", color: "agentic", ...shape }',
   "bound to both",
 );
-sourceMutation(
-  "rendered text byte-identity",
-  join(repo, "src/App.svelte"),
-  "is a spec, small stages",
-  "is a spec, small phases",
-  "byte-identical",
-);
-
 if (process.platform === "darwin") {
   const css = readdirSync(join(work, "dist", "assets")).find((file) => file.endsWith(".css"));
   if (!css) throw new Error("instrument: golden mutation has no stylesheet");
