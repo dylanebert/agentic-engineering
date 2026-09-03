@@ -1,6 +1,5 @@
 <script lang="ts">
   import Overture from "./lib/Overture.svelte";
-  import SpectrumAxis from "./lib/SpectrumAxis.svelte";
   import StageLoop from "./lib/StageLoop.svelte";
 </script>
 
@@ -45,7 +44,6 @@
       directed, and every step is checked.
     </p>
 
-    <SpectrumAxis />
   </section>
 
   <section class="section" id="principles">

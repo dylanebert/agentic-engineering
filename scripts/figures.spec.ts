@@ -427,14 +427,10 @@ test("figures: no figcaption anywhere, and no figure above the opening section",
 });
 
 // Ordered geometry for what is arranged (taste.md, one assertion per claim-kind). The expected
-// orders come from the prose, not from the components: the spectrum runs vibe coding → agentic
-// engineering → human code, and the loop runs spec → stage → verify with a return edge spanning
-// back from the last node to the middle one: the spec is written once, so only stage and verify
-// are inside the repeat.
-// Mutation: swap the agentic and vibe entries' x coordinates in SpectrumAxis.svelte and the
-// left-to-right label order reads agentic engineering, vibe coding, human code — red.
+// The expected order comes from the prose, not from the component: the loop runs spec → stage →
+// verify with a return edge spanning back from the last node to the middle one. The spec is
+// written once, so only stage and verify are inside the repeat.
 const ORDERS: Record<string, readonly string[]> = {
-  "spectrum-axis": ["vibe coding", "agentic engineering", "human code"],
   "stage-loop": ["spec", "stage", "verify"],
 };
 
@@ -563,22 +559,38 @@ const phaseDriver = (id: string, steps: number) => async (page: import("@playwri
   }, String(step / (steps - 1)));
 };
 
-// Perceptual variance over a JND for what moves (taste.md: one assertion per claim kind). The
-// three recorded failures this catches are inert variants that passed every other oracle, so the
-// read is over rendered pixels, not over the CSS that produced them.
-// Mutation: pin the spectrum halo and underline opacity at 1 and adjacent cycle states are
-// perceptually identical — red (instrument.ts, "spectrum emphasis motion").
-test("figures: the spectrum's middle position varies perceptibly across its cycle", async ({ page }) => {
-  const steps = 3;
-  const result = await assertVaries(page, figureSelector("spectrum-axis"), phaseDriver("spectrum-axis", steps), steps);
-  console.log(`spectrum variance: steps=${result.steps} failures=${JSON.stringify(result.failures)}`);
-  expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
-});
+// Perceptual variance over a JND for the one traveling unit. The structural reads beside it pin
+// the three distinct channels: position advances spec → stage → verify → stage, occupied nodes
+// gain an emphasis stroke, and the return edge reveals by dash offset.
+test("figures: one unit travels spec to stage to verify to stage with stroke emphasis and a dashed return", async ({ page }) => {
+  const phases = [0, 186 / 668, 372 / 668, 1];
+  await page.goto(url, { waitUntil: "networkidle" });
+  const reads = [];
+  for (const phase of phases) {
+    const read = await page.locator(figureSelector("stage-loop")).evaluate((element, value) => {
+      (element as HTMLElement).style.setProperty("--phase", String(value));
+      const unit = element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect();
+      const emphasis = [...element.querySelectorAll<SVGElement>(".emphasis")].map((node) => ({
+        node: node.dataset.node,
+        opacity: Number(getComputedStyle(node).opacity),
+      }));
+      const edge = getComputedStyle(element.querySelector('[data-figure-part="return-edge"]')!);
+      const fills = [...element.querySelectorAll("rect, circle, path, line")].map((node) => getComputedStyle(node).fill);
+      return { unit: { x: unit.x + unit.width / 2, y: unit.y + unit.height / 2 }, emphasis, dash: parseFloat(edge.strokeDashoffset), fills };
+    }, phase);
+    reads.push(read);
+  }
+  console.log(`loop channels: ${JSON.stringify(reads)}`);
+  expect(reads.every((read) => read.fills.every((fill) => fill === "none"))).toBe(true);
+  expect(reads.map((read) => read.emphasis.find((node) => node.opacity > 0.9)?.node)).toEqual(["spec", "stage", "verify", "stage"]);
+  expect(reads[0].unit.x).toBeLessThan(reads[1].unit.x);
+  expect(reads[1].unit.x).toBeLessThan(reads[2].unit.x);
+  expect(reads[3].unit.x).toBeLessThan(reads[2].unit.x);
+  expect(reads[3].unit.y).toBeGreaterThan(reads[2].unit.y);
+  expect(reads.slice(0, 3).every((read) => read.dash === 100)).toBe(true);
+  expect(reads[3].dash).toBe(0);
 
-// Mutation: pin the loop's stage fills at full opacity and the cycle no longer advances — red
-// (instrument.ts, "loop advance motion").
-test("figures: the loop's advance varies perceptibly across its cycle", async ({ page }) => {
-  const steps = 5;
+  const steps = 4;
   const result = await assertVaries(page, figureSelector("stage-loop"), phaseDriver("stage-loop", steps), steps);
   console.log(`loop variance: steps=${result.steps} failures=${JSON.stringify(result.failures)}`);
   expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
@@ -596,12 +608,18 @@ test("figures: reduced-motion rest is fully drawn and byte-stable", async ({ pag
     const result = await assertReducedMotion(page, selector, async (target, step) => {
       if (step === 0) await target.goto(url, { waitUntil: "networkidle" });
     }, 1);
-    const phase = await page.locator(selector).evaluate((element) =>
-      getComputedStyle(element).getPropertyValue("--phase").trim(),
-    );
-    console.log(`reduced rest ${entry.id}: phase=${phase} failures=${JSON.stringify(result.failures)}`);
+    const rest = await page.locator(selector).evaluate((element) => ({
+      phase: getComputedStyle(element).getPropertyValue("--phase").trim(),
+      occupied: [...element.querySelectorAll<SVGElement>(".emphasis")]
+        .filter((node) => Number(getComputedStyle(node).opacity) > 0.9)
+        .map((node) => node.dataset.node),
+      returnDash: parseFloat(getComputedStyle(element.querySelector('[data-figure-part="return-edge"]')!).strokeDashoffset),
+    }));
+    console.log(`reduced rest ${entry.id}: ${JSON.stringify(rest)} failures=${JSON.stringify(result.failures)}`);
     expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
-    expect(Number(phase)).toBe(1);
+    expect(Number(rest.phase)).toBe(1);
+    expect(rest.occupied).toEqual(["stage"]);
+    expect(rest.returnDash).toBe(0);
   }
 });
 
@@ -619,7 +637,7 @@ test("figures: every color role is bound to both a prose span and a figure part"
         .filter((role) => role.length > 0);
     return {
       prose: read(".page .section p .term[data-role], .page .section li .term[data-role]"),
-      figures: read("figure [data-role]"),
+      figures: read("figure [data-role], [data-overture-id] [data-role]"),
     };
   });
   const roles = Object.keys(grammar.colors);

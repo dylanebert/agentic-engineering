@@ -152,8 +152,8 @@ sourceMutation(
 sourceMutation(
   "figure claim against its lead-in paragraph",
   join(repo, "src/lib/figures.ts"),
-  'claim: "Between vibe coding and human code is a whole space, and agentic engineering lives there"',
-  'claim: "Between vibe coding and human code is a whole space, and vibe coding lives there"',
+  'claim: "Then repeat: stage, verify, stage again, until the spec is done."',
+  'claim: "Then repeat: spec, verify, spec again, until the spec is done."',
   "quoted claim",
 );
 sourceMutation(
@@ -167,14 +167,14 @@ sourceMutation(
   "no figure above the opening section",
   join(repo, "src/App.svelte"),
   '<h1 class="title">agentic engineering</h1>',
-  '<h1 class="title">agentic engineering</h1>\n    <SpectrumAxis />',
+  '<h1 class="title">agentic engineering</h1>\n    <StageLoop />',
   "figcaption anywhere",
 );
 sourceMutation(
-  "ordered geometry on the spectrum axis",
-  join(repo, "src/lib/SpectrumAxis.svelte"),
-  'x: 74, anchor: "middle" },\n    { role: "agentic", label: concepts.agentic.label, x: 274',
-  'x: 274, anchor: "middle" },\n    { role: "agentic", label: concepts.agentic.label, x: 74',
+  "ordered geometry in the stage loop",
+  join(repo, "src/lib/StageLoop.svelte"),
+  "{ role: concepts.spec.color, label: concepts.spec.label, x: 14, step: 0 },",
+  "{ role: concepts.spec.color, label: concepts.spec.label, x: 300, step: 0 },",
   "order the prose states",
 );
 sourceMutation(
@@ -192,20 +192,27 @@ sourceMutation(
   "substring of its section",
 );
 
-// S4 motion and binding arms. Each mutation reaches the assertion its arm is named for.
+// H2 motion arms. Each mutation removes one of the loop's three independent channels.
 sourceMutation(
-  "spectrum emphasis motion",
-  join(repo, "src/lib/SpectrumAxis.svelte"),
-  "    opacity: var(--phase, 1);",
-  "    opacity: 1;",
-  "middle position varies",
+  "loop traveling unit",
+  join(repo, "src/lib/StageLoop.svelte"),
+  "offset-distance: calc(var(--phase, 1) * 100%);",
+  "offset-distance: 100%;",
+  "one unit travels",
 );
 sourceMutation(
-  "loop advance motion",
+  "loop occupied-node emphasis",
   join(repo, "src/lib/StageLoop.svelte"),
-  "opacity: clamp(0, calc(var(--phase, 1) * 4 - var(--step)), 1);",
-  "opacity: 1;",
-  "loop's advance varies",
+  "opacity: clamp(0, calc(1 - abs(var(--phase, 1) - 0.5569) * 12), 1);",
+  "opacity: 0;",
+  "one unit travels",
+);
+sourceMutation(
+  "loop return dash offset",
+  join(repo, "src/lib/StageLoop.svelte"),
+  "stroke-dashoffset: clamp(0px, calc((1 - var(--phase, 1)) * 225.7px), 100px);",
+  "stroke-dashoffset: 0;",
+  "one unit travels",
 );
 // The discriminating mutation here is the reduced-motion read itself, not the effect's early
 // return: with `reduced` still true the clock is bypassed anyway, so deleting the return alone
