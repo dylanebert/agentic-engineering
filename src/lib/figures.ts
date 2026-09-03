@@ -1,19 +1,15 @@
 // The figure manifest, the overture declaration, and the manuscript's beat map.
 //
-// Two explanatory figures on this page and only two (spec, locked): the spectrum axis in the
-// spectrum section and the loop in the loop section. Each entry names its site — the section's id
+// One explanatory figure remains on this page (spec H2): the loop in the loop section. Each entry names its site — the section's id
 // and the zero-based index of its lead-in paragraph among that section's own `p` children — quotes
 // that paragraph's claim verbatim so claim fidelity is checkable by substring against the rendered
 // text, and declares its label policy. The paragraph before a figure does the caption's job; there
 // are no figcaptions.
 //
-// R1 re-declared the sites after the prose rebuild: the spectrum section now opens with a framing
-// paragraph and gives each spectrum point its own block, so the axis's lead-in moved from
-// paragraph 1 to paragraph 3. Both claims are unchanged, which keeps the S5(c) lead-in decision
-// and the loop's return-edge geometry claim intact. H1 mounts the overture declared below and
-// partitions the arms by register; H2 retires the spectrum entry and its component.
+// H2 retires the duplicated spectrum axis after H1 moved that vocabulary into the overture. The
+// loop keeps the S5(c) lead-in decision and return-edge geometry claim intact.
 
-export type FigureKind = "axis" | "loop";
+export type FigureKind = "loop";
 export type LabelPolicy = "none" | "required";
 
 export type FigureEntry = {
@@ -31,14 +27,6 @@ export type FigureEntry = {
 };
 
 export const figures = [
-  {
-    id: "spectrum-axis",
-    section: "spectrum",
-    paragraph: 3,
-    claim: "Between vibe coding and human code is a whole space, and agentic engineering lives there",
-    kind: "axis",
-    labels: "required",
-  },
   {
     id: "stage-loop",
     section: "loop",

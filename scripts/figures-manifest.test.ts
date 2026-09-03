@@ -10,7 +10,7 @@ import { grammar } from "../src/lib/vocabulary";
 //
 //   1. the page declares its sections in the manuscript's beat order,
 //   2. every beat's anchor is a verbatim line of the manuscript, in the manuscript's order,
-//   3. the manifest holds exactly the two declared figures, each sited in a real section.
+//   3. the manifest holds exactly the surviving loop figure, sited in a real section.
 //
 // The manuscript sits outside this repo when it is checked out standalone, so property 2 skips
 // with a note rather than reddening there.
@@ -56,10 +56,10 @@ describe("figure manifest", () => {
     expect(at).toEqual([...at].sort((a, b) => a - b));
   });
 
-  test("exactly the two declared figures, each sited in a real section", () => {
-    expect(figures.length).toBe(2);
-    expect(figures.map((f) => f.kind).sort()).toEqual(["axis", "loop"]);
-    expect(figures.map((f) => f.labels)).toEqual(["required", "required"]);
+  test("exactly the surviving loop figure, sited in a real section", () => {
+    expect(figures.length).toBe(1);
+    expect(figures.map((f) => f.kind)).toEqual(["loop"]);
+    expect(figures.map((f) => f.labels)).toEqual(["required"]);
     expect(new Set(figures.map((f) => f.id)).size).toBe(figures.length);
     for (const figure of figures) {
       expect(sectionIds()).toContain(figure.section);
