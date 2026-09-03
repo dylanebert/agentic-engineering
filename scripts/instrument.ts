@@ -192,7 +192,8 @@ sourceMutation(
   "substring of its section",
 );
 
-// H2 motion arms. Each mutation removes one of the loop's three independent channels.
+// H2 motion arms. Each mutation removes one of the loop's three independent channels; all three
+// target the real-page "one unit travels" arm, so a source replacement cannot pass on fixture-only coverage.
 sourceMutation(
   "loop traveling unit",
   join(repo, "src/lib/StageLoop.svelte"),
