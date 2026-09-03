@@ -74,6 +74,28 @@ describe("figure manifest", () => {
     expect(sectionGap).toBeGreaterThan(2.5 * paragraphGap);
   });
 
+  // P2 discloses the loop one concept at a time and reserves "stage" for the noun. The figure
+  // follows the third paragraph, whose claim names every rendered label plus repeat. Mutation:
+  // move the figure back to paragraph 1 or restore "do the stage" and this arm reds.
+  test("P2 progressively discloses the loop with stage used only as a noun", () => {
+    const app = appSource();
+    const loop = app.match(/<section class="section" id="loop">([\s\S]*?)<StageLoop \/>/)?.[1];
+    expect(loop).toBeDefined();
+    const paragraphs = [...(loop?.matchAll(/<p>\s*([\s\S]*?)<\/p>/g) ?? [])]
+      .map((match) => match[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+    expect(paragraphs).toHaveLength(3);
+    expect(paragraphs[0]).toContain("spec");
+    expect(paragraphs[0]).not.toContain("stage");
+    expect(paragraphs[1]).toContain("stage");
+    expect(paragraphs[1]).not.toContain("Verification");
+    expect(paragraphs[2]).toContain(figures[0].claim);
+    expect(figures[0].paragraph).toBe(2);
+    expect(loop?.toLowerCase()).not.toMatch(/\b(?:do|doing|stage|staged|staging) the stage\b/);
+    for (const label of ["spec", "stage", "verify", "repeat"]) {
+      expect(figures[0].claim.toLowerCase()).toContain(label);
+    }
+  });
+
   test("every beat anchor is a verbatim manuscript line, in the manuscript's order", () => {
     if (!existsSync(manuscript)) {
       console.log(`figure manifest: ${manuscript} absent — skipping the manuscript arm`);
