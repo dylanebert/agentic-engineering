@@ -51,7 +51,7 @@ function prepWork(workDir: string): void {
   for (const f of readdirSync(workDir)) {
     if (f.endsWith(".spec.ts")) rmSync(join(workDir, f), { force: true });
   }
-  for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts", "prose-capture.txt"]) {
+  for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
     cpSync(join(import.meta.dir, f), join(workDir, f));
   }
   // The figure arms read the manifest as an external expectation rather than off the page they

@@ -1,52 +1,71 @@
-dylan ebert · august 2026 agentic engineering for beginners agentic engineering Agentic engineering is directing agents to make software. This page is the
-      written version of my video on the subject, with the details and examples
-      it had no room for. You say what you want, an agent writes the code, and
-      you decide whether what came back is right. the spectrum One end of the spectrum is vibe coding. You tell an agent "make me some
-      software," and some software comes out. It might be good. It might be bad.
-      And in my experience a model given no direction reaches for the same few
-      colors, so it's probably purple. The other end is 100% organic human code,
-      every line typed by a person. Those are not your only two options. Between
-      vibe coding and human code is a whole space, and agentic engineering lives
-      there: you direct the work, and you check each step. vibe codingagentic engineeringhuman code The space is wide. You can hand over a feature, a single function, or only
-      the boilerplate around a design you already settled. Where you sit is a
-      choice you make per task, not a stance you hold forever. verifiability Writing the code is no longer the hard part. An agent wrote some code.
-      Does it work? Is it fast? Is it secure? Is it how you wanted it? Verifiability is how well you can answer those questions. Agentic engineering is young. Most of it is still "just try things and
-      see what happens." Two principles have come up often enough in my own
-      work that I'll claim them, and this is the first. The cost is lopsided. Writing a screen of code takes an agent seconds.
-      Reading that screen closely enough to trust it takes you minutes. Give the
-      agent more to do and your reading is the first thing to break, so most of
-      the practice is about making the checking cheaper. I go further on a companion page, verifiability. It covers why checking sets
-      the pace of development, and when a cheap check is worth trusting in place
-      of an expensive one: a test suite, say, instead of reading the diff. context engineering The second principle is context engineering: give an agent just enough
-      context to complete a task, and no more than that. It sounds like a
-      platitude. The discipline is in the second half. Too little context and the agent guesses, confidently. Too much and the
-      task sits buried under things it shouldn't be reading. A long
-      conversation is the usual way to get too much: deep into one, much of
-      what the agent can see is its own abandoned attempts. So the unit of work is one task plus the context for that task. A fresh
-      conversation per unit is how you hold the line, and it is why the next
-      section starts by writing something down. the loop Put the two principles together. Say the job is a todo list app. In the
-      first conversation, don't implement anything. Write a spec instead: what
-      the thing is, and how the work breaks into stages small enough to check
-      one at a time. Then open a new conversation and do the next stage of the spec. Verify
-      that stage. If the check fails, fix it before you go on. Then repeat:
-      stage, verify, stage again, until the spec is done. repeatspecstageverify The spec is the thing crossing between conversations. It carries the
-      stages, what each stage needs, and what done means, so a fresh
-      conversation picks up cold. The stage boundary is where errors stop too: a
-      mistake caught at stage three doesn't become the floor for stage four. how you verify The word doing the work in that loop is "verify." In practice it is a mix
-      of three kinds of checking, and each one reaches somewhere the others
-      don't. Machine verification. Typechecking and test suites.
-        Fast, cheap, and the same answer every run. They catch what you thought
-        to check. Agent verification. A second agent reads the code. It
-        has no stake in having written it, and it will read more of the diff
-        than you have patience for. Human verification. Your own feedback. The slowest and
-        most expensive, and still the last word on whether the thing is any
-        good. Machine checks run on every save. Agent review runs at the end of a stage.
-      My own reading runs where the other two can't reach. Picking the mix is
-      the judgment call, and the verifiability page is where I work out how far the cheap ones can be pushed. in practice In practice, agentic engineering is a spec, small stages, a fresh
-      conversation for each, and a check before the next one opens. The weak point is the spec. Everything downstream inherits it, and a spec
-      that is wrong just gets built correctly, stage by stage, with every check
-      passing. Writing it is still the part I do by hand. My own habits keep
-      moving; spec, then stages, then a check on each has held so far. A second companion page, taste-loops, is about the part you can't hand
-      to a machine or a second agent, where your own judgment, taste, is the
-      check. The final judge is you, so the checking has to be fast enough that
-      you keep doing it. check out the video version.
+dylan ebert · august 2026
+agentic engineering
+
+Agentic engineering is directing agents to make software.
+
+the spectrum
+
+Two ends bracket the work. The interesting ground sits between them.
+
+vibe coding
+
+One end is vibe coding. Tell an agent "make me some software," and software comes out. It might be good. It might be bad. And it's probably purple: a model given no direction reaches for the same few defaults every time.
+
+human code
+
+The other end is human code, every line typed by a person. Slower per line, and the intent behind each one is known. For work where the design is the hard part and the typing is incidental, it stays the right trade.
+
+agentic engineering
+
+Those are not the only two options. Between vibe coding and human code is a whole space, and agentic engineering lives there: the work is directed, and every step is checked.
+
+vibe coding
+agentic engineering
+human code
+principles
+
+The practice is young. Most of it is still just trying things and seeing what happens, but enough things have been tried to name two principles.
+
+1. verifiability
+
+Writing code is no longer the hard part. An agent wrote some code. But does it work? Is it fast? Is it secure? Is it what was asked for? Verifiability is how well those questions can be answered, and it is the hard part.
+
+A companion page, verifiability, goes further: why checking sets the pace of development, and when a cheap check can stand in for an expensive one.
+
+2. context engineering
+
+Context engineering is giving an agent just enough context to complete a task, and no more. Too little and it guesses, confidently. Too much and the task sits buried under everything else in the window.
+
+A long conversation is the usual way to get too much. Deep into one, much of what the agent can see is its own abandoned attempts. So the unit of work is one task plus its context, and each unit gets a fresh conversation.
+
+the loop
+
+Put the two principles together. Say the job is a todo list app. The first conversation writes no code: it produces a spec, one file naming what the thing is and how the work splits into stages small enough to check one at a time.
+
+Each stage then gets its own conversation. Do the stage, verify the stage, fix any failure before moving on. Then repeat: stage, verify, stage again, until the spec is done.
+
+repeat
+spec
+stage
+verify
+
+The spec is the one thing crossing between conversations. It carries the stages, what each stage needs, and what done means, so a cold conversation can pick the work up. Stage boundaries also stop errors: a mistake caught at stage three does not become the floor for stage four.
+
+how do you verify?
+
+The hard part of the loop is verifying. In practice it is three kinds of checking, and each kind reaches somewhere the other two do not.
+
+Machine verification. Typechecking and test suites. Fast, cheap, the same answer every run. They catch what the checks were written to catch.
+Agent verification. A second agent reads the code. It has no stake in having written it, and it will read the whole diff without getting bored.
+Human verification. My own feedback. Slowest, most expensive, and still the last word on whether the thing is any good.
+
+Machine checks run on every save. Agent review runs at the end of a stage. My own reading runs where the other two cannot reach, and picking the mix is the judgment call.
+
+in practice
+
+One spec, small stages, a fresh conversation for each, and a check before the next one opens. Verifiability is why the check comes first; context engineering is why the conversation is fresh.
+
+The application of these principles is agentic engineering. My own habits keep moving, and this loop is the part holding steady so far.
+
+This page is the written version of my video on the subject,
+with the details and examples it had no room for.

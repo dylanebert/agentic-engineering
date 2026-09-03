@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 
 // Prose tripwires over the built page's rendered text (prose.md Concision; spec validation 3).
-// Two numbers, both derived in prose.md from measured reference prose and floored there: no
+// Three numbers, each derived in prose.md from measured reference prose and floored there: no
 // rendered paragraph over 79 words, and relativizers under 12.0 per 1,000 words across the whole
 // document. Both read the rendered page through the same local-server harness the text oracle
 // uses, so the units counted are the units a reader receives: every p and every li is a prose
@@ -104,4 +104,35 @@ test("tripwires: relativizer rate under 12.0 per 1,000 words", async ({ page }) 
   console.log(`  hits: ${hits.join(", ")}`);
 
   expect(rate).toBeLessThan(RELATIVIZER_MAX);
+});
+
+// Second-person density (spec Validation; criterion 3). Ceiling 16.5 per 1,000 words: the local
+// technical sibling projects/verifiability measured 14.35 you-family hits per 1k and the tripwire
+// is that reference figure plus 15% (14.35 × 1.15 = 16.50), the same derivation prose.md uses for
+// the other two numbers. The shipped S6 page measured 29.08, which is the failure this arm exists
+// to keep from coming back. Hits are printed with context so the count is read as classified
+// direct address rather than as a bare grep: every hit on this page is second-person address, so
+// none is discounted — the classification is reported, never subtracted.
+const SECOND_PERSON_MAX = 16.5;
+const SECOND_PERSON_RE = /\b(you|your|yours|yourself|yourselves)\b/gi;
+
+test("tripwires: second-person density at or under 16.5 per 1,000 words", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto(url, { waitUntil: "networkidle" });
+  await page.evaluate(() => document.fonts.ready);
+
+  const text = await page.evaluate(() => document.body.innerText ?? "");
+  const words = text.trim().split(/\s+/).filter(Boolean).length;
+  const hits = [...text.matchAll(SECOND_PERSON_RE)].map((m) => ({
+    word: m[0],
+    context: text.slice(Math.max(0, m.index - 30), m.index + m[0].length + 30).replace(/\s+/g, " "),
+  }));
+  const rate = words === 0 ? 0 : (hits.length / words) * 1000;
+
+  console.log(
+    `tripwires: ${hits.length} you-family hits in ${words} words = ${rate.toFixed(2)} per 1k (cap ${SECOND_PERSON_MAX}; reference projects/verifiability 14.35 per 1k, shipped S6 page 29.08)`,
+  );
+  for (const hit of hits) console.log(`  address: "${hit.word}" in "…${hit.context}…"`);
+
+  expect(rate).toBeLessThanOrEqual(SECOND_PERSON_MAX);
 });
