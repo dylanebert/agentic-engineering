@@ -20,38 +20,28 @@
 
   <section class="section" id="spectrum">
     <h2>the spectrum</h2>
-    <p>Two ways of making software sit at opposite ends of a spectrum.</p>
-
-    <h3 class="point" data-role="vibe">vibe coding</h3>
     <p>
-      One end is <span class="term" data-role="vibe">vibe coding</span>. Tell an agent "make me
+      <span class="term" data-role="vibe">vibe coding</span> sits at one end. Tell an agent "make me
       some software," and software comes out. It might be good. It might be bad. And it's probably
       <span class="term" data-role="vibe">purple</span>: a model given no direction reaches for the
       same few defaults every time.
     </p>
 
-    <h3 class="point" data-role="prose">human code</h3>
     <p>
-      The other end is <span class="term" data-role="prose">human code</span>, every line typed by
+      <span class="term" data-role="prose">human code</span> sits at the other, every line typed by
       a person. Slower per line, and the intent behind each one is known. For work where the design
       is the hard part and the typing is incidental, it stays the right trade.
     </p>
 
-    <h3 class="point" data-role="agentic">agentic engineering</h3>
     <p>
-      Those are not the only two options. Between vibe coding and human code is a whole space, and
-      <span class="term" data-role="agentic">agentic engineering</span> lives there: the work is
-      directed, and every step is checked.
+      <span class="term" data-role="agentic">agentic engineering</span> lives in the whole space
+      between them: the work is directed, and every step is checked.
     </p>
-
   </section>
 
   <section class="section" id="principles">
-    <h2>principles</h2>
-    <p>
-      The practice is young. Most of it is still just trying things and seeing what happens, but I
-      have seen enough to name two principles.
-    </p>
+    <h2>principles of agentic engineering</h2>
+    <p>After a lot of experimentation, the practice is beginning to converge on two principles.</p>
 
     <section class="principle" id="verifiability">
       <h3>1. verifiability</h3>
@@ -60,10 +50,6 @@
         fast? Is it secure? Is it what was asked for?
         <span class="term" data-role="verify">Verifiability</span> is how well those questions can
         be answered, and it is the hard part.
-      </p>
-      <p>
-        A companion page, <a href="/verifiability/">verifiability</a>, goes further: why checking
-        sets the pace of development, and when a cheap check can stand in for an expensive one.
       </p>
     </section>
 
@@ -104,7 +90,7 @@
   </section>
 
   <section class="section" id="verification">
-    <h2>how do you verify?</h2>
+    <h2>but how do you verify?</h2>
     <p>
       In practice, verifying is three kinds of checking, and each kind reaches somewhere the other
       two do not.
@@ -205,9 +191,8 @@
     margin-bottom: var(--heading-margin-bottom);
   }
 
-  /* The second heading tier: the spectrum's three points and the two numbered principles. Same
-     display family, weight and lowercase register as h2, one step down in size, so the page gains
-     a tier without a new type identity (spec Out of scope: the type and measure stay as shipped). */
+  /* The numbered principles use the display family one step down from their parent heading, so
+     the page gains a tier without a new type identity (spec Out of scope: type and measure stay). */
   .section h3 {
     font-family: var(--display);
     font-size: var(--body-font-size);
@@ -219,23 +204,6 @@
     margin-bottom: 2px;
   }
 
-  /* A spectrum point's heading carries the same role color its prose span and its figure part
-     carry (src/lib/vocabulary.ts), which is what makes the block structure read as the page's
-     one vocabulary. The role's *prose* binding is still the span inside the paragraph: the
-     rendered-tree arm reads `.term[data-role]` inside p and li only, so a heading can never
-     satisfy the binding on its own. */
-  .point[data-role="vibe"] {
-    color: var(--role-vibe);
-  }
-
-  .point[data-role="agentic"] {
-    color: var(--role-agentic);
-  }
-
-  .point[data-role="prose"] {
-    color: var(--role-prose);
-  }
-
   /* The two principles are subsections of one section, not sections of their own: they carry the
      beats the manuscript numbers, and the manifest declares them at subsection level. */
   .principle {
@@ -245,6 +213,10 @@
   .section p {
     margin-top: var(--paragraph-margin-top);
     color: var(--text-dim);
+  }
+
+  #spectrum p {
+    margin-top: 10px;
   }
 
   /* Color roles bound to the prose (src/lib/vocabulary.ts). A term the page names as a concept

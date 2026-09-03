@@ -4,11 +4,10 @@ import { join } from "node:path";
 import { playwrightVersion } from "./playwright-version";
 import { figures, sectionOrder } from "../src/lib/figures";
 
-// Self-terminating rendered-text oracle (criteria 3 and 4, amended at E's review; widened at I
-// to three sampled morph positions). Builds the site, stages dist + the oracle spec and its deps
-// into a work dir, runs playwright, exits. Serves the built dist over a local origin (not a dev
-// server), extracts the page's visible text at all three morph positions (0 = vibe, 0.5 = kex,
-// 1 = win98), and runs the voice ban list, the em-dash cap, and the novelty regex over that text.
+// Self-terminating rendered-text oracle (criteria 3 and 4). Builds the site, stages dist + the
+// oracle spec and its dependencies into a work dir, runs Playwright, and exits. It serves the built
+// dist over a local origin (not a dev server), extracts the page's visible text, and runs the voice
+// ban list, em-dash cap, and novelty regex over that text.
 // Display-gated like shot.ts; WSL branch stages onto Windows TEMP and runs through PowerShell.
 
 const repo = join(import.meta.dir, "..");
