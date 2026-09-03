@@ -75,9 +75,10 @@ describe("figure manifest", () => {
   });
 
   // P2 discloses the loop one concept at a time and reserves "stage" for the noun. The figure
-  // follows the third paragraph, whose claim names every rendered label plus repeat. Mutation:
-  // move the figure back to paragraph 1 or restore "do the stage" and this arm reds.
-  test("P2 progressively discloses the loop with stage used only as a noun", () => {
+  // follows the third paragraph, whose claim names every rendered label plus repeat. Its closing
+  // heading also stands alone instead of being echoed by the first sentence. Mutations: move the
+  // figure back to paragraph 1, restore "do the stage", or begin the closing "In practice" — red.
+  test("P2 progressively discloses the loop and keeps the closing heading standalone", () => {
     const app = appSource();
     const loop = app.match(/<section class="section" id="loop">([\s\S]*?)<StageLoop \/>/)?.[1];
     expect(loop).toBeDefined();
@@ -94,6 +95,14 @@ describe("figure manifest", () => {
     for (const label of ["spec", "stage", "verify", "repeat"]) {
       expect(figures[0].claim.toLowerCase()).toContain(label);
     }
+
+    const closing = app.match(/<section class="section" id="closing">([\s\S]*?)<\/section>/)?.[1];
+    const heading = closing?.match(/<h2>([^<]+)<\/h2>/)?.[1].trim().toLowerCase();
+    const opener = closing?.match(/<p>\s*([\s\S]*?)<\/p>/)?.[1]
+      .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
+    expect(heading).toBe("in practice");
+    expect(opener).toBeDefined();
+    expect(opener?.startsWith(heading!)).toBe(false);
   });
 
   test("every beat anchor is a verbatim manuscript line, in the manuscript's order", () => {

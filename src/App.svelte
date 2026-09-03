@@ -121,7 +121,7 @@
   <section class="section" id="closing">
     <h2>in practice</h2>
     <p>
-      In practice, <span class="term" data-role="agentic">agentic engineering</span> is one spec,
+      <span class="term" data-role="agentic">Agentic engineering</span> is one spec,
       small stages, a fresh conversation for each, and a check before the next one opens.
     </p>
     <p>
