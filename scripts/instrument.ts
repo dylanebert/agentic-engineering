@@ -203,7 +203,11 @@ sourceMutation(
 sourceMutation(
   "loop eased approach",
   join(repo, "src/lib/StageLoop.svelte"),
-  "offset-distance: calc((var(--phase, 1) - sin(var(--phase, 1) * 1080deg) * 0.018) * 100%);",
+  `offset-distance: calc((var(--phase, 1) - (
+      sin(var(--phase, 1) * 360deg) +
+      sin(var(--phase, 1) * 720deg) * 1.33791876 +
+      sin(var(--phase, 1) * 1080deg) * 0.60019838
+    ) * 0.006) * 100%);`,
   "offset-distance: calc(var(--phase, 1) * 100%);",
   "non-constant speed",
 );
@@ -225,7 +229,11 @@ sourceMutation(
 sourceMutation(
   "loop traveling unit",
   join(repo, "src/lib/StageLoop.svelte"),
-  "offset-distance: calc((var(--phase, 1) - sin(var(--phase, 1) * 1080deg) * 0.018) * 100%);",
+  `offset-distance: calc((var(--phase, 1) - (
+      sin(var(--phase, 1) * 360deg) +
+      sin(var(--phase, 1) * 720deg) * 1.33791876 +
+      sin(var(--phase, 1) * 1080deg) * 0.60019838
+    ) * 0.006) * 100%);`,
   "offset-distance: 100%;",
   "one unit travels",
 );

@@ -125,7 +125,11 @@
     stroke: var(--role-agentic);
     stroke-width: 3;
     offset-path: url("#unit-route");
-    offset-distance: calc((var(--phase, 1) - sin(var(--phase, 1) * 1080deg) * 0.018) * 100%);
+    offset-distance: calc((var(--phase, 1) - (
+      sin(var(--phase, 1) * 360deg) +
+      sin(var(--phase, 1) * 720deg) * 1.33791876 +
+      sin(var(--phase, 1) * 1080deg) * 0.60019838
+    ) * 0.006) * 100%);
     r: calc(7px * max(
       clamp(0, calc(1 - var(--phase, 1) * 18), 1),
       clamp(0, calc(1 - abs(var(--phase, 1) - 0.2784) * 32), 1),

@@ -672,10 +672,14 @@ test("figures: one unit travels spec to stage to verify to stage with stroke emp
     const read = await page.locator(figureSelector("stage-loop")).evaluate((element, value) => {
       (element as HTMLElement).style.setProperty("--phase", String(value));
       const unit = element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect();
-      const emphasis = [...element.querySelectorAll<SVGElement>(".emphasis")].map((node) => ({
-        node: node.dataset.node,
-        opacity: Number(getComputedStyle(node).opacity),
-      }));
+      const emphasis = [...element.querySelectorAll<SVGElement>(".emphasis")].map((node) => {
+        const box = node.getBoundingClientRect();
+        return {
+          node: node.dataset.node,
+          opacity: Number(getComputedStyle(node).opacity),
+          center: { x: box.x + box.width / 2, y: box.y + box.height / 2 },
+        };
+      });
       const edge = getComputedStyle(element.querySelector('[data-figure-part="return-edge"]')!);
       const fills = [...element.querySelectorAll("rect, circle, path, line")].map((node) => getComputedStyle(node).fill);
       return { unit: { x: unit.x + unit.width / 2, y: unit.y + unit.height / 2 }, emphasis, dash: parseFloat(edge.strokeDashoffset), fills };
@@ -685,6 +689,10 @@ test("figures: one unit travels spec to stage to verify to stage with stroke emp
   console.log(`loop channels: ${JSON.stringify(reads)}`);
   expect(reads.every((read) => read.fills.every((fill) => fill === "none"))).toBe(true);
   expect(reads.map((read) => read.emphasis.find((node) => node.opacity > 0.9)?.node)).toEqual(["spec", "stage", "verify", "stage"]);
+  for (const read of reads.slice(0, 3)) {
+    const landed = read.emphasis.find((node) => node.opacity > 0.9)!;
+    expect(Math.hypot(read.unit.x - landed.center.x, read.unit.y - landed.center.y)).toBeLessThanOrEqual(0.5);
+  }
   expect(reads[0].unit.x).toBeLessThan(reads[1].unit.x);
   expect(reads[1].unit.x).toBeLessThan(reads[2].unit.x);
   expect(reads[3].unit.x).toBeLessThan(reads[2].unit.x);
