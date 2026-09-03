@@ -148,6 +148,13 @@ sourceMutation(
   "order the prose states",
 );
 sourceMutation(
+  "return edge lands on the stage node",
+  join(repo, "src/lib/StageLoop.svelte"),
+  "L 460 100 L 274 100 L 274 {top + height}",
+  "L 460 100 L 88 100 L 88 {top + height}",
+  "lands on the stage node",
+);
+sourceMutation(
   "figure label against its section's prose",
   join(repo, "src/lib/vocabulary.ts"),
   'verify: { label: "verify", color: "verify"',
