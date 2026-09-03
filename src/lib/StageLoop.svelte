@@ -23,8 +23,9 @@
         <path id="unit-route" fill="none" d="M 88 34 L 274 34 L 460 34 L 460 100 L 274 100 L 274 56" />
       </defs>
 
-      <line class="edge" x1="162" y1={top + height / 2} x2="192" y2={top + height / 2} />
-      <line class="edge" x1="348" y1={top + height / 2} x2="378" y2={top + height / 2} />
+      <line class="edge base" x1="162" y1={top + height / 2} x2="200" y2={top + height / 2} />
+      <line class="edge base" x1="348" y1={top + height / 2} x2="386" y2={top + height / 2} />
+      <path class="edge base" d="M 460 {top + height} L 460 100 L 274 100 L 274 {top + height}" />
       <path
         class="edge return"
         data-figure-part="return-edge"
@@ -124,7 +125,13 @@
     stroke: var(--role-agentic);
     stroke-width: 3;
     offset-path: url("#unit-route");
-    offset-distance: calc(var(--phase, 1) * 100%);
+    offset-distance: calc((var(--phase, 1) - sin(var(--phase, 1) * 1080deg) * 0.018) * 100%);
+    r: calc(7px * max(
+      clamp(0, calc(1 - var(--phase, 1) * 18), 1),
+      clamp(0, calc(1 - abs(var(--phase, 1) - 0.2784) * 32), 1),
+      clamp(0, calc(1 - abs(var(--phase, 1) - 0.5569) * 32), 1),
+      clamp(0, calc(1 - abs(var(--phase, 1) - 0.84) * 12), 1)
+    ));
   }
 
   .label {

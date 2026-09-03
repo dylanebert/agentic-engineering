@@ -180,8 +180,8 @@ sourceMutation(
 sourceMutation(
   "return edge lands on the stage node",
   join(repo, "src/lib/StageLoop.svelte"),
-  "L 460 100 L 274 100 L 274 {top + height}",
-  "L 460 100 L 88 100 L 88 {top + height}",
+  'data-figure-part="return-edge"\n        d="M 460 {top + height} L 460 100 L 274 100 L 274 {top + height}"',
+  'data-figure-part="return-edge"\n        d="M 460 {top + height} L 460 100 L 88 100 L 88 {top + height}"',
   "lands on the stage node",
 );
 sourceMutation(
@@ -192,12 +192,40 @@ sourceMutation(
   "substring of its claim",
 );
 
+// V1 connector, easing, and rest mutations each restore the rejected mechanism directly.
+sourceMutation(
+  "loop connector endpoints",
+  join(repo, "src/lib/StageLoop.svelte"),
+  'x2="200" y2={top + height / 2}',
+  'x2="192" y2={top + height / 2}',
+  "every loop connector meets",
+);
+sourceMutation(
+  "loop eased approach",
+  join(repo, "src/lib/StageLoop.svelte"),
+  "offset-distance: calc((var(--phase, 1) - sin(var(--phase, 1) * 1080deg) * 0.018) * 100%);",
+  "offset-distance: calc(var(--phase, 1) * 100%);",
+  "non-constant speed",
+);
+sourceMutation(
+  "loop indicator absent at rest",
+  join(repo, "src/lib/StageLoop.svelte"),
+  `r: calc(7px * max(
+      clamp(0, calc(1 - var(--phase, 1) * 18), 1),
+      clamp(0, calc(1 - abs(var(--phase, 1) - 0.2784) * 32), 1),
+      clamp(0, calc(1 - abs(var(--phase, 1) - 0.5569) * 32), 1),
+      clamp(0, calc(1 - abs(var(--phase, 1) - 0.84) * 12), 1)
+    ));`,
+  "r: 7px;",
+  "reduced-motion rest",
+);
+
 // H2 motion arms. Each mutation removes one of the loop's three independent channels; all three
 // target the real-page "one unit travels" arm, so a source replacement cannot pass on fixture-only coverage.
 sourceMutation(
   "loop traveling unit",
   join(repo, "src/lib/StageLoop.svelte"),
-  "offset-distance: calc(var(--phase, 1) * 100%);",
+  "offset-distance: calc((var(--phase, 1) - sin(var(--phase, 1) * 1080deg) * 0.018) * 100%);",
   "offset-distance: 100%;",
   "one unit travels",
 );
