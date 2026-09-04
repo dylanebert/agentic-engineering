@@ -1,6 +1,7 @@
 import { createServer, type Server } from "node:http";
 import { readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test, expect } from "@playwright/test";
 
 // Rendered-text oracle (criteria 3 and 4, amended at E's review; widened at I to three sampled
@@ -12,7 +13,7 @@ import { test, expect } from "@playwright/test";
 // (0 = vibe, 0.5 = kex, 1 = win98) since the morph adds a descriptor per end and a
 // position-dependent span is still the page's prose.
 
-const root = __dirname;
+const root = dirname(fileURLToPath(import.meta.url));
 const dist = join(root, "dist");
 const base = "/agentic-engineering/";
 

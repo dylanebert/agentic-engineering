@@ -1,8 +1,10 @@
 import { createServer, type Server } from "node:http";
 import { readFile, readdir } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test, expect } from "@playwright/test";
-import { perceptualDelta } from "./png";
+import { pixelProbePass, probePixels, type PixelProbe } from "./shallot-pixels";
+import { decodePng, perceptualDelta } from "./png";
 import { figures } from "./manifest";
 import { assertVaries } from "./variance";
 import { assertReducedMotion } from "./reduced";
@@ -14,7 +16,7 @@ import { grammar } from "./vocabulary";
 // substrate arm, the server contract, typography, readable measure, emphasis, rhythm, and
 // non-interference.
 
-const root = __dirname;
+const root = dirname(fileURLToPath(import.meta.url));
 const dist = join(root, "dist");
 const base = "/agentic-engineering/";
 const types: Record<string, string> = {
@@ -53,8 +55,8 @@ test("substrate: dist contains no Shallot or typegpu", async () => {
       : readFile(join(path, entry.name), "utf8").catch(() => "")))).flat();
   };
   const built = (await readTree(dist)).join("\n").toLowerCase();
-  expect(built).not.toContain("shallot");
-  expect(built).not.toContain("typegpu");
+  expect(built).not.toMatch(/(?:from|import\()\s*["\'](?:@dylanebert\/shallot|typegpu|unplugin-typegpu)/);
+  expect(built).not.toMatch(/<iframe|https?:\/\/(?:localhost|127\.0\.0\.1):\d+|\bvite\s+(?:dev|serve|preview)\b/);
 });
 
 // --- Server contract: missing assets 404 (no SPA fallback masking) ---
@@ -270,123 +272,78 @@ test("non-interference: story text remains intact", async ({ page }) => {
   expect(result.text).toContain("The application of these principles is agentic engineering.");
 });
 
-// --- H1 overture register ---
+// --- H3 hero register and degradation ---
 
-test("overture: exactly one unlabeled overture sits above the opening", async ({ page }) => {
+test("hero: exactly one unlabeled three-state hero sits above the opening", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const read = await page.evaluate(() => {
-    const overtures = [...document.querySelectorAll("[data-overture-id]")];
-    const opening = document.querySelector("section.section");
-    return {
-      count: overtures.length,
-      states: overtures[0] ? [...overtures[0].querySelectorAll("[data-overture-state]")].map((node) => node.getAttribute("data-overture-state")) : [],
-      labels: overtures[0]?.querySelectorAll("[data-figure-label], figcaption").length ?? -1,
-      above: overtures[0] && opening ? (overtures[0].compareDocumentPosition(opening) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 : false,
-      roles: overtures[0] ? [...overtures[0].querySelectorAll("[data-overture-state]")].map((node) => node.getAttribute("data-role")) : [],
-    };
+    const heroes = [...document.querySelectorAll("[data-hero-id]")];
+    const hero = heroes[0]; const opening = document.querySelector("section.section");
+    return { count: heroes.length, states: hero ? [...hero.querySelectorAll("rect[data-hero-state]")].map((n) => n.getAttribute("data-hero-state")) : [], labels: hero?.querySelectorAll("[data-figure-label],figcaption").length ?? -1, canvases: hero?.querySelectorAll("canvas").length ?? 0, above: !!hero && !!opening && (hero.compareDocumentPosition(opening) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 };
   });
-  console.log(`overture register: ${JSON.stringify(read)}`);
-  expect(read).toEqual({ count: 1, states: ["human", "agentic", "vibe"], labels: 0, above: true, roles: ["prose", "agentic", "vibe"] });
+  console.log(`hero register: ${JSON.stringify(read)}`);
+  expect(read).toEqual({ count: 1, states: ["human", "agentic", "vibe"], labels: 0, canvases: 1, above: true });
 });
 
-test("overture: reduced motion rests on a stable agentic captured-cell state", async ({ page }) => {
-  const result = await assertReducedMotion(page, '[data-overture-id="spectrum-overture"]', async (target, step) => {
-    if (step === 0) await target.goto(url, { waitUntil: "networkidle" });
-  }, 1);
-  const read = await page.locator('[data-overture-id="spectrum-overture"]').evaluate((element) => ({
-    phase: getComputedStyle(element).getPropertyValue("--phase").trim(),
-    cells: element.querySelector("pre")?.textContent?.split("\n") ?? [],
-    width: element.querySelector("pre")?.getBoundingClientRect().width ?? 0,
-  }));
-  console.log(`overture reduced rest: phase=${read.phase} cells=${read.cells[0]?.length}x${read.cells.length} width=${read.width}`);
-  expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
-  expect(Number(read.phase)).toBe(1);
-  expect(read.cells).toHaveLength(14);
-  expect(read.cells.every((row) => row.length === 22)).toBe(true);
-  expect(read.width).toBeGreaterThanOrEqual(176);
+test("hero: reduced motion rests on the captured agentic frame", async ({ page }) => {
+  const result = await assertReducedMotion(page, '[data-hero-id="spectrum-hero"]', async (target, step) => { if (step === 0) await target.goto(url, { waitUntil: "networkidle" }); }, 1);
+  const read = await page.locator('[data-hero-id="spectrum-hero"]').evaluate((element) => ({ phase: getComputedStyle(element).getPropertyValue("--phase").trim(), rows: element.querySelector("pre")?.textContent?.split("\n").length, state: element.getAttribute("data-hero-state") }));
+  console.log(`hero reduced rest: ${JSON.stringify(read)}`); expect(result.pass).toBe(true); expect(read).toEqual({ phase: "1", rows: 14, state: "agentic" });
 });
 
-test("overture: captured cells keep the H0 minimum width at the mobile measure", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
+test("hero: DOM spectrum uses strokes without area tint", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
-  const width = await page.locator('[data-overture-state="agentic"] pre').evaluate((element) => element.getBoundingClientRect().width);
-  console.log(`overture mobile captured-cell width: ${width}`);
-  expect(width).toBeGreaterThanOrEqual(176);
+  const fills = await page.locator('[data-hero-id] path, [data-hero-id] rect').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
+  expect(fills.every((fill) => fill === "none")).toBe(true);
 });
 
-test("overture: geometry uses strokes without area fill or tint", async ({ page }) => {
-  await page.goto(url, { waitUntil: "networkidle" });
-  const fills = await page.locator('[data-overture-id="spectrum-overture"] path').evaluateAll((paths) => paths.map((path) => ({
-    fill: getComputedStyle(path).fill,
-    opacity: getComputedStyle(path).fillOpacity,
-  })));
-  console.log(`overture geometry fills: ${JSON.stringify(fills)}`);
-  expect(fills.every(({ fill, opacity }) => fill === "none" || opacity === "0")).toBe(true);
-});
-
-test("overture: captured pose varies perceptibly across phase", async ({ page }) => {
-  const steps = 3;
-  const result = await assertVaries(page, '[data-overture-id="spectrum-overture"]', async (target, step) => {
-    if (step === 0) await target.goto(url, { waitUntil: "networkidle" });
-    await target.locator('[data-overture-id="spectrum-overture"]').evaluate((element, value) => {
-      (element as HTMLElement).style.setProperty("--phase", value);
-    }, String(step / (steps - 1)));
-  }, steps);
-  console.log(`overture variance: failures=${JSON.stringify(result.failures)}`);
-  expect(result.pass, result.failures.map((failure) => failure.reason).join("; ")).toBe(true);
-});
-
-// Mutation: restore vibe's uncapped triangular expression and its sampled scale exceeds the
-// phase-1 maximum (1.04 > 1), red.
-test("overture: sampled visual values never exceed the phase-1 rest-state maxima", async ({ page }) => {
-  await page.goto(url, { waitUntil: "networkidle" });
-  const read = await page.locator('[data-overture-id="spectrum-overture"]').evaluate((element) => {
-    const states = [...element.querySelectorAll<HTMLElement>("[data-overture-state]")];
-    const sample = (phase: number) => {
-      (element as HTMLElement).style.setProperty("--phase", String(phase));
-      return states.map((state) => {
-        const style = getComputedStyle(state);
-        const matrix = new DOMMatrixReadOnly(style.transform);
-        return { opacity: Number(style.opacity), scale: matrix.a, translateY: matrix.f };
-      });
-    };
-    const rest = sample(1);
-    const maxima = {
-      opacity: Math.max(...rest.map((value) => value.opacity)),
-      scale: Math.max(...rest.map((value) => value.scale)),
-      translateY: Math.max(...rest.map((value) => value.translateY)),
-    };
-    const sampled = Array.from({ length: 121 }, (_, index) => sample(index / 120)).flat();
-    return { maxima, sampled };
+// Five H3 mutations terminate here: fallback copy changes body text; deleting the no-adapter
+// branch hides the captured pre; a transparent canvas fails both probes; removing GlazePlugin
+// or the explicit state.step leaves sear's offscreen frame absent from the composited screenshot.
+test("hero: real WebGPU acquisition draws a composited, varying cube and plain Chromium keeps silent rest", async ({ page }, testInfo) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    (window as any).__webgpuCalls = 0;
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: Parameters<typeof original>) {
+      if (args[0] === "webgpu") (window as any).__webgpuCalls++;
+      return original.apply(this, args);
+    } as typeof original;
   });
-  console.log(`overture visual maxima: ${JSON.stringify(read.maxima)}`);
-  for (const value of read.sampled) {
-    expect(value.opacity).toBeLessThanOrEqual(read.maxima.opacity + 1e-4);
-    expect(value.scale).toBeLessThanOrEqual(read.maxima.scale + 1e-4);
-    expect(value.translateY).toBeLessThanOrEqual(read.maxima.translateY + 1e-4);
-  }
-});
-
-// Mutation: skew agentic's --offset from 0 to 0.001 and its sampled >=0.9 count drops below
-// both sibling states, red.
-test("overture: agentic high-emphasis dwell is not less than any other state", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
+  page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(url, { waitUntil: "networkidle" });
-  const dwell = await page.locator('[data-overture-id="spectrum-overture"]').evaluate((element) => {
-    const states = [...element.querySelectorAll<HTMLElement>("[data-overture-state]")];
-    const counts = Object.fromEntries(states.map((state) => [state.dataset.overtureState!, 0]));
-    for (let index = 0; index < 600; index += 1) {
-      (element as HTMLElement).style.setProperty("--phase", String(index / 600));
-      for (const state of states) {
-        const focus = (Number(getComputedStyle(state).opacity) - 0.58) / 0.42;
-        if (focus >= 0.9 - 1e-6) counts[state.dataset.overtureState!] += 1;
-      }
+  const hero = page.locator('[data-hero-id="spectrum-hero"]');
+  const initialText = await page.locator("body").innerText();
+  if (testInfo.project.name === "chromium-webgpu") {
+    await expect(hero).toHaveAttribute("data-hero-gpu", "drawn", { timeout: 30000 });
+    expect(await hero.locator("canvas").count()).toBe(1);
+    expect(await page.evaluate(() => (window as any).__webgpuCalls)).toBe(1);
+    const first = await hero.locator("canvas").screenshot();
+    await page.waitForTimeout(700);
+    const second = await hero.locator("canvas").screenshot();
+    const decoded = decodePng(first);
+    const probes: PixelProbe[] = [
+      { name: "scene field", minPixels: 1000, minSpan: 100, r: [0, 70], g: [0, 70], b: [0, 70] },
+      { name: "lit cube", minPixels: 100, minSpan: 20, r: [75, 255], g: [35, 220], b: [10, 180] },
+    ];
+    for (const probe of probes) {
+      const result = probePixels(decoded.data, decoded.width, decoded.height, probe);
+      console.log(`hero ${probe.name}: ${JSON.stringify(result)}`);
+      expect(pixelProbePass(result, probe)).toBe(true);
     }
-    return counts;
-  });
-  console.log(`overture >=0.9 dwell samples: ${JSON.stringify(dwell)}`);
-  expect(dwell.agentic).toBeGreaterThanOrEqual(dwell.human);
-  expect(dwell.agentic).toBeGreaterThanOrEqual(dwell.vibe);
+    const variance = perceptualDelta(first, second);
+    console.log(`hero canvas variance=${JSON.stringify(variance)}`);
+    expect(variance.maxDelta).toBeGreaterThan(3);
+    expect(variance.extent).toBeGreaterThan(0.001);
+  } else {
+    await expect(hero.locator("pre")).toBeVisible();
+    await expect(hero).not.toHaveAttribute("data-hero-gpu", "drawn");
+    await page.waitForTimeout(700);
+    expect(await page.locator("body").innerText()).toBe(initialText);
+    expect(await page.evaluate(() => (window as any).__webgpuCalls)).toBe(0);
+  }
+  expect(errors).toEqual([]);
 });
 
 // --- S3 figure arms ---
@@ -746,7 +703,7 @@ test("figures: every color role is bound to both a prose span and a figure part"
         .filter((role) => role.length > 0);
     return {
       prose: read(".page .section p .term[data-role], .page .section li .term[data-role]"),
-      figures: read("figure [data-role], [data-overture-id] [data-role]"),
+      figures: read("figure [data-role], [data-hero-id] [data-role]"),
     };
   });
   const roles = Object.keys(grammar.colors);

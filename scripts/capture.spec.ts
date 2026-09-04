@@ -1,6 +1,7 @@
 import { createServer, type Server } from "node:http";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { expect, test } from "@playwright/test";
 
 // Runs in the work dir next to a built `dist/`. Serves it over a local origin, checks direct-set
@@ -8,7 +9,7 @@ import { expect, test } from "@playwright/test";
 // screenshots. The neutral captures compare against platform-stamped goldens on the producing seat;
 // shot.ts stages this spec and collects the portable captures.
 
-const root = __dirname;
+const root = dirname(fileURLToPath(import.meta.url));
 const dist = join(root, "dist");
 const base = "/agentic-engineering/";
 
@@ -115,7 +116,7 @@ for (const view of views) {
       // Playwright appends the project and platform to the snapshot filename.
       await expect(page).toHaveScreenshot(
         view.name === "desktop.png" ? "neutral-desktop.png" : "neutral-mobile.png",
-        { fullPage: true },
+        { fullPage: true, mask: [page.locator("[data-hero-canvas]")] },
       );
     } else {
       console.log(`golden: skipped on ${seat}; stamped seat is ${goldenBrowser}-${goldenPlatform}`);

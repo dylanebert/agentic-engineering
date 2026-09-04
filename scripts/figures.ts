@@ -33,8 +33,18 @@ function run(cmd: string[], cwd: string): void {
   }
 }
 
+const shallotTarball = readdirSync(join(repo, "vendor")).find((file) => file.endsWith(".tgz"));
+if (!shallotTarball) throw new Error("vendored Shallot tarball is missing");
 const pkg = JSON.stringify(
-  { name: "agentic-engineering-figures", private: true, dependencies: { "@playwright/test": playwrightVersion } },
+  {
+    name: "agentic-engineering-figures",
+    private: true,
+    type: "module",
+    dependencies: {
+      "@playwright/test": playwrightVersion,
+      "@dylanebert/shallot": `file:${join(repo, "vendor", shallotTarball)}`,
+    },
+  },
   null,
   2,
 );
@@ -54,6 +64,11 @@ function prepWork(workDir: string): void {
   for (const f of ["figures.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
     cpSync(join(import.meta.dir, f), join(workDir, f));
   }
+  // Exercise the vendored package's final-compositor classifier without maintaining a local mirror.
+  cpSync(
+    join(repo, "node_modules/@dylanebert/shallot/src/harness/pixels.ts"),
+    join(workDir, "shallot-pixels.ts"),
+  );
   // The figure arms read the manifest as an external expectation rather than off the page they
   // are checking, so the declaration module is staged beside the spec.
   cpSync(join(import.meta.dir, "../src/lib/figures.ts"), join(workDir, "manifest.ts"));

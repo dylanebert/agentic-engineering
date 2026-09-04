@@ -150,8 +150,9 @@ describe("figure manifest", () => {
   // labels, no claim, no beat, and a rest state on agentic.
   // Mutation: add a fourth state, or set `labels: "required"`, and this arm reds.
   test("the overture declares three unlabeled states, each named later in the prose", () => {
-    expect(overture.kind).toBe("overture");
+    expect(overture.kind).toBe("hero");
     expect(overture.labels).toBe("none");
+    expect(overture.canvas).toBe("one");
     expect(overture.site).toBe("above-opening");
     expect(overture.rest).toBe("agentic");
     expect(overture.states.map((state) => state.state)).toEqual(["human", "agentic", "vibe"]);
