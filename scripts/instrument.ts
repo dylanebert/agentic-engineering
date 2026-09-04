@@ -98,6 +98,10 @@ for (const file of readdirSync(work)) if (file.endsWith(".spec.ts")) rmSync(join
 for (const file of ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
   cpSync(join(import.meta.dir, file), join(work, file));
 }
+cpSync(
+  join(repo, "node_modules/@dylanebert/shallot/src/harness/pixels.ts"),
+  join(work, "shallot-pixels.ts"),
+);
 writeFileSync(join(work, "package.json"), JSON.stringify({ name: "agentic-engineering-instrument", private: true, type: "module", dependencies: { "@playwright/test": playwrightVersion } }));
 cpSync(join(import.meta.dir, "capture.spec.ts-snapshots"), join(work, "capture.spec.ts-snapshots"), { recursive: true });
 stage();

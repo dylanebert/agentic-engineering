@@ -10,9 +10,10 @@
     let last = 0;
     let engine: Awaited<ReturnType<typeof import("./hero-engine")["mountHero"]>> | undefined;
     const tick = (time: number) => {
-      if (last) clock = (clock + time - last) % loop;
+      const dt = last ? time - last : 0;
+      if (last) clock = (clock + dt) % loop;
       last = time;
-      engine?.render(phase);
+      engine?.render(phase, dt);
       raf = requestAnimationFrame(tick);
     };
     const observer = new IntersectionObserver(async ([entry]) => {
@@ -23,8 +24,10 @@
         const adapter = await navigator.gpu.requestAdapter();
         if (adapter) {
           const { mountHero } = await import("./hero-engine");
-          engine = await mountHero();
-          engine.render(phase);
+          engine = await mountHero(canvas);
+          // build() starts no loop: this explicit step produces the first composited frame,
+          // including the phase-1 reduced-motion rest frame, before the capture is hidden.
+          engine.render(phase, 0);
           drawn = true;
           root.dataset.heroGpu = "drawn";
         }

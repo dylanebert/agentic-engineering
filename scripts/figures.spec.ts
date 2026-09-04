@@ -3,7 +3,8 @@ import { readFile, readdir } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test, expect } from "@playwright/test";
-import { perceptualDelta } from "./png";
+import { pixelProbePass, probePixels, type PixelProbe } from "./shallot-pixels";
+import { decodePng, perceptualDelta } from "./png";
 import { figures } from "./manifest";
 import { assertVaries } from "./variance";
 import { assertReducedMotion } from "./reduced";
@@ -55,7 +56,7 @@ test("substrate: dist contains no Shallot or typegpu", async () => {
   };
   const built = (await readTree(dist)).join("\n").toLowerCase();
   expect(built).not.toMatch(/(?:from|import\()\s*["\'](?:@dylanebert\/shallot|typegpu|unplugin-typegpu)/);
-  for (const banned of ["iframe", "vite preview", "fallback string", "error text"]) expect(built).not.toContain(banned);
+  expect(built).not.toMatch(/<iframe|https?:\/\/(?:localhost|127\.0\.0\.1):\d+|\bvite\s+(?:dev|serve|preview)\b/);
 });
 
 // --- Server contract: missing assets 404 (no SPA fallback masking) ---
@@ -296,18 +297,51 @@ test("hero: DOM spectrum uses strokes without area tint", async ({ page }) => {
   expect(fills.every((fill) => fill === "none")).toBe(true);
 });
 
-test("hero: WebGPU draws only in the WebGPU project and plain Chromium keeps the captured frame", async ({ page }, testInfo) => {
+// Five H3 mutations terminate here: fallback copy changes body text; deleting the no-adapter
+// branch hides the captured pre; a transparent canvas fails both probes; removing GlazePlugin
+// or the explicit state.step leaves sear's offscreen frame absent from the composited screenshot.
+test("hero: real WebGPU acquisition draws a composited, varying cube and plain Chromium keeps silent rest", async ({ page }, testInfo) => {
+  await page.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    (window as any).__webgpuCalls = 0;
+    HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: Parameters<typeof original>) {
+      if (args[0] === "webgpu") (window as any).__webgpuCalls++;
+      return original.apply(this, args);
+    } as typeof original;
+  });
   const errors: string[] = [];
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto(url, { waitUntil: "networkidle" });
   const hero = page.locator('[data-hero-id="spectrum-hero"]');
+  const initialText = await page.locator("body").innerText();
   if (testInfo.project.name === "chromium-webgpu") {
     await expect(hero).toHaveAttribute("data-hero-gpu", "drawn", { timeout: 30000 });
-    expect(await page.locator("canvas").count()).toBe(1);
+    expect(await hero.locator("canvas").count()).toBe(1);
+    expect(await page.evaluate(() => (window as any).__webgpuCalls)).toBe(1);
+    const first = await hero.locator("canvas").screenshot();
+    await page.waitForTimeout(700);
+    const second = await hero.locator("canvas").screenshot();
+    const decoded = decodePng(first);
+    const probes: PixelProbe[] = [
+      { name: "scene field", minPixels: 1000, minSpan: 100, r: [0, 70], g: [0, 70], b: [0, 70] },
+      { name: "lit cube", minPixels: 100, minSpan: 20, r: [75, 255], g: [35, 220], b: [10, 180] },
+    ];
+    for (const probe of probes) {
+      const result = probePixels(decoded.data, decoded.width, decoded.height, probe);
+      console.log(`hero ${probe.name}: ${JSON.stringify(result)}`);
+      expect(pixelProbePass(result, probe)).toBe(true);
+    }
+    const variance = perceptualDelta(first, second);
+    console.log(`hero canvas variance=${JSON.stringify(variance)}`);
+    expect(variance.maxDelta).toBeGreaterThan(3);
+    expect(variance.extent).toBeGreaterThan(0.001);
   } else {
     await expect(hero.locator("pre")).toBeVisible();
     await expect(hero).not.toHaveAttribute("data-hero-gpu", "drawn");
+    await page.waitForTimeout(700);
+    expect(await page.locator("body").innerText()).toBe(initialText);
+    expect(await page.evaluate(() => (window as any).__webgpuCalls)).toBe(0);
   }
   expect(errors).toEqual([]);
 });
