@@ -8,5 +8,8 @@ export default defineConfig({
   retries: 0,
   reporter: "list",
   use: { headless: true },
-  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
+  projects: [
+    { name: "chromium", use: { browserName: "chromium" } },
+    { name: "chromium-webgpu", use: { browserName: "chromium", launchOptions: { args: ["--enable-unsafe-webgpu", "--use-angle=metal"] } } },
+  ],
 });

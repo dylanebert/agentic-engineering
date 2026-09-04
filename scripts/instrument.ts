@@ -68,6 +68,27 @@ function sourceMutation(label: string, path: string, needle: string, replacement
   run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep], work);
 }
 
+function buildMutation(
+  label: string,
+  path: string,
+  needle: string | string[],
+  replacement: string | string[],
+): void {
+  const source = readFileSync(path, "utf8");
+  const needles = Array.isArray(needle) ? needle : [needle];
+  const replacements = Array.isArray(replacement) ? replacement : [replacement];
+  const mutated = needles.reduce((text, value, index) => text.replace(value, replacements[index]), source);
+  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match`);
+  writeFileSync(path, mutated);
+  try {
+    mustRed(label, ["bun", "run", "build"], repo);
+  } finally {
+    writeFileSync(path, source);
+  }
+  run(["bun", "run", "build"], repo);
+  stage();
+}
+
 if (!requireDisplay("instrument")) process.exit(0);
 
 rmSync(join(repo, "dist"), { recursive: true, force: true });
@@ -77,7 +98,7 @@ for (const file of readdirSync(work)) if (file.endsWith(".spec.ts")) rmSync(join
 for (const file of ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
   cpSync(join(import.meta.dir, file), join(work, file));
 }
-writeFileSync(join(work, "package.json"), JSON.stringify({ name: "agentic-engineering-instrument", private: true, dependencies: { "@playwright/test": playwrightVersion } }));
+writeFileSync(join(work, "package.json"), JSON.stringify({ name: "agentic-engineering-instrument", private: true, type: "module", dependencies: { "@playwright/test": playwrightVersion } }));
 cpSync(join(import.meta.dir, "capture.spec.ts-snapshots"), join(work, "capture.spec.ts-snapshots"), { recursive: true });
 stage();
 run(["bun", "install", "--silent"], work);
@@ -110,34 +131,33 @@ sourceMutation(
 // the prose-content-dependent tightness half was deleted, reddened nothing.
 cssMutation("selected desktop measure", "--measure: 548px", "--measure: 700px", "shipped desktop measure");
 
-// H1 overture arms: register and label policy are partitioned from explanatory figures.
+// H3 hero mutations.
 sourceMutation(
-  "overture mount and placement",
-  join(repo, "src/App.svelte"),
-  "\n  <Overture />\n",
-  "\n",
-  "exactly one unlabeled overture",
-);
-sourceMutation(
-  "overture zero-label policy",
+  "hero register",
   join(repo, "src/lib/Overture.svelte"),
-  'aria-hidden="true">\n  <div class="skin human"',
-  'aria-hidden="true">\n  <div data-figure-label>forbidden</div>\n  <div class="skin human"',
-  "exactly one unlabeled overture",
+  'data-hero-id="spectrum-hero"',
+  'data-retired-hero-id="spectrum-hero"',
+  "exactly one unlabeled three-state hero",
 );
-sourceMutation(
-  "overture mobile cell minimum",
+sourceMutation("hero zero-label policy", join(repo, "src/lib/Overture.svelte"), 'aria-hidden="true">', 'aria-hidden="true"><span data-figure-label>forbidden</span>', "exactly one unlabeled three-state hero");
+sourceMutation("hero no area fill", join(repo, "src/lib/Overture.svelte"), '.spectrum path,.spectrum rect,.spectrum circle{fill:none', '.spectrum path,.spectrum rect,.spectrum circle{fill:currentColor', "DOM spectrum uses strokes without area tint");
+buildMutation(
+  "static hero import",
   join(repo, "src/lib/Overture.svelte"),
-  "@media (max-width: 560px) {\n    .overture {",
-  "@media (max-width: 560px) {\n    pre { width: 112px; }\n    .overture {",
-  "captured cells keep the H0 minimum width",
+  [
+    '  import { cubeFrames } from "./cube-frames";',
+    '          const { mountHero } = await import("./hero-engine");',
+  ],
+  [
+    '  import { cubeFrames } from "./cube-frames";\n  import { mountHero } from "./hero-engine";',
+    "",
+  ],
 );
-sourceMutation(
-  "overture no area fill",
-  join(repo, "src/lib/Overture.svelte"),
-  "svg path { fill: none;",
-  "svg path { fill: currentColor;",
-  "geometry uses strokes without area fill or tint",
+buildMutation(
+  "hero chunk budget",
+  join(repo, "vite.config.ts"),
+  "export const HERO_GZIP_BUDGET = 200_000;",
+  "export const HERO_GZIP_BUDGET = 1;",
 );
 
 // S3 figure arms. Each mutation below reaches the assertion the arm is named for: the

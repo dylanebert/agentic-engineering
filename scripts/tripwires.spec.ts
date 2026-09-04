@@ -1,6 +1,7 @@
 import { createServer, type Server } from "node:http";
 import { readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { test, expect } from "@playwright/test";
 
 // Prose tripwires over the built page's rendered text (prose.md Concision; spec validation 3).
@@ -10,7 +11,7 @@ import { test, expect } from "@playwright/test";
 // uses, so the units counted are the units a reader receives: every p and every li is a prose
 // block, and the rate is over the page's whole visible text.
 
-const root = __dirname;
+const root = dirname(fileURLToPath(import.meta.url));
 const dist = join(root, "dist");
 const base = "/agentic-engineering/";
 

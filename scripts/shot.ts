@@ -31,6 +31,7 @@ const capturePkg = JSON.stringify(
   {
     name: "agentic-engineering-capture",
     private: true,
+    type: "module",
     dependencies: { "@playwright/test": playwrightVersion },
   },
   null,

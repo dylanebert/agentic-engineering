@@ -51,14 +51,15 @@ export type OvertureState = {
   term: string;
   /** A declared color role in src/lib/vocabulary.ts. */
   role: "prose" | "agentic" | "vibe";
-  /** How the one pose-identical cube is rendered for this state. */
-  skin: "shaded" | "ascii" | "glow";
+  /** The plain H3 mechanism drives one color transition; H4 owns treatments. */
+  treatment: "color";
 };
 
 export const overture: {
   id: string;
-  kind: "overture";
+  kind: "hero";
   labels: "none";
+  canvas: "one";
   /** Above the opening section, so it belongs to no section and carries no beat. */
   site: "above-opening";
   /** At rest (phase 1) the overture settles on the agentic state. */
@@ -66,14 +67,15 @@ export const overture: {
   states: readonly OvertureState[];
 } = {
   id: "spectrum-overture",
-  kind: "overture",
+  kind: "hero",
   labels: "none",
+  canvas: "one",
   site: "above-opening",
   rest: "agentic",
   states: [
-    { state: "human", term: "human code", role: "prose", skin: "shaded" },
-    { state: "agentic", term: "agentic engineering", role: "agentic", skin: "ascii" },
-    { state: "vibe", term: "vibe coding", role: "vibe", skin: "glow" },
+    { state: "human", term: "human code", role: "prose", treatment: "color" },
+    { state: "agentic", term: "agentic engineering", role: "agentic", treatment: "color" },
+    { state: "vibe", term: "vibe coding", role: "vibe", treatment: "color" },
   ],
 };
 

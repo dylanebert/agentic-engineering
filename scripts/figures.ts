@@ -34,7 +34,7 @@ function run(cmd: string[], cwd: string): void {
 }
 
 const pkg = JSON.stringify(
-  { name: "agentic-engineering-figures", private: true, dependencies: { "@playwright/test": playwrightVersion } },
+  { name: "agentic-engineering-figures", private: true, type: "module", dependencies: { "@playwright/test": playwrightVersion } },
   null,
   2,
 );

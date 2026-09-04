@@ -35,7 +35,7 @@ function run(cmd: string[], cwd: string): void {
 }
 
 const pkg = JSON.stringify(
-  { name: "agentic-engineering-tripwires", private: true, dependencies: { "@playwright/test": playwrightVersion } },
+  { name: "agentic-engineering-tripwires", private: true, type: "module", dependencies: { "@playwright/test": playwrightVersion } },
   null,
   2,
 );
