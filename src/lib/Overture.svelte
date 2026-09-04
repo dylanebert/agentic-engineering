@@ -1,19 +1,33 @@
 <script lang="ts">
   import { cubeFrames } from "./cube-frames";
-  const loop = 6000;
+  const loop = 12000;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let root: HTMLElement; let canvas: HTMLCanvasElement;
   let clock = $state(0); let drawn = $state(false);
   const phase = $derived(reduced ? 1 : clock / loop);
+  const treatment = $derived.by(() => {
+    const position = Math.sin(phase * Math.PI * 2);
+    return position < -0.5 ? "human" : position > 0.5 ? "vibe" : "agentic";
+  });
   $effect(() => {
     let raf = 0;
     let last = 0;
+    let rendering = false;
     let engine: Awaited<ReturnType<typeof import("./hero-engine")["mountHero"]>> | undefined;
     const tick = (time: number) => {
       const dt = last ? time - last : 0;
       if (last) clock = (clock + dt) % loop;
       last = time;
-      engine?.render(phase, dt);
+      root.dataset.heroState = treatment;
+      if (engine && !rendering) {
+        rendering = true;
+        const next = treatment;
+        void engine.render(next, phase, dt).then((grid) => {
+          root.dataset.heroTreatment = next;
+          if (grid) root.dataset.heroCells = grid;
+          else delete root.dataset.heroCells;
+        }).finally(() => { rendering = false; });
+      }
       raf = requestAnimationFrame(tick);
     };
     const observer = new IntersectionObserver(async ([entry]) => {
@@ -24,10 +38,24 @@
         const adapter = await navigator.gpu.requestAdapter();
         if (adapter) {
           const { mountHero } = await import("./hero-engine");
-          engine = await mountHero(canvas);
+          const getContext = canvas.getContext.bind(canvas);
+          let webgpu: RenderingContext | null = null;
+          canvas.getContext = ((kind: string, options?: unknown) => {
+            if (kind !== "webgpu") return getContext(kind as "2d", options as CanvasRenderingContext2DSettings);
+            webgpu ??= getContext("webgpu" as never, options as never);
+            return webgpu;
+          }) as typeof canvas.getContext;
+          const style = getComputedStyle(root);
+          engine = await mountHero(canvas, {
+            human: style.getPropertyValue("--role-prose").trim(),
+            agentic: style.getPropertyValue("--role-agentic").trim(),
+            vibe: style.getPropertyValue("--role-vibe").trim(),
+          }, treatment);
           // build() starts no loop: this explicit step produces the first composited frame,
           // including the phase-1 reduced-motion rest frame, before the capture is hidden.
-          engine.render(phase, 0);
+          const grid = await engine.render(treatment, phase, 0);
+          if (grid) root.dataset.heroCells = grid;
+          root.dataset.heroTreatment = treatment;
           drawn = true;
           root.dataset.heroGpu = "drawn";
         }

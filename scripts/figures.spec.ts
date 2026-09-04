@@ -325,7 +325,7 @@ test("hero: real WebGPU acquisition draws a composited, varying cube and plain C
     const decoded = decodePng(first);
     const probes: PixelProbe[] = [
       { name: "scene field", minPixels: 1000, minSpan: 100, r: [0, 70], g: [0, 70], b: [0, 70] },
-      { name: "lit cube", minPixels: 100, minSpan: 20, r: [75, 255], g: [35, 220], b: [10, 180] },
+      { name: "treated cube", minPixels: 100, minSpan: 20, r: [20, 255], g: [20, 255], b: [20, 255] },
     ];
     for (const probe of probes) {
       const result = probePixels(decoded.data, decoded.width, decoded.height, probe);
@@ -344,6 +344,32 @@ test("hero: real WebGPU acquisition draws a composited, varying cube and plain C
     expect(await page.evaluate(() => (window as any).__webgpuCalls)).toBe(0);
   }
   expect(errors).toEqual([]);
+});
+
+test("hero: three rendered treatments match the occupied state, identify Cells live, and clear pairwise JND", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== "chromium-webgpu");
+  await page.goto(url, { waitUntil: "networkidle" });
+  const hero = page.locator('[data-hero-id="spectrum-hero"]');
+  await expect(hero).toHaveAttribute("data-hero-gpu", "drawn", { timeout: 30000 });
+  const states = ["agentic", "vibe", "human"] as const;
+  const captures = new Map<string, Buffer>();
+  for (const state of states) {
+    await expect.poll(async () => {
+      const read = await hero.evaluate((element) => ({ state: element.getAttribute("data-hero-state"), treatment: element.getAttribute("data-hero-treatment") }));
+      return `${read.state}/${read.treatment}`;
+    }, { timeout: 20000 }).toBe(`${state}/${state}`);
+    const cells = await hero.getAttribute("data-hero-cells");
+    if (state === "agentic") expect(cells).toMatch(/^\d+x\d+$/);
+    else expect(cells).toBeNull();
+    captures.set(state, await hero.locator("canvas").screenshot());
+  }
+  const deltas = [["human", "agentic"], ["human", "vibe"], ["agentic", "vibe"]].map(([a, b]) => ({ pair: `${a}/${b}`, ...perceptualDelta(captures.get(a)!, captures.get(b)!) }));
+  console.log(`hero treatment JND: ${JSON.stringify(deltas)}`);
+  for (const delta of deltas) {
+    expect(delta.maxDelta, delta.pair).toBeGreaterThan(3);
+    expect(delta.extent, delta.pair).toBeGreaterThan(0.001);
+  }
+  expect(await hero.locator("[data-figure-label],figcaption").count()).toBe(0);
 });
 
 // --- S3 figure arms ---

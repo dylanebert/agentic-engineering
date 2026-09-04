@@ -156,6 +156,7 @@ describe("figure manifest", () => {
     expect(overture.site).toBe("above-opening");
     expect(overture.rest).toBe("agentic");
     expect(overture.states.map((state) => state.state)).toEqual(["human", "agentic", "vibe"]);
+    expect(overture.states.map((state) => state.treatment)).toEqual(["shallot", "cells", "glow"]);
     expect(beats.some((beat) => beat.section === overture.id)).toBe(false);
     expect(figures.some((figure) => figure.id === overture.id)).toBe(false);
     const roles = Object.keys(grammar.colors);
