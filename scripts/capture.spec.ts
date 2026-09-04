@@ -107,6 +107,13 @@ for (const view of views) {
       );
     }
 
+    // H5 round 1: keep the full-width canvas footprint compact enough that the cube and
+    // spectrum read as one overture rather than two marks separated by dead space.
+    const canvasHeight = await page.locator(".canvas-wrap").evaluate((node) =>
+      node.getBoundingClientRect().height,
+    );
+    expect(canvasHeight).toBe(220);
+
     await page.evaluate(() => document.fonts.ready);
     // Always write the portable capture first, then compare only on the stamped seat. A WSL
     // capture runs on Windows and has no Darwin golden by design.
