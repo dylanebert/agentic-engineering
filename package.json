@@ -14,6 +14,11 @@
     "vite": "8.0.16"
   },
   "private": true,
+  "dependencies": {
+    "@dylanebert/shallot": "file:vendor/shallot-0.10.0-5fa98bb.tgz",
+    "typegpu": "~0.12.4",
+    "unplugin-typegpu": "~0.12.3"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -25,7 +30,8 @@
     "figures": "bun run scripts/figures.ts",
     "oracle-text": "bun run scripts/oracle-text.ts",
     "tripwires": "bun run scripts/tripwires.ts",
-    "oracle-vocabulary": "bun run scripts/vocabulary.oracle.ts"
+    "oracle-vocabulary": "bun run scripts/vocabulary.oracle.ts",
+    "oracle-substrate": "bun run scripts/substrate.oracle.ts"
   },
   "type": "module"
 }
