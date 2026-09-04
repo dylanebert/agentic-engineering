@@ -51,8 +51,8 @@ export type OvertureState = {
   term: string;
   /** A declared color role in src/lib/vocabulary.ts. */
   role: "prose" | "agentic" | "vibe";
-  /** The plain H3 mechanism drives one color transition; H4 owns treatments. */
-  treatment: "color";
+  /** The canvas treatment bound to this spectrum state. */
+  treatment: "shallot" | "cells" | "glow";
 };
 
 export const overture: {
@@ -73,9 +73,9 @@ export const overture: {
   site: "above-opening",
   rest: "agentic",
   states: [
-    { state: "human", term: "human code", role: "prose", treatment: "color" },
-    { state: "agentic", term: "agentic engineering", role: "agentic", treatment: "color" },
-    { state: "vibe", term: "vibe coding", role: "vibe", treatment: "color" },
+    { state: "human", term: "human code", role: "prose", treatment: "shallot" },
+    { state: "agentic", term: "agentic engineering", role: "agentic", treatment: "cells" },
+    { state: "vibe", term: "vibe coding", role: "vibe", treatment: "glow" },
   ],
 };
 
