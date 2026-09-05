@@ -30,6 +30,17 @@ export function bytes(root: string): Record<string, string> {
   visit(root);
   return result;
 }
+/** Re-enumerate paths as well as bytes on every read; ignored outputs stay excluded. */
+export function sourceSnapshots(root: string): () => Record<string, string> {
+  return () => {
+    const listing = spawnSync("git", ["ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: root, encoding: "utf8" });
+    expect(listing.error, "predicate:runner.source-enumeration").toBeUndefined();
+    expect(listing.status, "predicate:runner.source-enumeration").toBe(0);
+    const paths = listing.stdout.split("\0").filter(Boolean).sort();
+    expect(paths.length, "predicate:runner.source-population").toBeGreaterThan(0);
+    return Object.fromEntries(paths.map(path => [path, sha(readFileSync(join(root, path)))]));
+  };
+}
 export function record(event: string, details: Record<string, unknown> = {}) {
   const line = JSON.stringify({ at: new Date().toISOString(), event, runner: process.pid, ...details });
   if (process.env.CAMPAIGN_LEDGER) appendFileSync(process.env.CAMPAIGN_LEDGER, line + "\n");
@@ -264,8 +275,7 @@ export async function campaign(selection: string, mutations: Mutation[]) {
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
   cpSync(join(repo, "src/lib/vocabulary.ts"), join(work, "vocabulary.ts"));
-  const tracked = Bun.spawnSync(["git", "ls-files", "--cached", "--others", "--exclude-standard", "-z"], { cwd: repo }).stdout.toString().split("\0").filter(Boolean);
-  const sourceBytes = () => Object.fromEntries(tracked.map(p => [p, sha(readFileSync(join(repo, p)))]));
+  const sourceBytes = sourceSnapshots(repo);
   const initial = sourceBytes();
   writeFileSync(join(work, "source-before.json"), JSON.stringify(initial, null, 2));
   const runBuild = (dest: string, red?: string) => {

@@ -1,6 +1,11 @@
 import { expect } from "@playwright/test";
+import { createHash } from "node:crypto";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { selfArms } from "./arms";
-import { changedClass, closeSharedContext, emptyInput, fixtureCampaign, namedRed, observe, record, serve, stagedCases, test, type FixtureDeclaration, type Input } from "./campaign";
+import { changedClass, closeSharedContext, emptyInput, fixtureCampaign, namedRed, observe, record, serve, sourceSnapshots, stagedCases, test, type FixtureDeclaration, type Input } from "./campaign";
 
 if (stagedCases().some(c => c.input.id === "baseline")) test("host/article boundary and decodable self icon @plain", async ({ browser, browserPid }) => {
   const baseline = stagedCases().find(c => c.input.id === "baseline")!.input;
@@ -134,6 +139,73 @@ test("changed subjects classify package keys and assertion consumers @pure", () 
   expect(changedClass(["package.json"], { dependencies: { a: "1" } }, { dependencies: { a: "2" } })).toBe(4);
   expect(changedClass(["src/App.svelte"])).toBe(4);
 });
+test("whole-source snapshots see path additions, deletions, bytes and enumeration refusal @pure", async () => {
+  const owned = mkdtempSync(join(tmpdir(), "article-source-snapshot-"));
+  const root = join(owned, "repo");
+  const git = (cwd: string, args: string[]) => {
+    const result = spawnSync("git", args, { cwd, encoding: "utf8" });
+    expect(result.status, result.stderr).toBe(0);
+  };
+  try {
+    mkdirSync(root);
+    git(root, ["init", "--quiet"]);
+    writeFileSync(join(root, ".gitignore"), "ignored/\n");
+    writeFileSync(join(root, "source.ts"), "export const value = 1;\n");
+    writeFileSync(join(root, "untracked.ts"), "export const extra = 1;\n");
+    git(root, ["add", "--", "source.ts"]);
+    const snapshot = sourceSnapshots(root); // Same factory/binding used by campaign's three reads.
+    const initial = snapshot();
+    expect(Object.keys(initial)).toEqual([".gitignore", "source.ts", "untracked.ts"]);
+    expect(snapshot()).toEqual(initial);
+    mkdirSync(join(root, "ignored"));
+    writeFileSync(join(root, "ignored", "build.js"), "ignored output");
+    expect(snapshot()).toEqual(initial);
+
+    // Reproduce the old carrier with real file reads but its one-time path enumeration.
+    const frozenPaths = Object.keys(initial);
+    const frozenSnapshot = () => Object.fromEntries(frozenPaths.map(path => [path, createHash("sha256").update(readFileSync(join(root, path))).digest("hex")]));
+    writeFileSync(join(root, "added.ts"), "export const added = true;\n");
+    expect(frozenSnapshot()).toEqual(initial);
+    expect(Object.keys(snapshot())).toContain("added.ts");
+    await namedRed("runner.source-before-browser", async () => {
+      expect(snapshot(), "predicate:runner.source-before-browser").toEqual(initial);
+    });
+    await namedRed("runner.whole-tree-restoration", async () => {
+      expect(snapshot(), "predicate:runner.whole-tree-restoration").toEqual(initial);
+    });
+    record("source-snapshot-control", { change: "untracked-addition", legacyMissed: true, correctedDetected: true });
+    rmSync(join(root, "added.ts"));
+    expect(snapshot()).toEqual(initial);
+
+    rmSync(join(root, "untracked.ts"));
+    await namedRed("runner.whole-tree-restoration", async () => {
+      expect(snapshot(), "predicate:runner.whole-tree-restoration").toEqual(initial);
+    });
+    writeFileSync(join(root, "untracked.ts"), "export const extra = 1;\n");
+    writeFileSync(join(root, "source.ts"), "export const value = 2;\n");
+    await namedRed("runner.whole-tree-restoration", async () => {
+      expect(snapshot(), "predicate:runner.whole-tree-restoration").toEqual(initial);
+    });
+    writeFileSync(join(root, "source.ts"), "export const value = 1;\n");
+    expect(snapshot()).toEqual(initial);
+    rmSync(join(root, "source.ts"));
+    expect(() => snapshot()).toThrow(/ENOENT/);
+    record("source-snapshot-control", { change: "untracked-deletion, tracked-byte-change, tracked-deletion", detected: true });
+
+    const empty = join(owned, "empty"), notRepo = join(owned, "not-repo");
+    mkdirSync(empty); mkdirSync(notRepo);
+    git(empty, ["init", "--quiet"]);
+    await namedRed("runner.source-population", async () => { sourceSnapshots(empty)(); });
+    for (const path of [notRepo, join(owned, "absent")]) {
+      await namedRed("runner.source-enumeration", async () => { sourceSnapshots(path)(); });
+    }
+    record("source-snapshot-control", { change: "empty, non-Git and failed-spawn listings", refused: true });
+  } finally {
+    rmSync(owned, { recursive: true, force: true });
+    record("source-snapshot-cleanup", { owned });
+  }
+});
+
 test("named-red refuses unrelated exceptions and wrong assertion identities @pure", async () => {
   for (const body of [async () => { throw new Error("predicate:wanted"); }, async () => { expect(1, "predicate:other").toBe(2); }, async () => {}]) {
     let rejected = false;
