@@ -1,8 +1,7 @@
 import { readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { expect as assertion, type Page, type Browser, type APIRequestContext, type TestInfo } from "@playwright/test";
-import { pixelProbePass, probePixels, type PixelProbe } from "./shallot-pixels";
-import { decodePng, perceptualDelta, type DecodedPng } from "./png";
+import { perceptualDelta, type DecodedPng } from "./png";
 import { assertVaries, type AxisDriver } from "./variance";
 import { assertReducedMotion, settleToRest } from "./reduced";
 import { classifyRegion } from "./region";
@@ -273,10 +272,9 @@ test("hero: DOM spectrum uses strokes without area tint", async ({ page }) => {
   assertion(fills.every((fill) => fill === "none"), "predicate:figure-10.1").toBe(true);
 });
 
-// Five H3 mutations terminate here: fallback copy changes body text; deleting the no-adapter
-// branch hides the captured pre; a transparent canvas fails both probes; removing GlazePlugin
-// or the explicit state.step leaves sear's offscreen frame absent from the composited screenshot.
-test("hero: real WebGPU acquisition draws a composited, varying cube and plain Chromium keeps silent rest", async ({ page }, testInfo) => {
+// The plain-degradation boundary remains until its real-caller qualification.
+// Sustained GPU regions, change, identity, lifetime and errors live in runtime.
+test("hero: plain Chromium keeps silent rest", async ({ page }) => {
   await page.addInitScript(() => {
     const original = HTMLCanvasElement.prototype.getContext;
     (window as any).__webgpuCalls = 0;
@@ -291,61 +289,12 @@ test("hero: real WebGPU acquisition draws a composited, varying cube and plain C
   await page.goto(url, { waitUntil: "networkidle" });
   const hero = page.locator('[data-hero-id="spectrum-hero"]');
   const initialText = await page.locator("body").innerText();
-  if (testInfo.project.name === "chromium-webgpu") {
-    await assertion(hero, "predicate:figure-11.1").toHaveAttribute("data-hero-gpu", "drawn", { timeout: 30000 });
-    assertion(await hero.locator("canvas").count(), "predicate:figure-11.2").toBe(1);
-    assertion(await page.evaluate(() => (window as any).__webgpuCalls), "predicate:figure-11.3").toBe(1);
-    const first = await hero.locator("canvas").screenshot();
-    await page.waitForTimeout(700);
-    const second = await hero.locator("canvas").screenshot();
-    const decoded = decodePng(first);
-    const probes: PixelProbe[] = [
-      { name: "scene field", minPixels: 1000, minSpan: 100, r: [0, 70], g: [0, 70], b: [0, 70] },
-      { name: "treated cube", minPixels: 100, minSpan: 20, r: [20, 255], g: [20, 255], b: [20, 255] },
-    ];
-    for (const probe of probes) {
-      const result = probePixels(decoded.data, decoded.width, decoded.height, probe);
-      console.log(`hero ${probe.name}: ${JSON.stringify(result)}`);
-      assertion(pixelProbePass(result, probe), "predicate:figure-11.4").toBe(true);
-    }
-    const variance = perceptualDelta(first, second);
-    console.log(`hero canvas variance=${JSON.stringify(variance)}`);
-    assertion(variance.maxDelta, "predicate:figure-11.5").toBeGreaterThan(3);
-    assertion(variance.extent, "predicate:figure-11.6").toBeGreaterThan(0.001);
-  } else {
-    await assertion(hero.locator("pre"), "predicate:figure-11.7").toBeVisible();
-    await assertion(hero, "predicate:figure-11.8").not.toHaveAttribute("data-hero-gpu", "drawn");
-    await page.waitForTimeout(700);
-    assertion(await page.locator("body").innerText(), "predicate:figure-11.9").toBe(initialText);
-    assertion(await page.evaluate(() => (window as any).__webgpuCalls), "predicate:figure-11.10").toBe(0);
-  }
+  await assertion(hero.locator("pre"), "predicate:figure-11.7").toBeVisible();
+  await assertion(hero, "predicate:figure-11.8").not.toHaveAttribute("data-hero-gpu", "drawn");
+  await page.waitForTimeout(700);
+  assertion(await page.locator("body").innerText(), "predicate:figure-11.9").toBe(initialText);
+  assertion(await page.evaluate(() => (window as any).__webgpuCalls), "predicate:figure-11.10").toBe(0);
   assertion(errors, "predicate:figure-11.11").toEqual([]);
-});
-
-test("hero: three rendered treatments match the occupied state, identify Cells live, and clear pairwise JND", async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== "chromium-webgpu");
-  await page.goto(url, { waitUntil: "networkidle" });
-  const hero = page.locator('[data-hero-id="spectrum-hero"]');
-  await assertion(hero, "predicate:figure-12.1").toHaveAttribute("data-hero-gpu", "drawn", { timeout: 30000 });
-  const states = ["agentic", "vibe", "human"] as const;
-  const captures = new Map<string, Buffer>();
-  for (const state of states) {
-    await assertion.poll(async () => {
-      const read = await hero.evaluate((element) => ({ state: element.getAttribute("data-hero-state"), treatment: element.getAttribute("data-hero-treatment") }));
-      return `${read.state}/${read.treatment}`;
-    }, { timeout: 20000 }).toBe(`${state}/${state}`);
-    const cells = await hero.getAttribute("data-hero-cells");
-    if (state === "agentic") assertion(cells, "predicate:figure-12.2").toMatch(/^\d+x\d+$/);
-    else assertion(cells, "predicate:figure-12.3").toBeNull();
-    captures.set(state, await hero.locator("canvas").screenshot());
-  }
-  const deltas = [["human", "agentic"], ["human", "vibe"], ["agentic", "vibe"]].map(([a, b]) => ({ pair: `${a}/${b}`, ...perceptualDelta(captures.get(a)!, captures.get(b)!) }));
-  console.log(`hero treatment JND: ${JSON.stringify(deltas)}`);
-  for (const delta of deltas) {
-    assertion(delta.maxDelta, "predicate:figure-12.4 " + (delta.pair)).toBeGreaterThan(3);
-    assertion(delta.extent, "predicate:figure-12.5 " + (delta.pair)).toBeGreaterThan(0.001);
-  }
-  assertion(await hero.locator("[data-figure-label],figcaption").count(), "predicate:figure-12.6").toBe(0);
 });
 
 // --- S3 figure arms ---

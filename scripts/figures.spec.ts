@@ -2,7 +2,7 @@ import { expect } from "@playwright/test";
 import { emptyInput, observe, record, resolveArms, stagedCases, test } from "./campaign";
 import { figureArms } from "./arms";
 
-for (const item of stagedCases().filter(item => item.group !== "capture")) {
+for (const item of stagedCases().filter(item => item.group !== "capture" && !item.id.startsWith("runtime/"))) {
   const pure = item.group === "figure" && figureArms(emptyInput).find(arm => arm.title === item.title)?.pure;
   if (pure) {
     test(`${item.id} @${item.cohort}`, async ({}, info) => {

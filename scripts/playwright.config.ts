@@ -20,7 +20,7 @@ if (gpu && (!REAL_GPU_LAUNCH || Object.keys(REAL_GPU_LAUNCH).length === 0)) thro
 
 export default defineConfig({
   testDir: ".",
-  testMatch: fixture ? ["instrument.spec.ts"] : ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts"],
+  testMatch: process.env.CAMPAIGN_SELECTION === "runtime" ? ["runtime.spec.ts"] : fixture ? ["instrument.spec.ts"] : ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "runtime.spec.ts"],
   timeout: 120_000,
   workers: 1,
   retries: 0,

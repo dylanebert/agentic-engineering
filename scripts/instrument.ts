@@ -240,8 +240,8 @@ export const mutations: Mutation[] = [
     "path": "src/lib/Overture.svelte",
     "needle": "canvas.drawn{opacity:1}",
     "replacement": "canvas.drawn{opacity:0}",
-    "grep": "real WebGPU acquisition",
-    "predicate": "figure-11.4",
+    "predicate": "runtime.agentic.region",
+    "runtime": true,
     "cohort": "gpu"
   },
   {
@@ -255,8 +255,8 @@ export const mutations: Mutation[] = [
       "root.dataset.heroCells = \"invalid\"",
       "root.dataset.heroCells = \"invalid\""
     ],
-    "grep": "three rendered treatments",
-    "predicate": "figure-12.2",
+    "predicate": "runtime.agentic.identity",
+    "runtime": true,
     "cohort": "gpu"
   },
   {
@@ -264,12 +264,12 @@ export const mutations: Mutation[] = [
     "path": "src/lib/Overture.svelte",
     "needle": "pre{margin:0;",
     "replacement": "pre{visibility:hidden;margin:0;",
-    "grep": "real WebGPU acquisition",
+    "grep": "plain Chromium keeps silent rest",
     "predicate": "figure-11.7"
   }
 ];
 
 if (import.meta.main) {
-  const selection = process.argv.includes("--pure") ? "pure" : process.argv.includes("--narrow") ? "narrow" : process.argv.includes("--runner") ? "runner" : "R3";
+  const selection = process.argv.includes("--runtime-witnesses") ? "runtime-witnesses" : process.argv.includes("--pure") ? "pure" : process.argv.includes("--narrow") ? "narrow" : process.argv.includes("--runner") ? "runner" : "R3";
   await campaign(selection, mutations);
 }
