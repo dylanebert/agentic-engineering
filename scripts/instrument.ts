@@ -1,315 +1,275 @@
-import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
-import { requireDisplay } from "./display";
-import { playwrightVersion } from "./playwright-version";
+import { campaign, type Mutation } from "./campaign";
 
-const repo = join(import.meta.dir, "..");
-const work = join(tmpdir(), "agentic-engineering-instrument");
-
-function run(command: string[], cwd: string): void {
-  const result = Bun.spawnSync(command, { cwd, stdout: "inherit", stderr: "inherit" });
-  if (result.exitCode !== 0) throw new Error(`instrument: '${command.join(" ")}' failed (exit ${result.exitCode})`);
-}
-
-function mustRed(label: string, command: string[], cwd: string, env?: Record<string, string>): void {
-  const result = Bun.spawnSync(command, {
-    cwd,
-    stdout: "inherit",
-    stderr: "inherit",
-    env: env ? { ...process.env, ...env } : process.env,
-  });
-  if (result.exitCode === 0) throw new Error(`instrument: ${label} mutation unexpectedly passed`);
-  console.log(`instrument: ${label} mutation red as required`);
-}
-
-function stage(): void {
-  rmSync(join(work, "dist"), { recursive: true, force: true });
-  cpSync(join(repo, "dist"), join(work, "dist"), { recursive: true });
-  // The figure arms read the manifest as their external expectation; it is staged on every
-  // pass so a mutation of the declaration reaches the arms the same way a mutation of the page
-  // does.
-  cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
-  cpSync(join(repo, "src/lib/vocabulary.ts"), join(work, "vocabulary.ts"));
-}
-
-function cssMutation(label: string, needle: string, replacement: string, grep: string): void {
-  const path = join(repo, "src/app.css");
-  const source = readFileSync(path, "utf8");
-  const mutated = source.replace(needle, replacement);
-  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match`);
-  writeFileSync(path, mutated);
-  try {
-    run(["bun", "run", "build"], repo);
-    stage();
-    mustRed(label, ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep], work);
-  } finally {
-    writeFileSync(path, source);
-    run(["bun", "run", "build"], repo);
-    stage();
+export const mutations: Mutation[] = [
+  {
+    "label": "missing-asset server",
+    "mode": "fallback",
+    "grep": "missing assets",
+    "predicate": "figure-2.1"
+  },
+  {
+    "label": "neutral hierarchy",
+    "path": "src/app.css",
+    "needle": "--heading-font-size: 20px",
+    "replacement": "--heading-font-size: 15px",
+    "grep": "neutral hierarchy",
+    "predicate": "figure-3.1"
+  },
+  {
+    "label": "readable measure",
+    "path": "src/app.css",
+    "needle": "--measure: 548px",
+    "replacement": "--measure: 700px",
+    "grep": "readable long-form band",
+    "predicate": "figure-4.2"
+  },
+  {
+    "label": "strong emphasis",
+    "path": "src/app.css",
+    "needle": "--emphasis-font-weight: 600",
+    "replacement": "--emphasis-font-weight: 400",
+    "grep": "production strong emphasis",
+    "predicate": "figure-6.1"
+  },
+  {
+    "label": "story non-interference",
+    "path": "src/App.svelte",
+    "needle": "Agentic engineering is directing agents to make software.",
+    "replacement": "Changed article text is directing agents to make software.",
+    "grep": "non-interference",
+    "predicate": "figure-7.1"
+  },
+  {
+    "label": "selected desktop measure",
+    "path": "src/app.css",
+    "needle": "--measure: 548px",
+    "replacement": "--measure: 700px",
+    "grep": "shipped desktop measure",
+    "predicate": "figure-5.1"
+  },
+  {
+    "label": "hero register",
+    "path": "src/lib/Overture.svelte",
+    "needle": "data-hero-id=\"spectrum-hero\"",
+    "replacement": "data-retired-hero-id=\"spectrum-hero\"",
+    "grep": "exactly one unlabeled three-state hero",
+    "predicate": "figure-8.1"
+  },
+  {
+    "label": "hero zero-label policy",
+    "path": "src/lib/Overture.svelte",
+    "needle": "aria-hidden=\"true\">",
+    "replacement": "aria-hidden=\"true\"><span data-figure-label>forbidden</span>",
+    "grep": "exactly one unlabeled three-state hero",
+    "predicate": "figure-8.1"
+  },
+  {
+    "label": "hero no area fill",
+    "path": "src/lib/Overture.svelte",
+    "needle": ".spectrum path,.spectrum rect,.spectrum circle{fill:none",
+    "replacement": ".spectrum path,.spectrum rect,.spectrum circle{fill:currentColor",
+    "grep": "DOM spectrum uses strokes without area tint",
+    "predicate": "figure-10.1"
+  },
+  {
+    "label": "static hero import",
+    "path": "src/lib/Overture.svelte",
+    "needle": [
+      "  import { cubeFrames } from \"./cube-frames\";",
+      "          const { mountHero } = await import(\"./hero-engine\");"
+    ],
+    "replacement": [
+      "  import { cubeFrames } from \"./cube-frames\";\n  import { mountHero } from \"./hero-engine\";",
+      ""
+    ],
+    "predicate": "",
+    "buildRed": "lazy hero chunk is missing"
+  },
+  {
+    "label": "hero chunk budget",
+    "path": "vite.config.ts",
+    "needle": "export const HERO_GZIP_BUDGET = 200_000;",
+    "replacement": "export const HERO_GZIP_BUDGET = 1;",
+    "predicate": "",
+    "buildRed": "exceeds 1"
+  },
+  {
+    "label": "figure count against the manifest",
+    "path": "src/App.svelte",
+    "needle": "\n    <StageLoop />\n",
+    "replacement": "\n",
+    "grep": "declared site",
+    "predicate": "figure-13.1"
+  },
+  {
+    "label": "figure claim against its lead-in paragraph",
+    "path": "src/lib/figures.ts",
+    "needle": "claim: \"Then repeat: implement a stage, verify it, implement the next, until the spec is done.\"",
+    "replacement": "claim: \"Then repeat: implement a task, validate it, implement the next, until the work is done.\"",
+    "grep": "quoted claim",
+    "predicate": "figure-14.3"
+  },
+  {
+    "label": "figcaption absence",
+    "path": "src/lib/Figure.svelte",
+    "needle": "{@render children({ elapsed, reduced })}",
+    "replacement": "{@render children({ elapsed, reduced })}\n  <figcaption>a caption</figcaption>",
+    "grep": "figcaption anywhere",
+    "predicate": "figure-15.1"
+  },
+  {
+    "label": "no figure above the opening section",
+    "path": "src/App.svelte",
+    "needle": "<h1 class=\"title\">agentic engineering</h1>",
+    "replacement": "<h1 class=\"title\">agentic engineering</h1>\n    <StageLoop />",
+    "grep": "figcaption anywhere",
+    "predicate": "figure-15.2"
+  },
+  {
+    "label": "ordered geometry in the stage loop",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "{ role: concepts.spec.color, label: concepts.spec.label, x: 14, step: 0 },",
+    "replacement": "{ role: concepts.spec.color, label: concepts.spec.label, x: 300, step: 0 },",
+    "grep": "order the prose states",
+    "predicate": "figure-16.2"
+  },
+  {
+    "label": "return edge lands on the stage node",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "data-figure-part=\"return-edge\"\n        d=\"M 460 {top + height} L 460 100 L 274 100 L 274 {top + height}\"",
+    "replacement": "data-figure-part=\"return-edge\"\n        d=\"M 460 {top + height} L 460 100 L 88 100 L 88 {top + height}\"",
+    "grep": "lands on the stage node",
+    "predicate": "figure-17.3"
+  },
+  {
+    "label": "figure label against its claim",
+    "path": "src/lib/vocabulary.ts",
+    "needle": "verify: { label: \"verify\", color: \"verify\"",
+    "replacement": "verify: { label: \"validate\", color: \"verify\"",
+    "grep": "substring of its claim",
+    "predicate": "figure-18.4"
+  },
+  {
+    "label": "loop connector endpoints",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "x2=\"200\" y2={top + height / 2}",
+    "replacement": "x2=\"192\" y2={top + height / 2}",
+    "grep": "every loop connector meets",
+    "predicate": "figure-19.1"
+  },
+  {
+    "label": "loop eased approach",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "offset-distance: calc((var(--phase, 1) - (\n      sin(var(--phase, 1) * 360deg) +\n      sin(var(--phase, 1) * 720deg) * 1.33791876 +\n      sin(var(--phase, 1) * 1080deg) * 0.60019838\n    ) * 0.006) * 100%);",
+    "replacement": "offset-distance: calc(var(--phase, 1) * 100%);",
+    "grep": "non-constant speed",
+    "predicate": "figure-20.1"
+  },
+  {
+    "label": "loop indicator absent at rest",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "r: calc(7px * max(\n      clamp(0, calc(1 - var(--phase, 1) * 18), 1),\n      clamp(0, calc(1 - abs(var(--phase, 1) - 0.2784) * 32), 1),\n      clamp(0, calc(1 - abs(var(--phase, 1) - 0.5569) * 32), 1),\n      clamp(0, calc(1 - abs(var(--phase, 1) - 0.84) * 12), 1)\n    ));",
+    "replacement": "r: 7px;",
+    "grep": "reduced-motion rest",
+    "predicate": "figure-22.5"
+  },
+  {
+    "label": "loop traveling unit",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "offset-distance: calc((var(--phase, 1) - (\n      sin(var(--phase, 1) * 360deg) +\n      sin(var(--phase, 1) * 720deg) * 1.33791876 +\n      sin(var(--phase, 1) * 1080deg) * 0.60019838\n    ) * 0.006) * 100%);",
+    "replacement": "offset-distance: 100%;",
+    "grep": "one unit travels",
+    "predicate": "figure-21.3"
+  },
+  {
+    "label": "loop occupied-node emphasis",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "opacity: clamp(0, calc(1 - abs(var(--phase, 1) - 0.5569) * 12), 1);",
+    "replacement": "opacity: 0;",
+    "grep": "one unit travels",
+    "predicate": "figure-21.2"
+  },
+  {
+    "label": "loop return dash offset",
+    "path": "src/lib/StageLoop.svelte",
+    "needle": "stroke-dashoffset: clamp(0px, calc((1 - var(--phase, 1)) * 225.7px), 100px);",
+    "replacement": "stroke-dashoffset: 0;",
+    "grep": "one unit travels",
+    "predicate": "figure-21.8"
+  },
+  {
+    "label": "reduced-motion rest",
+    "path": "src/lib/Figure.svelte",
+    "needle": "const reduced = window.matchMedia(\"(prefers-reduced-motion: reduce)\").matches;",
+    "replacement": "const reduced = false;",
+    "grep": "reduced-motion rest",
+    "predicate": "figure-22.2"
+  },
+  {
+    "label": "role bound in a prose span",
+    "path": "src/App.svelte",
+    "needle": "<span class=\"term\" data-role=\"prose\">human code</span>",
+    "replacement": "human code",
+    "grep": "bound to both",
+    "predicate": "figure-23.1"
+  },
+  {
+    "label": "role bound in a figure part",
+    "path": "src/lib/vocabulary.ts",
+    "needle": "spec: { label: \"spec\", color: \"context\", ...shape }",
+    "replacement": "spec: { label: \"spec\", color: \"agentic\", ...shape }",
+    "grep": "bound to both",
+    "predicate": "figure-23.2"
+  },
+  {
+    "label": "golden screenshot pixels",
+    "mode": "golden",
+    "grep": "capture desktop.png",
+    "predicate": "capture-2.2"
+  },
+  {
+    "label": "new hero captured rest rows",
+    "path": "src/lib/Overture.svelte",
+    "needle": "cubeFrames[2].join(\"\\n\")",
+    "replacement": "cubeFrames[2].slice(1).join(\"\\n\")",
+    "grep": "reduced motion rests",
+    "predicate": "figure-9.2"
+  },
+  {
+    "label": "new hero invisible GPU canvas",
+    "path": "src/lib/Overture.svelte",
+    "needle": "canvas.drawn{opacity:1}",
+    "replacement": "canvas.drawn{opacity:0}",
+    "grep": "real WebGPU acquisition",
+    "predicate": "figure-11.4",
+    "cohort": "gpu"
+  },
+  {
+    "label": "new hero Cells identity malformed",
+    "path": "src/lib/Overture.svelte",
+    "needle": [
+      "root.dataset.heroCells = grid",
+      "root.dataset.heroCells = grid"
+    ],
+    "replacement": [
+      "root.dataset.heroCells = \"invalid\"",
+      "root.dataset.heroCells = \"invalid\""
+    ],
+    "grep": "three rendered treatments",
+    "predicate": "figure-12.2",
+    "cohort": "gpu"
+  },
+  {
+    "label": "plain fallback hidden",
+    "path": "src/lib/Overture.svelte",
+    "needle": "pre{margin:0;",
+    "replacement": "pre{visibility:hidden;margin:0;",
+    "grep": "real WebGPU acquisition",
+    "predicate": "figure-11.7"
   }
-  run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep], work);
+];
+
+if (import.meta.main) {
+  const selection = process.argv.includes("--pure") ? "pure" : process.argv.includes("--narrow") ? "narrow" : process.argv.includes("--runner") ? "runner" : "R3";
+  await campaign(selection, mutations);
 }
-
-function sourceMutation(label: string, path: string, needle: string, replacement: string, grep: string): void {
-  const source = readFileSync(path, "utf8");
-  const mutated = source.replace(needle, replacement);
-  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match`);
-  writeFileSync(path, mutated);
-  try {
-    run(["bun", "run", "build"], repo);
-    stage();
-    mustRed(label, ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep], work);
-  } finally {
-    writeFileSync(path, source);
-    run(["bun", "run", "build"], repo);
-    stage();
-  }
-  run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", grep], work);
-}
-
-function buildMutation(
-  label: string,
-  path: string,
-  needle: string | string[],
-  replacement: string | string[],
-): void {
-  const source = readFileSync(path, "utf8");
-  const needles = Array.isArray(needle) ? needle : [needle];
-  const replacements = Array.isArray(replacement) ? replacement : [replacement];
-  const mutated = needles.reduce((text, value, index) => text.replace(value, replacements[index]), source);
-  if (mutated === source) throw new Error(`instrument: ${label} mutation did not match`);
-  writeFileSync(path, mutated);
-  try {
-    mustRed(label, ["bun", "run", "build"], repo);
-  } finally {
-    writeFileSync(path, source);
-  }
-  run(["bun", "run", "build"], repo);
-  stage();
-}
-
-if (!requireDisplay("instrument")) process.exit(0);
-
-rmSync(join(repo, "dist"), { recursive: true, force: true });
-run(["bun", "run", "build"], repo);
-mkdirSync(work, { recursive: true });
-for (const file of readdirSync(work)) if (file.endsWith(".spec.ts")) rmSync(join(work, file));
-for (const file of ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "variance.ts", "reduced.ts", "png.ts", "playwright.config.ts"]) {
-  cpSync(join(import.meta.dir, file), join(work, file));
-}
-cpSync(
-  join(repo, "node_modules/@dylanebert/shallot/src/harness/pixels.ts"),
-  join(work, "shallot-pixels.ts"),
-);
-writeFileSync(join(work, "package.json"), JSON.stringify({ name: "agentic-engineering-instrument", private: true, type: "module", dependencies: { "@playwright/test": playwrightVersion } }));
-cpSync(join(import.meta.dir, "capture.spec.ts-snapshots"), join(work, "capture.spec.ts-snapshots"), { recursive: true });
-stage();
-run(["bun", "install", "--silent"], work);
-run(["bunx", "playwright", "install", "chromium"], work);
-run(["bunx", "playwright", "test", "--config", "playwright.config.ts", "instrument.spec.ts"], work);
-
-const figureSpec = join(work, "figures.spec.ts");
-const figureSource = readFileSync(figureSpec, "utf8");
-writeFileSync(figureSpec, figureSource.replace("res.writeHead(404", "res.writeHead(200"));
-try {
-  mustRed("missing-asset server", ["bunx", "playwright", "test", "--config", "playwright.config.ts", "figures.spec.ts", "--grep", "missing assets"], work);
-} finally {
-  writeFileSync(figureSpec, figureSource);
-}
-
-cssMutation("neutral hierarchy", "--heading-font-size: 20px", "--heading-font-size: 15px", "neutral hierarchy");
-cssMutation("readable measure", "--measure: 548px", "--measure: 700px", "readable long-form band");
-cssMutation("strong emphasis", "--emphasis-font-weight: 600", "--emphasis-font-weight: 400", "production strong emphasis");
-sourceMutation(
-  "story non-interference",
-  join(repo, "src/App.svelte"),
-  "Agentic engineering is directing agents to make software.",
-  "Changed article text is directing agents to make software.",
-  "non-interference",
-);
-
-// The measure arm's witness breaches the production measure constant, not the spec's sweep
-// width: at 700px the rendered longest line leaves the readable band and the arm reds, which is
-// the property the arm exists to hold. The old witness mutated readMaximum(548) to 549 and, once
-// the prose-content-dependent tightness half was deleted, reddened nothing.
-cssMutation("selected desktop measure", "--measure: 548px", "--measure: 700px", "shipped desktop measure");
-
-// H3 hero mutations.
-sourceMutation(
-  "hero register",
-  join(repo, "src/lib/Overture.svelte"),
-  'data-hero-id="spectrum-hero"',
-  'data-retired-hero-id="spectrum-hero"',
-  "exactly one unlabeled three-state hero",
-);
-sourceMutation("hero zero-label policy", join(repo, "src/lib/Overture.svelte"), 'aria-hidden="true">', 'aria-hidden="true"><span data-figure-label>forbidden</span>', "exactly one unlabeled three-state hero");
-sourceMutation("hero no area fill", join(repo, "src/lib/Overture.svelte"), '.spectrum path,.spectrum rect,.spectrum circle{fill:none', '.spectrum path,.spectrum rect,.spectrum circle{fill:currentColor', "DOM spectrum uses strokes without area tint");
-buildMutation(
-  "static hero import",
-  join(repo, "src/lib/Overture.svelte"),
-  [
-    '  import { cubeFrames } from "./cube-frames";',
-    '          const { mountHero } = await import("./hero-engine");',
-  ],
-  [
-    '  import { cubeFrames } from "./cube-frames";\n  import { mountHero } from "./hero-engine";',
-    "",
-  ],
-);
-buildMutation(
-  "hero chunk budget",
-  join(repo, "vite.config.ts"),
-  "export const HERO_GZIP_BUDGET = 200_000;",
-  "export const HERO_GZIP_BUDGET = 1;",
-);
-
-// S3 figure arms. Each mutation below reaches the assertion the arm is named for: the
-// discriminating red, not a missing subject or a preempting error.
-sourceMutation(
-  "figure count against the manifest",
-  join(repo, "src/App.svelte"),
-  "\n    <StageLoop />\n",
-  "\n",
-  "declared site",
-);
-sourceMutation(
-  "figure claim against its lead-in paragraph",
-  join(repo, "src/lib/figures.ts"),
-  'claim: "Then repeat: implement a stage, verify it, implement the next, until the spec is done."',
-  'claim: "Then repeat: implement a task, validate it, implement the next, until the work is done."',
-  "quoted claim",
-);
-sourceMutation(
-  "figcaption absence",
-  join(repo, "src/lib/Figure.svelte"),
-  "{@render children({ elapsed, reduced })}",
-  "{@render children({ elapsed, reduced })}\n  <figcaption>a caption</figcaption>",
-  "figcaption anywhere",
-);
-sourceMutation(
-  "no figure above the opening section",
-  join(repo, "src/App.svelte"),
-  '<h1 class="title">agentic engineering</h1>',
-  '<h1 class="title">agentic engineering</h1>\n    <StageLoop />',
-  "figcaption anywhere",
-);
-sourceMutation(
-  "ordered geometry in the stage loop",
-  join(repo, "src/lib/StageLoop.svelte"),
-  "{ role: concepts.spec.color, label: concepts.spec.label, x: 14, step: 0 },",
-  "{ role: concepts.spec.color, label: concepts.spec.label, x: 300, step: 0 },",
-  "order the prose states",
-);
-sourceMutation(
-  "return edge lands on the stage node",
-  join(repo, "src/lib/StageLoop.svelte"),
-  'data-figure-part="return-edge"\n        d="M 460 {top + height} L 460 100 L 274 100 L 274 {top + height}"',
-  'data-figure-part="return-edge"\n        d="M 460 {top + height} L 460 100 L 88 100 L 88 {top + height}"',
-  "lands on the stage node",
-);
-sourceMutation(
-  "figure label against its claim",
-  join(repo, "src/lib/vocabulary.ts"),
-  'verify: { label: "verify", color: "verify"',
-  'verify: { label: "validate", color: "verify"',
-  "substring of its claim",
-);
-
-// V1 connector, easing, and rest mutations each restore the rejected mechanism directly.
-sourceMutation(
-  "loop connector endpoints",
-  join(repo, "src/lib/StageLoop.svelte"),
-  'x2="200" y2={top + height / 2}',
-  'x2="192" y2={top + height / 2}',
-  "every loop connector meets",
-);
-sourceMutation(
-  "loop eased approach",
-  join(repo, "src/lib/StageLoop.svelte"),
-  `offset-distance: calc((var(--phase, 1) - (
-      sin(var(--phase, 1) * 360deg) +
-      sin(var(--phase, 1) * 720deg) * 1.33791876 +
-      sin(var(--phase, 1) * 1080deg) * 0.60019838
-    ) * 0.006) * 100%);`,
-  "offset-distance: calc(var(--phase, 1) * 100%);",
-  "non-constant speed",
-);
-sourceMutation(
-  "loop indicator absent at rest",
-  join(repo, "src/lib/StageLoop.svelte"),
-  `r: calc(7px * max(
-      clamp(0, calc(1 - var(--phase, 1) * 18), 1),
-      clamp(0, calc(1 - abs(var(--phase, 1) - 0.2784) * 32), 1),
-      clamp(0, calc(1 - abs(var(--phase, 1) - 0.5569) * 32), 1),
-      clamp(0, calc(1 - abs(var(--phase, 1) - 0.84) * 12), 1)
-    ));`,
-  "r: 7px;",
-  "reduced-motion rest",
-);
-
-// H2 motion arms. Each mutation removes one of the loop's three independent channels; all three
-// target the real-page "one unit travels" arm, so a source replacement cannot pass on fixture-only coverage.
-sourceMutation(
-  "loop traveling unit",
-  join(repo, "src/lib/StageLoop.svelte"),
-  `offset-distance: calc((var(--phase, 1) - (
-      sin(var(--phase, 1) * 360deg) +
-      sin(var(--phase, 1) * 720deg) * 1.33791876 +
-      sin(var(--phase, 1) * 1080deg) * 0.60019838
-    ) * 0.006) * 100%);`,
-  "offset-distance: 100%;",
-  "one unit travels",
-);
-sourceMutation(
-  "loop occupied-node emphasis",
-  join(repo, "src/lib/StageLoop.svelte"),
-  "opacity: clamp(0, calc(1 - abs(var(--phase, 1) - 0.5569) * 12), 1);",
-  "opacity: 0;",
-  "one unit travels",
-);
-sourceMutation(
-  "loop return dash offset",
-  join(repo, "src/lib/StageLoop.svelte"),
-  "stroke-dashoffset: clamp(0px, calc((1 - var(--phase, 1)) * 225.7px), 100px);",
-  "stroke-dashoffset: 0;",
-  "one unit travels",
-);
-// The discriminating mutation here is the reduced-motion read itself, not the effect's early
-// return: with `reduced` still true the clock is bypassed anyway, so deleting the return alone
-// changes nothing observable and survived the first run of this witness.
-sourceMutation(
-  "reduced-motion rest",
-  join(repo, "src/lib/Figure.svelte"),
-  'const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;',
-  "const reduced = false;",
-  "reduced-motion rest",
-);
-sourceMutation(
-  "role bound in a prose span",
-  join(repo, "src/App.svelte"),
-  '<span class="term" data-role="prose">human code</span>',
-  "human code",
-  "bound to both",
-);
-sourceMutation(
-  "role bound in a figure part",
-  join(repo, "src/lib/vocabulary.ts"),
-  'spec: { label: "spec", color: "context", ...shape }',
-  'spec: { label: "spec", color: "agentic", ...shape }',
-  "bound to both",
-);
-if (process.platform === "darwin") {
-  const css = readdirSync(join(work, "dist", "assets")).find((file) => file.endsWith(".css"));
-  if (!css) throw new Error("instrument: golden mutation has no stylesheet");
-  const path = join(work, "dist", "assets", css);
-  const source = readFileSync(path, "utf8");
-  writeFileSync(path, source.replace("548px", "549px"));
-  try {
-    mustRed("golden screenshot pixels", ["bunx", "playwright", "test", "--config", "playwright.config.ts", "capture.spec.ts", "--grep", "capture desktop.png"], work);
-  } finally {
-    writeFileSync(path, source);
-  }
-}
-
-console.log("instrument: self-test and mutation witnesses passed");

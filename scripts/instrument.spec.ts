@@ -1,292 +1,216 @@
-import { createServer, type Server } from "node:http";
-import type { Page } from "@playwright/test";
-import { test, expect } from "@playwright/test";
-import { assertVaries, type AxisDriver } from "./variance";
-import { assertReducedMotion, settleToRest } from "./reduced";
-import { perceptualDelta } from "./png";
+import { expect } from "@playwright/test";
+import { createHash } from "node:crypto";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { selfArms } from "./arms";
+import { changedClass, closeSharedContext, emptyInput, fixtureCampaign, namedRed, observe, record, serve, sourceSnapshots, stagedCases, test, type FixtureDeclaration, type Input } from "./campaign";
 
-// Self-test for the figure instrument (variance + reduced-motion). Serves synthetic fixtures and
-// drives them through the reusable harnesses. This proved the instrument discriminates before
-// the real figures did, per oracle 5 / coding.md (a check is evidence only if you have seen it fail).
-//
-// Fixtures:
-//   /hue            — a figure whose background hue rotates 90° per --step (the real shape).
-//   /subperceptual  — a figure whose red channel steps by 1 RGB unit per --step: bytes differ,
-//                     perception does not. Reds the perceptual floor (fix 2); would have passed
-//                     the old Buffer.equals check.
-//   /blank          — a figure that never draws (transparent). Reds the non-triviality guard
-//                     (fix 4) even though it is perfectly stable.
-
-const hueHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-      body { margin: 0; padding: 24px; }
-      .figure {
-        width: 200px;
-        height: 200px;
-        background: hsl(calc(var(--step, 0) * 90deg), 70%, 50%);
-        transition: background 0.3s ease;
+if (stagedCases().some(c => c.input.id === "baseline")) test("host/article boundary and decodable self icon @plain", async ({ browser, browserPid }) => {
+  const baseline = stagedCases().find(c => c.input.id === "baseline")!.input;
+  const check = async (mode: Input["mode"], originFault?: Input["originFault"]) => {
+    const origin = await serve({ ...baseline, mode, originFault });
+    const context = await browser.newContext();
+    const id = `origin-control/${mode}/${originFault ?? "baseline"}`;
+    record("context", { id, pid: browserPid, origin: origin.origin });
+    try {
+      for (const path of ["/index.html", "/unknown-root", "/agentic-engineering/favicon.ico"]) {
+        const response = await context.request.get(origin.origin + path);
+        expect(response.status(), "predicate:runner.origin-boundary").toBe(404);
       }
-      @media (prefers-reduced-motion: reduce) {
-        .figure { transition: none; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="figure" id="fig"></div>
-  </body>
-</html>`;
+      const response = await context.request.get(origin.origin + "/favicon.ico");
+      expect(response.status(), "predicate:runner.icon-status").toBe(200);
+      expect(response.headers()["content-type"], "predicate:runner.icon-type").toBe("image/x-icon");
+      const page = await context.newPage();
+      const session = await context.newCDPSession(page);
+      const target = await session.send("Target.getTargetInfo"); await session.detach();
+      record("page", { id, pid: browserPid, target: target.targetInfo.targetId });
+      await page.goto(origin.url + (mode === "self" ? "hue" : ""));
+      const size = await page.evaluate(async () => {
+        const icon = new Image(); icon.src = "/favicon.ico";
+        try { await icon.decode(); } catch { /* A decoding refusal is measured as zero dimensions. */ }
+        return [icon.naturalWidth, icon.naturalHeight];
+      });
+      expect(size, "predicate:runner.icon-decodes").toEqual([16, 16]);
+      expect([...origin.fulfilled], "predicate:runner.host-set").toEqual(["/favicon.ico"]);
+      record("origin-control", { mode, size, declared: origin.declared, fulfilled: [...origin.fulfilled] });
+    } finally { await context.close(); record("context-close", { id, pid: browserPid }); await origin.close(); }
+  };
+  for (const mode of ["files", "fallback", "self"] as const) await check(mode);
+  await namedRed("runner.origin-boundary", () => check("files", "off-base"));
+  await namedRed("runner.origin-boundary", () => check("files", "base-icon"));
+  await namedRed("runner.icon-decodes", () => check("self", "self-html-icon"));
+});
 
-const subPerceptualHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-      body { margin: 0; padding: 24px; }
-      .figure {
-        width: 200px;
-        height: 200px;
-        /* 1-RGB-unit red step per --step: every state differs in bytes, none perceptibly. */
-        background: rgb(calc(100 + var(--step, 0)), 100, 100);
-      }
-    </style>
-  </head>
-  <body>
-    <div class="figure" id="fig"></div>
-  </body>
-</html>`;
-
-const blankHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-      body { margin: 0; padding: 24px; }
-      .figure { width: 200px; height: 200px; }
-    </style>
-  </head>
-  <body>
-    <div class="figure" id="fig"></div>
-  </body>
-</html>`;
-
-// Mutation fixture for active-motion detection: infinite keyframes that do not honor
-// prefers-reduced-motion. The animation metadata arm rejects it before the raster settle runs.
-const restlessHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-      body { margin: 0; padding: 24px; }
-      .figure {
-        width: 200px;
-        height: 200px;
-        animation: drift 0.6s linear infinite;
-      }
-      @keyframes drift {
-        from { background: hsl(0, 70%, 50%); }
-        to { background: hsl(340, 70%, 50%); }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="figure" id="fig"></div>
-  </body>
-</html>`;
-
-const finiteMotionHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-      body { margin: 0; padding: 24px; }
-      .figure {
-        width: 200px;
-        height: 200px;
-        background: hsl(calc(var(--step, 0) * 90deg), 70%, 50%);
-        transition: background 120ms linear;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="figure" id="fig"></div>
-  </body>
-</html>`;
-
-const rafRepaintHtml = `<!doctype html>
-<html lang="en">
-  <head>
-    <style>
-      body { margin: 0; padding: 24px; }
-      .figure { width: 200px; height: 200px; }
-    </style>
-  </head>
-  <body>
-    <canvas class="figure" id="fig" width="200" height="200"></canvas>
-    <script>
-      const figure = document.querySelector("#fig");
-      const context = figure.getContext("2d");
-      let frame = 0;
-      function repaint() {
-        context.fillStyle = "white";
-        context.fillRect(0, 0, 200, 200);
-        context.fillStyle = "black";
-        context.font = "32px sans-serif";
-        context.fillText(String(frame++), 10, 50);
-        requestAnimationFrame(repaint);
-      }
-      requestAnimationFrame(repaint);
-    </script>
-  </body>
-</html>`;
-
-const fixtures: Record<string, string> = {
-  "/hue": hueHtml,
-  "/subperceptual": subPerceptualHtml,
-  "/blank": blankHtml,
-  "/restless": restlessHtml,
-  "/finite-motion": finiteMotionHtml,
-  "/raf-repaint": rafRepaintHtml,
-};
-
-let server: Server;
-let url: string;
-
-test.beforeAll(async () => {
-  server = createServer((req, res) => {
-    const path = new URL(req.url ?? "/", "http://localhost").pathname;
-    const body = fixtures[path] ?? hueHtml;
-    res.writeHead(200, { "content-type": "text/html; charset=utf-8" });
-    res.end(body);
+const fixtureDeclarations: FixtureDeclaration[] = [
+  { id: "pure-a", requirement: "pure" },
+  { id: "plain-a", requirement: "plain" },
+  { id: "plain-b", requirement: "plain" },
+  { id: "gpu-a", requirement: "gpu" },
+  { id: "fresh-a", requirement: "fresh" },
+];
+if (process.env.CAMPAIGN_FIXTURE_CHILD === "1") {
+  test("independent pure subject @fixture-pure", () => { record("fixture-complete", { id: "pure-a" }); });
+  for (const item of stagedCases()) test(`${item.id} @fixture-${item.cohort}`, async ({ browser, browserPid }, info) => {
+    const fault = process.env.CAMPAIGN_FIXTURE_FAULT;
+    const red = item.id === "plain-b" ? ({ "context-reuse": "runner.context-isolation", "wrong-expectation": "runner.expectation-input", "wrong-origin": "runner.origin-input" } as Record<string, string>)[fault ?? ""] : item.id === "gpu-a" && fault === "merged-cohort" ? "runner.fixture-adapter" : undefined;
+    const run = () => observe(browser, browserPid, item, info);
+    if (red) await namedRed(red, run); else await run();
+    record("fixture-complete", { id: item.id, pid: browserPid, red });
   });
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const address = server.address();
-  if (address === null || typeof address === "string") throw new Error("no server port");
-  url = `http://127.0.0.1:${address.port}`;
-});
-
-test.afterAll(async () => {
-  await new Promise<void>((resolve, reject) =>
-    server.close((err) => (err ? reject(err) : resolve())),
-  );
-});
-
-// The axis driver: sets --step on the figure. To pin (mutation run), set the second arg to 0
-// instead of step — every state renders the same hue, so the variance harness reds.
-const driver: AxisDriver = async (page, step) => {
-  await page.locator("#fig").evaluate((el, s) => el.style.setProperty("--step", String(s)), step);
-};
-
-async function settle(page: Page): Promise<void> {
-  await page.evaluate(
-    () =>
-      new Promise((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r(null))),
-      ),
-  );
+  if (process.env.CAMPAIGN_FIXTURE_FAULT === "baseline") test("compatible same-process context and input faults @fixture-plain", async ({ browser, browserPid }, info) => {
+    const a = stagedCases().find(c => c.id === "plain-a")!;
+    const b = stagedCases().find(c => c.id === "plain-b")!;
+    try {
+      process.env.CAMPAIGN_FIXTURE_FAULT = "context-reuse";
+      await observe(browser, browserPid, { ...a, id: "probe-context-a" }, info);
+      await namedRed("runner.context-isolation", () => observe(browser, browserPid, { ...b, id: "probe-context-b" }, info));
+      await closeSharedContext();
+      for (const [fault, predicate] of [["wrong-expectation", "runner.expectation-input"], ["wrong-origin", "runner.origin-input"]]) {
+        process.env.CAMPAIGN_FIXTURE_FAULT = fault;
+        await namedRed(predicate, () => observe(browser, browserPid, { ...b, id: `probe-${fault}` }, info));
+      }
+    } finally { await closeSharedContext(); process.env.CAMPAIGN_FIXTURE_FAULT = "baseline"; }
+  });
+  test.afterAll(async () => { await closeSharedContext(); });
 }
+if (process.env.CAMPAIGN_FIXTURE_CHILD !== "1") test("independent actual-runner population and structural witnesses @runner", async () => {
+  expect(fixtureDeclarations).toHaveLength(5);
+  for (const fault of ["pure", "baseline", "redundant-launch", "merged-cohort", "fresh-reuse", "dropped-case", "empty-gpu"]) {
+    const declarations = fault === "pure" ? fixtureDeclarations.filter(c => c.requirement === "pure") : fixtureDeclarations;
+    const result = fixtureCampaign(declarations, fault);
+    const events = (name: string) => result.events.filter(e => e.event === name);
+    const launches = events("launch");
+    const closes = events("close");
+    expect(closes.map(e => e.pid).sort(), "predicate:runner.fixture-closure").toEqual(launches.map(e => e.pid).sort());
+    expect(closes.every(e => e.alive === false), "predicate:runner.fixture-closure").toBe(true);
+    if (fault === "empty-gpu") {
+      expect(result.log).toContain("predicate:runner.gpu-config");
+      await namedRed("runner.gpu-config", async () => {
+        expect(Object.keys(events("fixture-configuration")[0].options).length, "predicate:runner.gpu-config").toBeGreaterThan(0);
+      });
+      expect(launches).toHaveLength(0);
+      expect(result.exit).not.toBe(0);
+      continue;
+    }
+    expect(result.exit, result.work + "/runner.log").toBe(0);
+    const verify = async () => {
+      if (fault === "redundant-launch" || fault === "baseline" || fault === "pure") {
+        // Derived from fixture declarations, never the selected/staged case list.
+        const compatible = new Set(declarations.filter(c => c.requirement !== "pure").map(c => c.requirement));
+        expect(launches.length, "predicate:runner.compatible-launches").toBe(compatible.size);
+      }
+      expect(events("fixture-complete").map(e => e.id).sort(), "predicate:runner.fixture-population").toEqual(declarations.map(c => c.id).sort());
+      if (fault === "baseline" || fault === "fresh-reuse") {
+        const completed = events("fixture-complete");
+        const fresh = completed.find(e => e.id === "fresh-a")!;
+        expect(completed.filter(e => e.id !== "fresh-a" && e.pid).every(e => e.pid !== fresh.pid), "predicate:runner.fresh-pid").toBe(true);
+        expect(completed.find(e => e.id === "plain-a")!.pid, "predicate:runner.compatible-pid").toBe(completed.find(e => e.id === "plain-b")!.pid);
+        const contexts = events("context").filter(e => !e.id.startsWith("probe-")), pages = events("page").filter(e => !e.id.startsWith("probe-"));
+        expect(contexts.length, "predicate:runner.fixture-contexts").toBe(4);
+        expect(new Set(pages.map(e => e.target)).size, "predicate:runner.fixture-pages").toBe(4);
+        expect(new Set(contexts.map(e => e.origin)).size, "predicate:runner.fixture-origins").toBe(4);
+      }
+    };
+    const structuralRed = ({ "redundant-launch": "runner.compatible-launches", "fresh-reuse": "runner.fresh-pid", "dropped-case": "runner.fixture-population" } as Record<string, string>)[fault];
+    if (structuralRed) await namedRed(structuralRed, verify); else await verify();
+    const inputRed = ({ "context-reuse": "runner.context-isolation", "merged-cohort": "runner.fixture-adapter", "wrong-expectation": "runner.expectation-input", "wrong-origin": "runner.origin-input" } as Record<string, string>)[fault];
+    if (inputRed) expect(events("named-red").map(e => e.predicate)).toContain(inputRed);
+    if (fault === "baseline") for (const predicate of ["runner.context-isolation", "runner.expectation-input", "runner.origin-input"]) expect(events("named-red").map(e => e.predicate)).toContain(predicate);
+    if (fault === "fresh-reuse") expect(events("fixture-marker").filter(e => e.clean)).toHaveLength(4);
+    record("fixture-qualified", { fault, work: result.work, launches: launches.length, contexts: events("context").length, pages: events("page").length });
+  }
+});
 
-async function capture(page: Page, step: number): Promise<Buffer> {
-  await driver(page, step);
-  await settle(page);
-  return page.locator("#fig").screenshot();
+const pure = selfArms(emptyInput).filter(arm => arm.pure);
+expect(pure).toHaveLength(33); // 32 region controls plus the retained delayed-frame pure control.
+for (const arm of pure) {
+  test(`${arm.title} @pure`, async ({}, info) => {
+    await arm.run(undefined!, info);
+    record("executed-pure", { id: `self/${arm.title}`, title: arm.title });
+  });
 }
+test("changed subjects classify package keys and assertion consumers @pure", () => {
+  expect(changedClass(["scripts/region.ts"])).toBe(1);
+  expect(changedClass(["scripts/instrument.ts"])).toBe(2);
+  expect(changedClass(["scripts/arms.ts", "scripts/instrument.ts"])).toBe(3);
+  expect(changedClass(["package.json"], { scripts: { a: "old" } }, { scripts: { a: "new" } })).toBe(2);
+  expect(changedClass(["package.json"], { dependencies: { a: "1" } }, { dependencies: { a: "2" } })).toBe(4);
+  expect(changedClass(["src/App.svelte"])).toBe(4);
+});
+test("whole-source snapshots see path additions, deletions, bytes and enumeration refusal @pure", async () => {
+  const owned = mkdtempSync(join(tmpdir(), "article-source-snapshot-"));
+  const root = join(owned, "repo");
+  const git = (cwd: string, args: string[]) => {
+    const result = spawnSync("git", args, { cwd, encoding: "utf8" });
+    expect(result.status, result.stderr).toBe(0);
+  };
+  try {
+    mkdirSync(root);
+    git(root, ["init", "--quiet"]);
+    writeFileSync(join(root, ".gitignore"), "ignored/\n");
+    writeFileSync(join(root, "source.ts"), "export const value = 1;\n");
+    writeFileSync(join(root, "untracked.ts"), "export const extra = 1;\n");
+    git(root, ["add", "--", "source.ts"]);
+    const snapshot = sourceSnapshots(root); // Same factory/binding used by campaign's three reads.
+    const initial = snapshot();
+    expect(Object.keys(initial)).toEqual([".gitignore", "source.ts", "untracked.ts"]);
+    expect(snapshot()).toEqual(initial);
+    mkdirSync(join(root, "ignored"));
+    writeFileSync(join(root, "ignored", "build.js"), "ignored output");
+    expect(snapshot()).toEqual(initial);
 
-const STEPS = 4;
+    // Reproduce the old carrier with real file reads but its one-time path enumeration.
+    const frozenPaths = Object.keys(initial);
+    const frozenSnapshot = () => Object.fromEntries(frozenPaths.map(path => [path, createHash("sha256").update(readFileSync(join(root, path))).digest("hex")]));
+    writeFileSync(join(root, "added.ts"), "export const added = true;\n");
+    expect(frozenSnapshot()).toEqual(initial);
+    expect(Object.keys(snapshot())).toContain("added.ts");
+    await namedRed("runner.source-before-browser", async () => {
+      expect(snapshot(), "predicate:runner.source-before-browser").toEqual(initial);
+    });
+    await namedRed("runner.whole-tree-restoration", async () => {
+      expect(snapshot(), "predicate:runner.whole-tree-restoration").toEqual(initial);
+    });
+    record("source-snapshot-control", { change: "untracked-addition", legacyMissed: true, correctedDetected: true });
+    rmSync(join(root, "added.ts"));
+    expect(snapshot()).toEqual(initial);
 
-test("variance: figure varies across its axis", async ({ page }) => {
-  await page.goto(url + "/hue", { waitUntil: "networkidle" });
-  const result = await assertVaries(page, "#fig", driver, STEPS);
-  expect(result.failures).toEqual([]);
-  expect(result.pass).toBe(true);
+    rmSync(join(root, "untracked.ts"));
+    await namedRed("runner.whole-tree-restoration", async () => {
+      expect(snapshot(), "predicate:runner.whole-tree-restoration").toEqual(initial);
+    });
+    writeFileSync(join(root, "untracked.ts"), "export const extra = 1;\n");
+    writeFileSync(join(root, "source.ts"), "export const value = 2;\n");
+    await namedRed("runner.whole-tree-restoration", async () => {
+      expect(snapshot(), "predicate:runner.whole-tree-restoration").toEqual(initial);
+    });
+    writeFileSync(join(root, "source.ts"), "export const value = 1;\n");
+    expect(snapshot()).toEqual(initial);
+    rmSync(join(root, "source.ts"));
+    expect(() => snapshot()).toThrow(/ENOENT/);
+    record("source-snapshot-control", { change: "untracked-deletion, tracked-byte-change, tracked-deletion", detected: true });
+
+    const empty = join(owned, "empty"), notRepo = join(owned, "not-repo");
+    mkdirSync(empty); mkdirSync(notRepo);
+    git(empty, ["init", "--quiet"]);
+    await namedRed("runner.source-population", async () => { sourceSnapshots(empty)(); });
+    for (const path of [notRepo, join(owned, "absent")]) {
+      await namedRed("runner.source-enumeration", async () => { sourceSnapshots(path)(); });
+    }
+    record("source-snapshot-control", { change: "empty, non-Git and failed-spawn listings", refused: true });
+  } finally {
+    rmSync(owned, { recursive: true, force: true });
+    record("source-snapshot-cleanup", { owned });
+  }
 });
 
-test("reduced-motion: figure renders fully drawn at every state", async ({ page }) => {
-  await page.goto(url + "/hue", { waitUntil: "networkidle" });
-  const result = await assertReducedMotion(page, "#fig", driver, STEPS);
-  expect(result.failures).toEqual([]);
-  expect(result.pass).toBe(true);
-});
-
-test("settle: a zero frame-pair budget rejects instead of reporting rest", async ({ page }) => {
-  await page.goto(url + "/hue", { waitUntil: "networkidle" });
-  await expect(settleToRest(page, "#fig", 0)).rejects.toThrow(/never reached rest within 0/);
-});
-
-test("settle: does not accept one equal stale pair before the driven frame arrives", async () => {
-  const oldFrame = Buffer.from("old");
-  const newFrame = Buffer.from("new");
-  const frames = [oldFrame, oldFrame, newFrame, newFrame, newFrame];
-  let captures = 0;
-  const delayedPage = {
-    evaluate: async () => undefined,
-    locator: () => ({ screenshot: async () => frames[captures++] }),
-  } as unknown as Page;
-
-  await settleToRest(delayedPage, "#fig");
-  expect(captures).toBe(5);
-});
-
-test("variance: sub-perceptual steps red at the perceptual floor (would pass byte-identity)", async ({ page }) => {
-  await page.goto(url + "/subperceptual", { waitUntil: "networkidle" });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  const a = await capture(page, 0);
-  const b = await capture(page, 1);
-  // OLD check (byte-identity, Buffer.equals): bytes differ → would have PASSED (green).
-  expect(a.equals(b)).toBe(false);
-  // NEW check (perceptual delta): 1-RGB-unit steps are sub-perceptual → REDS.
-  const delta = perceptualDelta(a, b);
-  console.log(
-    `sub-perceptual old-vs-new: byte-identity=${a.equals(b)} (old would pass); ` +
-      `perceptual meanDelta=${delta.meanDelta} maxDelta=${delta.maxDelta} extent=${delta.extent} (new reds)`,
-  );
-  expect(delta.maxDelta).toBeLessThan(3);
-  expect(delta.extent).toBe(0);
-  const result = await assertVaries(page, "#fig", driver, STEPS);
-  expect(result.pass).toBe(false);
-  expect(result.failures.length).toBeGreaterThan(0);
-  expect(result.failures[0].meanDelta).toBe(delta.meanDelta);
-  expect(result.failures[0].extent).toBe(delta.extent);
-});
-
-test("reduced-motion: blank element reds (never drew is not 'fully drawn')", async ({ page }) => {
-  await page.goto(url + "/blank", { waitUntil: "networkidle" });
-  const result = await assertReducedMotion(page, "#fig", driver, 1);
-  expect(result.pass).toBe(false);
-  expect(result.failures.some((f) => /trivial|blank/i.test(f.reason))).toBe(true);
-});
-
-test("reduced-motion: permanently animating figure reds as active motion", async ({ page }) => {
-  await page.goto(url + "/restless", { waitUntil: "networkidle" });
-  const result = await assertReducedMotion(page, "#fig", driver, STEPS);
-  expect(result.pass).toBe(false);
-  expect(result.failures.length).toBe(STEPS);
-  for (const f of result.failures) expect(f.reason).toMatch(/active animation/);
-});
-
-test("reduced-motion: finite transition reds even though it would settle within the budget", async ({ page }) => {
-  await page.goto(url + "/finite-motion", { waitUntil: "networkidle" });
-  const result = await assertReducedMotion(page, "#fig", driver, STEPS);
-  expect(result.pass).toBe(false);
-  expect(result.failures.some((failure) => /active animation/.test(failure.reason))).toBe(true);
-});
-
-test("reduced-motion: rAF repaint invisible to getAnimations reds on rest-budget expiry", async ({ page }) => {
-  await page.goto(url + "/raf-repaint", { waitUntil: "networkidle" });
-  const animationCount = await page
-    .locator("#fig")
-    .evaluate((el) => el.getAnimations({ subtree: true }).length);
-  expect(animationCount).toBe(0);
-  const result = await assertReducedMotion(page, "#fig", driver, 1);
-  expect(result.pass).toBe(false);
-  expect(result.failures).toHaveLength(1);
-  expect(result.failures[0].reason).toMatch(/never reached rest within/);
-});
-
-test("guards: assertVaries throws for <2 steps", async ({ page }) => {
-  await page.goto(url + "/hue", { waitUntil: "networkidle" });
-  await expect(assertVaries(page, "#fig", driver, 0)).rejects.toThrow();
-  await expect(assertVaries(page, "#fig", driver, 1)).rejects.toThrow();
-});
-
-test("guards: assertReducedMotion throws for <1 step", async ({ page }) => {
-  await page.goto(url + "/hue", { waitUntil: "networkidle" });
-  await expect(assertReducedMotion(page, "#fig", driver, 0)).rejects.toThrow();
+test("named-red refuses unrelated exceptions and wrong assertion identities @pure", async () => {
+  for (const body of [async () => { throw new Error("predicate:wanted"); }, async () => { expect(1, "predicate:other").toBe(2); }, async () => {}]) {
+    let rejected = false;
+    try { await namedRed("wanted", body); } catch { rejected = true; }
+    expect(rejected).toBe(true);
+  }
+  await namedRed("wanted", async () => { expect(1, "predicate:wanted").toBe(2); });
 });
