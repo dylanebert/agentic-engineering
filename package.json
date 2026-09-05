@@ -29,6 +29,7 @@
     "instrument": "bun run scripts/instrument.ts",
     "instrument:pure": "bun run scripts/instrument.ts --pure",
     "campaign": "bun run scripts/instrument.ts",
+    "runtime": "bun run scripts/runtime.ts",
     "figures": "bun run scripts/figures.ts",
     "oracle-text": "bun run scripts/oracle-text.ts",
     "tripwires": "bun run scripts/tripwires.ts",

@@ -11,9 +11,9 @@ import { requireDisplay } from "./display";
 
 export type Group = "figure" | "capture" | "text" | "prose" | "self";
 export type Cohort = "plain" | "gpu" | "fresh";
-export type Input = { id: string; root: string; mode: "files" | "fallback" | "self"; omitHostIcon?: boolean; originFault?: "off-base" | "base-icon" | "self-html-icon"; hashes: Record<string, string> };
+export type Input = { id: string; root: string; mode: "files" | "fallback" | "self"; omitHostIcon?: boolean; omitRuntimeCors?: boolean; runtimeControl?: "healthy" | "error"; originFault?: "off-base" | "base-icon" | "self-html-icon"; hashes: Record<string, string> };
 export type Case = { id: string; input: Input; group: Group; title: string; cohort: Cohort; red?: string; fixture?: { identity: string; requirement: string }; };
-export type Mutation = { label: string; path?: string; needle?: string | string[]; replacement?: string | string[]; grep?: string; predicate: string; cohort?: Cohort; mode?: "fallback" | "golden"; buildRed?: string };
+export type Mutation = { label: string; path?: string; needle?: string | string[]; replacement?: string | string[]; grep?: string; predicate: string; runtime?: boolean; cohort?: Cohort; mode?: "fallback" | "golden"; buildRed?: string };
 const here = dirname(fileURLToPath(import.meta.url));
 const factories = { figure: figureArms, capture: captureArms, text: textArms, prose: proseArms, self: selfArms };
 export const emptyInput: ArmInput = { root: here, dist: join(here, "dist"), url: "", figures: [], grammar: { colors: {} } as ArmInput["grammar"] };
@@ -95,7 +95,7 @@ export async function namedRed(predicate: string, body: () => Promise<unknown>) 
 }
 export const HOST_PATHS = ["/favicon.ico"];
 // A local 16x16 32-bit ICO (DIB plus AND mask), not an article/branding asset.
-const hostIcon = Buffer.alloc(22 + 40 + 16 * 16 * 4 + 16 * 4);
+export const hostIcon = Buffer.alloc(22 + 40 + 16 * 16 * 4 + 16 * 4);
 hostIcon.writeUInt16LE(1, 2); hostIcon.writeUInt16LE(1, 4);
 hostIcon[6] = 16; hostIcon[7] = 16;
 hostIcon.writeUInt16LE(1, 10); hostIcon.writeUInt16LE(32, 12);
@@ -103,7 +103,7 @@ hostIcon.writeUInt32LE(hostIcon.length - 22, 14); hostIcon.writeUInt32LE(22, 18)
 hostIcon.writeUInt32LE(40, 22); hostIcon.writeInt32LE(16, 26); hostIcon.writeInt32LE(32, 30);
 hostIcon.writeUInt16LE(1, 34); hostIcon.writeUInt16LE(32, 36);
 for (let i = 62; i < 62 + 1024; i += 4) { hostIcon[i] = 128; hostIcon[i + 1] = 128; hostIcon[i + 2] = 128; hostIcon[i + 3] = 255; }
-const types: Record<string, string> = { html: "text/html", js: "text/javascript", css: "text/css", svg: "image/svg+xml", json: "application/json", png: "image/png", woff2: "font/woff2", ttf: "font/ttf", webp: "image/webp", jpg: "image/jpeg", mp4: "video/mp4", ico: "image/x-icon", map: "application/json" };
+export const types: Record<string, string> = { html: "text/html", js: "text/javascript", css: "text/css", svg: "image/svg+xml", json: "application/json", png: "image/png", woff2: "font/woff2", ttf: "font/ttf", webp: "image/webp", jpg: "image/jpeg", mp4: "video/mp4", ico: "image/x-icon", map: "application/json" };
 export async function serve(input: Input) {
   expect(bytes(input.root), "predicate:runner.immutable-input").toEqual(input.hashes);
   const fulfilled = new Set<string>();
@@ -217,7 +217,7 @@ export type FixtureDeclaration = { id: string; requirement: "pure" | Cohort };
 export function fixtureCampaign(declarations: FixtureDeclaration[], fault: string) {
   const work = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-runner-fixture-"));
   symlinkSync(join(here, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["arms.ts", "campaign.ts", "instrument.spec.ts", "playwright.config.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts", "shallot-pixels.ts"]) cpSync(join(here, file), join(work, file));
+  for (const file of ["arms.ts", "campaign.ts", "instrument.spec.ts", "playwright.config.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   const cases: Case[] = [];
   for (const declaration of declarations) {
@@ -269,8 +269,7 @@ export async function campaign(selection: string, mutations: Mutation[]) {
   record("owner-start", { selection, repo, work });
   // Each run owns a new directory. No inherited capture or staging output is overwritten.
   symlinkSync(join(repo, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["arms.ts", "campaign.ts", "instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "playwright.config.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
-  cpSync(join(repo, "node_modules/@dylanebert/shallot/src/harness/pixels.ts"), join(work, "shallot-pixels.ts"));
+  for (const file of ["runtime.ts", "runtime.spec.ts", "arms.ts", "campaign.ts", "instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "playwright.config.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
   cpSync(join(here, "capture.spec.ts-snapshots"), join(work, "capture.spec.ts-snapshots"), { recursive: true });
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
@@ -307,18 +306,21 @@ export async function campaign(selection: string, mutations: Mutation[]) {
   const self = makeInput("self", "self");
   const cases: Case[] = [];
   const add = (input: Input, group: Group, arm: Arm, cohort: Cohort, suffix: string, red?: string) => cases.push({ id: `${group}/${arm.title}/${cohort}/${suffix}`, input, group, title: arm.title, cohort, red });
-  if (!pure) {
-    const groups: Group[] = selection === "narrow" ? [] : selection === "instrument" || selection === "R3" ? ["self", "figure", "capture", "text", "prose"] : [selection as Group];
+  if (selection === "runtime") {
+    const { stageRuntime } = await import("./runtime");
+    stageRuntime(baseline, cases);
+  } else if (!pure) {
+    const groups: Group[] = selection === "narrow" || selection === "runtime-witnesses" ? [] : selection === "instrument" || selection === "R3" ? ["self", "figure", "capture", "text", "prose"] : [selection as Group];
     for (const group of groups) for (const arm of factories[group](emptyInput)) {
       if (group === "self" && arm.pure) continue;
-      const gpuOnly = arm.title.includes("three rendered treatments");
-      const cohorts: Cohort[] = gpuOnly ? ["gpu"] : arm.title.includes("real WebGPU acquisition") ? ["plain", "gpu"] : ["plain"];
-      // Repetition is at the affected figure boundary, not wrapper or duplicate project level.
-      const repeats = group === "figure" && (selection === "R3" || selection === "figure") ? 5 : 1;
+      const cohorts: Cohort[] = ["plain"];
+      // R3 changes assertions, not the rendered subject. The figure wrapper retains
+      // its five repetitions for repetition-sensitive rendered-subject closes.
+      const repeats = group === "figure" && selection === "figure" ? 5 : 1;
       for (let repetition = 1; repetition <= repeats; repetition++) for (const cohort of cohorts) add(group === "self" ? self : baseline, group, arm, cohort, `baseline-${repetition}`);
     }
-    if (selection === "instrument" || selection === "R3" || selection === "narrow") {
-      const selected = selection === "narrow" ? mutations.filter(m => m.label.startsWith("new hero")) : mutations;
+    if (selection === "instrument" || selection === "R3" || selection === "narrow" || selection === "runtime-witnesses") {
+      const selected = selection === "runtime-witnesses" ? mutations.filter(m => m.runtime) : selection === "narrow" ? mutations.filter(m => m.label.startsWith("new hero")) : mutations;
       for (const [index, mutation] of selected.entries()) {
         const id = `mutation-${index}-${mutation.label.replace(/[^a-z0-9]+/gi, "-")}`;
         let input: Input;
@@ -356,15 +358,23 @@ export async function campaign(selection: string, mutations: Mutation[]) {
             record("restored", { label: mutation.label, path, sha256: sha(original) });
           }
         }
+        if (mutation.runtime) {
+          cases.push({ id: `runtime/${id}/gpu/1`, input: input!, group: "figure", title: mutation.label, cohort: "gpu", red: mutation.predicate });
+          continue;
+        }
         const group: Group = mutation.mode === "golden" ? "capture" : "figure";
         const arms = factories[group](emptyInput).filter(a => a.title.includes(mutation.grep!));
         if (arms.length !== 1) throw new Error(`mutation ${mutation.label} selects ${arms.length} arms`);
         if (selection === "narrow") add(baseline, group, arms[0], mutation.cohort ?? "plain", `baseline-${mutation.label}`);
         add(input!, group, arms[0], mutation.cohort ?? "plain", mutation.label, mutation.predicate);
       }
-      const noIcon = makeInput("host-icon-removed", "files", baseline);
-      noIcon.omitHostIcon = true;
-      add(noIcon, "figure", figureArms(emptyInput).find(a => a.title.includes("real WebGPU acquisition"))!, "gpu", "host-icon-removed", "figure-11.11");
+      const { stageRuntime } = await import("./runtime");
+      stageRuntime(baseline, cases, "healthy", true);
+      stageRuntime(baseline, cases, "error", true);
+      const corsInput = { ...cases.find(c => c.id === "runtime/healthy/plain/1")!.input, id: "cors-header-removed", omitRuntimeCors: true };
+      for (let n = 1; n <= 3; n++) cases.push({ id: `runtime/cors-header-removed/plain/${n}`, input: corsInput, group: "figure", title: "anonymous external script requires CORS", cohort: "plain", red: "runtime.zero-errors" });
+      const noIcon = { ...cases.find(c => c.id === "runtime/healthy/gpu/1")!.input, omitHostIcon: true };
+      cases.push({ id: "runtime/host-icon-removed/gpu/1", input: noIcon, group: "figure", title: "host-icon-removed", cohort: "gpu", red: "runtime.zero-errors" });
       // One pristine baseline observation after all staged witnesses, with source already restored.
       add(baseline, "figure", figureArms(emptyInput).find(a => a.title.includes("non-interference"))!, "plain", "restoration-control");
     }
@@ -374,6 +384,7 @@ export async function campaign(selection: string, mutations: Mutation[]) {
   writeFileSync(join(work, "cases.json"), JSON.stringify(cases, null, 2));
   writeFileSync(join(work, "selection.json"), JSON.stringify({ selection, pure }));
   const args = ["bunx", "playwright", "test", "--config", "playwright.config.ts"];
+  if (selection === "runtime") args.push(...process.argv.slice(2));
   record("playwright-start", { args, work });
   const child = Bun.spawnSync(args, { cwd: work, stdout: "inherit", stderr: "inherit", env: { ...process.env, DEBUG: "pw:browser", DEBUG_COLORS: "0", CAMPAIGN_SELECTION: selection } });
   record("playwright-end", { exit: child.exitCode });
