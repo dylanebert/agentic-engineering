@@ -49,16 +49,24 @@ export function stageRuntime(baseline: Input, cases: Case[], control = process.e
     writeFileSync(join(root, "dist/index.html"), healthy(control === "error"));
     input = { ...baseline, id: control, root, runtimeControl: control as "healthy" | "error", hashes: bytes(root) };
   }
+  if (!witness) {
+    const reads = control === "article" ? ["plain", "playback", "reduced"] : ["playback"];
+    for (const read of reads) cases.push({ id: `runtime/${control}/${read}/1`, title: "bounded runtime", group: "figure", cohort: read === "plain" ? "plain" : "gpu", input });
+    return;
+  }
   for (const cohort of ["plain", "gpu"] as const) for (let n = 1; n <= (cohort === "plain" ? 3 : 1); n++) {
     cases.push({ id: `runtime/${control}/${cohort}/${n}`, title: "sustained runtime", group: "figure", cohort, input, red: witness && control === "error" ? "runtime.zero-errors" : undefined });
   }
 }
 
 /** Runs before navigation and wraps native calls without replacing their results. */
-function instrument() {
+function instrument(diagnostic = true) {
   const w = window as any;
-  const s = w.__runtime = { adapters: 0, successfulAdapters: 0, devices: 0, successfulDevices: 0, contextCalls: 0, contexts: 0, canvases: 0, events: [] as any[], timeline: [] as any[] };
-  const emit = (kind: string, data: unknown) => s.events.push({ t: performance.now(), kind, data });
+  const s = w.__runtime = { adapters: 0, successfulAdapters: 0, devices: 0, successfulDevices: 0, contextCalls: 0, contexts: 0, canvases: 0, events: [] as any[], timeline: [] as any[], gpuErrors: 0 };
+  const emit = (kind: string, data: unknown) => {
+    if (kind === 'gpu-error' || kind === 'device-lost' || kind === 'device-rejected' || kind === 'adapter-rejected') s.gpuErrors++;
+    if (diagnostic || s.events.length < 100) s.events.push({ t: performance.now(), kind, data });
+  };
   const contexts = new WeakSet<object>(), canvases = new WeakSet<object>();
   const get = HTMLCanvasElement.prototype.getContext;
   HTMLCanvasElement.prototype.getContext = function (this: HTMLCanvasElement, ...args: any[]) {
@@ -92,7 +100,7 @@ function instrument() {
     }
     requestAnimationFrame(tick);
   }
-  requestAnimationFrame(tick);
+  if (diagnostic) requestAnimationFrame(tick);
 }
 async function snapshot(page: Page) {
   return page.locator(hero).evaluate(h => {
@@ -116,16 +124,102 @@ function localDelta(a: Frame, b: Frame) {
   return { mean: sum / n, extent: above / n, pixels: n };
 }
 
+type Check = (predicate: string, pass: boolean, evidence: unknown) => void;
+type Raw = (kind: string, data: unknown) => void;
+
+/** Pixels are a human read; markers only index the natural sequence. */
+async function boundedRead(page: Page, item: Case, info: TestInfo, check: Check, raw: Raw, reduced: boolean, started: number) {
+  const frames: { file: string; read: Read; at: string }[] = [];
+  const capture = async (label: string) => {
+    const read = await snapshot(page), file = label + ".png", at = new Date().toISOString();
+    await page.locator(hero).screenshot({ path: join(info.outputDir, file), animations: "allow" });
+    frames.push({ file, read, at }); raw("frame", frames.at(-1));
+    return read;
+  };
+  const gpu = item.cohort === "gpu";
+  if (gpu) {
+    try { await page.locator(hero + '[data-hero-gpu="drawn"]').waitFor({ timeout: 5000 }); }
+    catch (error) { check("runtime.first-draw", false, String(error)); }
+  } else {
+    await page.waitForFunction(() => (window as any).__runtime.adapters > 0, undefined, { timeout: 5000 });
+  }
+  raw("setup", { elapsedMs: Date.now() - started });
+  const observation = Date.now();
+  if (gpu && !reduced) {
+    for (let n = 0; n <= 15; n++) {
+      await page.waitForTimeout(Math.max(0, observation + n * 1000 - Date.now()));
+      await capture(`frame-${String(n).padStart(2, "0")}`);
+    }
+    check("runtime.playback-duration", Date.now() - observation >= 15000, { elapsedMs: Date.now() - observation });
+    const grid = treatments.map(state => ({ state, frames: frames.filter(f => f.read.state === state && f.read.treatment === state && f.read.drawn === "drawn").slice(0, 2) }));
+    check("runtime.frame-coverage", grid.every(row => row.frames.length === 2), grid);
+    writeFileSync(join(info.outputDir, "frames.html"), `<!doctype html><meta charset="utf-8"><title>Natural playback: human pixel evidence</title><style>img{width:48%}</style><h1>Markers index frames, not drawn-content proof</h1>${grid.map(row => `<h2>${row.state}</h2>${row.frames.length < 2 ? '<p>Missing frames: inconclusive</p>' : ''}${row.frames.map(f => `<figure><img src="${f.file}"><figcaption>${f.at}, phase ${f.read.phase}</figcaption></figure>`).join('')}`).join('')}`);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(300); const paused = await snapshot(page);
+    await page.waitForTimeout(500); const still = await snapshot(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(300); const returned = await capture("return");
+    await page.waitForTimeout(1000); const resumed = await capture("resumed");
+    check("runtime.intersection", paused.phase === still.phase && returned.phase !== resumed.phase, { paused, still, returned, resumed });
+  } else {
+    await page.setViewportSize(gpu ? { width: 1440, height: 900 } : { width: 390, height: 844 });
+    const first = await capture("rest-first");
+    const text = await page.locator('.page').innerText();
+    const rest = page.locator(hero + ' pre');
+    const content = await rest.textContent();
+    await page.waitForTimeout(1000);
+    const last = await capture("rest");
+    const register = await page.locator(hero).evaluate(h => ({
+      count: document.querySelectorAll('[data-hero-id]').length,
+      states: [...h.querySelectorAll('rect[data-hero-state]')].map(n => n.getAttribute('data-hero-state')),
+      labels: h.querySelectorAll('[data-figure-label],figcaption').length,
+      fills: [...h.querySelectorAll('path,rect')].map(n => getComputedStyle(n).fill),
+      phase: getComputedStyle(h).getPropertyValue('--phase').trim(),
+      height: h.querySelector('.canvas-wrap')?.getBoundingClientRect().height,
+      overflow: document.documentElement.scrollWidth > innerWidth,
+    }));
+    check("runtime.hero-register", register.count === 1 && JSON.stringify(register.states) === JSON.stringify(['human','agentic','vibe']) && register.labels === 0 && register.fills.every(f => f === 'none'), register);
+    check("runtime.layout", register.height === 220 && !register.overflow, register);
+    check("runtime.agentic-rest", first.state === 'agentic' && last.state === 'agentic' && first.phase === last.phase && content?.split('\n').length === 14, { first, last, content });
+    check("runtime.prose-rest", text === await page.locator('.page').innerText() && text.includes('Agentic engineering is directing agents to make software.') && text.includes('The application of these principles is agentic engineering.'), text);
+    if (gpu) check("runtime.reduced-drawn", first.drawn === 'drawn' && last.drawn === 'drawn' && readFileSync(join(info.outputDir, 'rest-first.png')).equals(readFileSync(join(info.outputDir, 'rest.png'))), { first, last });
+    else check("runtime.plain.rest", await rest.isVisible() && Boolean(content?.trim()) && content === await rest.textContent() && first.drawn !== 'drawn' && last.drawn !== 'drawn', { first, last });
+    // Read the existing loop rest, without a phase driver or another navigation.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    const loop = page.locator('[data-figure-id]');
+    check("runtime.loop-population", await loop.count() === 1, await loop.count());
+    if (await loop.count() === 1) {
+      await loop.scrollIntoViewIfNeeded();
+      await loop.screenshot({ path: join(info.outputDir, 'loop-rest.png') });
+      const read = await loop.evaluate(h => ({ phase: getComputedStyle(h).getPropertyValue('--phase').trim(), occupied: [...h.querySelectorAll<SVGElement>('.emphasis')].filter(n => Number(getComputedStyle(n).opacity) > 0.9).map(n => n.dataset.node), returnDash: parseFloat(getComputedStyle(h.querySelector('[data-figure-part="return-edge"]')!).strokeDashoffset), indicatorExtent: h.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect().width }));
+      check("runtime.loop-rest", Number(read.phase) === 1 && JSON.stringify(read.occupied) === '["stage"]' && read.returnDash === 0 && read.indicatorExtent === 0, read);
+    }
+  }
+  const end = await snapshot(page);
+  check(gpu ? "runtime.gpu-access" : "runtime.plain.no-adapter", gpu ? end.counters.successfulAdapters > 0 && end.counters.successfulDevices > 0 && end.counters.contexts > 0 : end.counters.adapters > 0 && end.counters.successfulAdapters === 0 && end.counters.devices === 0, end);
+  raw("observation", { elapsedMs: Date.now() - observation, frames: frames.length });
+}
+
 export async function observeRuntime(browser: Browser, pid: number, item: Case, info: TestInfo) {
+  const started = Date.now();
+  const bounded = item.title === "bounded runtime";
+  const reduced = item.id.includes("/reduced/") || bounded && item.cohort === "plain";
   const origin = await serve(item.input);
-  const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1, reducedMotion: "no-preference", serviceWorkers: "block" });
+  const options = { viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1, reducedMotion: reduced ? "reduce" as const : "no-preference" as const, serviceWorkers: "block" as const };
+  const context = await browser.newContext(options);
   record("context", { id: item.id, pid, origin: origin.origin });
   mkdirSync(info.outputDir, { recursive: true });
   const rawFile = join(info.outputDir, "raw.jsonl");
   const raw = (kind: string, data: unknown) => appendFileSync(rawFile, JSON.stringify({ at: new Date().toISOString(), kind, data }) + "\n");
   const outcomes: { predicate: string; pass: boolean; evidence: unknown }[] = [];
   const check = (predicate: string, pass: boolean, evidence: unknown) => { outcomes.push({ predicate, pass, evidence }); raw("assertion", outcomes.at(-1)); };
-  const errors: { kind: string; text: string }[] = [], fulfilled = new Set<string>(), rejected: string[] = [];
+  const errors: { kind: string; text: string; at: string }[] = [], fulfilled = new Set<string>(), rejected: string[] = [];
+  let errorCount = 0;
+  const error = (kind: string, text: string) => {
+    errorCount++;
+    if (errors.length < 100) { const entry = { kind, text: text.slice(0, 2000), at: new Date().toISOString() }; errors.push(entry); raw('error', entry); }
+  };
+  raw('subject', { id: item.id, observer: 'bounded-runtime-1', input: item.input.hashes, options, started: new Date(started).toISOString() });
   const control = Boolean(item.input.runtimeControl);
   const distPaths = Object.keys(bytes(join(item.input.root, "dist")));
   const articlePaths = control ? ["index.html"] : distPaths.filter(p => p !== "__case.json" && (item.cohort === "gpu" || !p.startsWith("fonts/") && !p.startsWith("assets/hero-engine-")));
@@ -163,10 +257,10 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
     });
     await session.send("Fetch.enable", { patterns: [{ urlPattern: "*" }] });
     record("page", { id: item.id, pid, target: target.targetInfo.targetId });
-    page.on("requestfailed", request => raw("requestfailed", { url: request.url(), failure: request.failure() }));
-    page.on("console", m => { raw("console", { type: m.type(), text: m.text(), location: m.location() }); if (m.type() === "error") errors.push({ kind: "console", text: m.text() }); });
-    page.on("pageerror", e => { raw("pageerror", { message: e.message, stack: e.stack }); errors.push({ kind: "pageerror", text: e.message }); });
-    await page.addInitScript(instrument);
+    page.on("requestfailed", request => { raw("requestfailed", { url: request.url(), failure: request.failure() }); error('requestfailed', `${request.url()}: ${request.failure()?.errorText}`); });
+    page.on("console", m => { if (m.type() === "error") error('console', m.text()); });
+    page.on("pageerror", e => error('pageerror', e.message));
+    await page.addInitScript(instrument, !bounded);
     const start = Date.now();
     await page.goto(origin.url, { waitUntil: "load" });
     // The S8r host fixture is an actual finite server response. Chromium may omit
@@ -186,7 +280,9 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
       const f = { before, after, image, region, file }; frames.push(f);
       raw("frame", { before, after, region, file }); return f;
     }
-    if (item.cohort === "gpu") {
+    if (bounded) {
+      await boundedRead(page, item, info, check, raw, reduced, started);
+    } else if (item.cohort === "gpu") {
       // No drawn-state wait: an absent/late engine must not prevent other observations.
       // Three observed wraps bracket two COMPLETE cycles, unlike a 24/30-second sleep.
       let wraps = 0, previous = (await snapshot(page)).phase;
@@ -238,12 +334,19 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
       check("runtime.plain.rest", visible && await rest.isVisible() && Boolean(content?.trim()) && content === await rest.textContent() && text === await page.locator('body').innerText() && first.equals(second) && before.drawn !== "drawn" && end.drawn !== "drawn", { before, end, visible, content, text });
       writeFileSync(join(info.outputDir,"rest.png"),second);
     }
-    raw("instrument", await page.evaluate(() => (window as any).__runtime));
+    const instrumentation = await page.evaluate(() => (window as any).__runtime);
+    raw("instrument", instrumentation);
+    check("runtime.gpu-errors", instrumentation.gpuErrors === 0, instrumentation);
     check("runtime.routing", rejected.length === 0 && JSON.stringify([...fulfilled].sort()) === JSON.stringify(declared), { declared, fulfilled: [...fulfilled].sort(), rejected });
   } finally {
-    await context.close(); record("context-close", { id: item.id, pid });
-    check("runtime.zero-errors", errors.length === 0, errors);
-    await origin.close();
+    const closing = Date.now();
+    try {
+      await context.close(); record("context-close", { id: item.id, pid });
+    } finally {
+      check("runtime.zero-errors", errorCount === 0, { count: errorCount, truncated: errorCount > errors.length, errors });
+      await origin.close();
+      raw("cost", { totalMs: Date.now() - started, closeMs: Date.now() - closing, options });
+    }
     writeFileSync(join(info.outputDir, "outcomes.json"), JSON.stringify(outcomes,null,2));
     record("runtime-outcomes", { id: item.id, outcomes: outcomes.map(({predicate,pass})=>({predicate,pass})), output: info.outputDir });
   }

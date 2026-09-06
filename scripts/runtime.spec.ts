@@ -6,7 +6,8 @@ import { observeRuntime } from "./runtime";
 const cases = stagedCases().filter(item => item.id.startsWith("runtime/"));
 // Plain failures are deferred across the whole compatible cohort; GPU witnesses
 // assert their named red and complete normally, preserving the worker browser.
-const groups: Case[][] = [cases.filter(item => item.cohort === "plain"), ...cases.filter(item => item.cohort === "gpu").map(item => [item])].filter(items => items.length);
+const bounded = cases.every(item => item.title === "bounded runtime");
+const groups: Case[][] = [cases.filter(item => item.cohort === "plain"), ...(bounded ? [cases.filter(item => item.cohort === "gpu")] : cases.filter(item => item.cohort === "gpu").map(item => [item]))].filter(items => items.length);
 for (const items of groups) {
   const cohort = items[0].cohort;
   test(`${cohort === "plain" ? "runtime plain" : items[0].id} @${cohort}`, async ({ browser, browserPid }, info) => {
@@ -16,7 +17,7 @@ for (const items of groups) {
       const outcomes = await test.step(item.id, () => observeRuntime(browser, browserPid, item, { ...info, outputDir }));
       results.push({ item, outcomes, outputDir });
     }
-    if (cohort === "plain") {
+    if (cohort === "plain" && !bounded) {
       for (const input of new Set(items.map(item => item.input.id))) {
         expect(results.filter(r => r.item.input.id === input).length, "predicate:runtime.case-population").toBe(3);
       }
