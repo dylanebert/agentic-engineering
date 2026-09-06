@@ -266,7 +266,7 @@ export async function campaign(selection: string, mutations: Mutation[]) {
   const repo = resolve(here, "..");
   const work = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-campaign-"));
   process.env.CAMPAIGN_LEDGER = join(work, "ledger.jsonl");
-  record("owner-start", { selection, repo, work });
+  record("owner-start", { selection, repo, work, source: spawnSync('git', ['rev-parse', 'HEAD', 'HEAD^{tree}'], { cwd: repo, encoding: 'utf8' }).stdout.trim().split('\n') });
   // Each run owns a new directory. No inherited capture or staging output is overwritten.
   symlinkSync(join(repo, "node_modules"), join(work, "node_modules"), "dir");
   for (const file of ["runtime.ts", "runtime.spec.ts", "arms.ts", "campaign.ts", "instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "playwright.config.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
@@ -303,7 +303,7 @@ export async function campaign(selection: string, mutations: Mutation[]) {
     return { id, root, mode, hashes: bytes(root) };
   };
   const baseline = makeInput("baseline");
-  const self = makeInput("self", "self");
+  const self = selection === "runtime" ? baseline : makeInput("self", "self");
   const cases: Case[] = [];
   const add = (input: Input, group: Group, arm: Arm, cohort: Cohort, suffix: string, red?: string) => cases.push({ id: `${group}/${arm.title}/${cohort}/${suffix}`, input, group, title: arm.title, cohort, red });
   if (selection === "runtime") {
@@ -314,9 +314,7 @@ export async function campaign(selection: string, mutations: Mutation[]) {
     for (const group of groups) for (const arm of factories[group](emptyInput)) {
       if (group === "self" && arm.pure) continue;
       const cohorts: Cohort[] = ["plain"];
-      // R3 changes assertions, not the rendered subject. The figure wrapper retains
-      // its five repetitions for repetition-sensitive rendered-subject closes.
-      const repeats = group === "figure" && selection === "figure" ? 5 : 1;
+      const repeats = 1;
       for (let repetition = 1; repetition <= repeats; repetition++) for (const cohort of cohorts) add(group === "self" ? self : baseline, group, arm, cohort, `baseline-${repetition}`);
     }
     if (selection === "instrument" || selection === "R3" || selection === "narrow" || selection === "runtime-witnesses") {
