@@ -260,7 +260,7 @@ export function changedClass(paths: string[], beforePackage = {}, afterPackage =
   return result;
 }
 
-export async function campaign(selection: string, mutations: Mutation[]) {
+export async function campaign(selection: string, mutations: Mutation[], updateSnapshots = false) {
   const pure = selection === "pure" || selection === "runner";
   if (selection !== "pure" && !requireDisplay("campaign")) return;
   const repo = resolve(here, "..");
@@ -383,6 +383,7 @@ export async function campaign(selection: string, mutations: Mutation[]) {
   writeFileSync(join(work, "selection.json"), JSON.stringify({ selection, pure }));
   const args = ["bunx", "playwright", "test", "--config", "playwright.config.ts"];
   if (selection === "runtime") args.push(...process.argv.slice(2));
+  if (selection === "capture" && updateSnapshots) args.push("--update-snapshots");
   record("playwright-start", { args, work });
   const child = Bun.spawnSync(args, { cwd: work, stdout: "inherit", stderr: "inherit", env: { ...process.env, DEBUG: "pw:browser", DEBUG_COLORS: "0", CAMPAIGN_SELECTION: selection } });
   record("playwright-end", { exit: child.exitCode });
