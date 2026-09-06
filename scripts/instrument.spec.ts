@@ -1,14 +1,26 @@
 import { expect } from "@playwright/test";
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { selfArms } from "./arms";
-import { changedClass, closeSharedContext, emptyInput, fixtureCampaign, namedRed, observe, record, serve, sourceSnapshots, stagedCases, test, type FixtureDeclaration, type Input } from "./campaign";
+import { changedClass, changedReaders, closeSharedContext, emptyInput, fixtureCampaign, namedRed, observe, ownedChild, record, serve, sourceSnapshots, stagedCases, test, type FixtureDeclaration, type Input } from "./campaign";
 
-if (stagedCases().some(c => c.input.id === "baseline")) test("host/article boundary and decodable self icon @plain", async ({ browser, browserPid }) => {
-  const baseline = stagedCases().find(c => c.input.id === "baseline")!.input;
+async function ownerControl(args: string[], fault?: string) {
+  const output = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-owner-control-"));
+  const repo = process.env.CAMPAIGN_REPO!;
+  const result = await ownedChild([process.execPath, join(repo, "scripts/instrument.ts"), ...args], repo, join(output, "owner.log"), { ...process.env, CAMPAIGN_OUTPUT: output, CAMPAIGN_FIXTURE_FAULT: fault });
+  const log = readFileSync(join(output, "owner.log"), "utf8");
+  const lines = log.split("\n").filter(line => line.startsWith("campaign {")).map(line => JSON.parse(line.slice(9)));
+  const work = lines.filter(e => e.event === "owner-start").at(-1)?.work as string | undefined;
+  const events = work ? readFileSync(join(work, "ledger.jsonl"), "utf8").trim().split("\n").map(line => JSON.parse(line)) : lines;
+  record("owner-control", { args, output, work, exit: result.exit });
+  return { result, log, events, work };
+}
+
+if (process.env.CAMPAIGN_FIXTURE_CHILD === "1" && process.env.CAMPAIGN_FIXTURE_FAULT === "baseline") test("host/article boundary and decodable self icon @fixture-plain", async ({ browser, browserPid }) => {
+  const baseline = stagedCases().find(c => c.input.id === "plain-a")!.input;
   const check = async (mode: Input["mode"], originFault?: Input["originFault"]) => {
     const origin = await serve({ ...baseline, mode, originFault });
     const context = await browser.newContext();
@@ -75,11 +87,12 @@ if (process.env.CAMPAIGN_FIXTURE_CHILD === "1") {
   });
   test.afterAll(async () => { await closeSharedContext(); });
 }
-if (process.env.CAMPAIGN_FIXTURE_CHILD !== "1") test("independent actual-runner population and structural witnesses @runner", async () => {
+if (process.env.CAMPAIGN_FIXTURE_CHILD !== "1") for (const fault of ["pure", "baseline", "redundant-launch", "merged-cohort", "fresh-reuse", "dropped-case", "empty-gpu"]) test(`independent actual-runner ${fault} @runner`, async () => {
+  test.setTimeout(30_000);
   expect(fixtureDeclarations).toHaveLength(5);
-  for (const fault of ["pure", "baseline", "redundant-launch", "merged-cohort", "fresh-reuse", "dropped-case", "empty-gpu"]) {
+  {
     const declarations = fault === "pure" ? fixtureDeclarations.filter(c => c.requirement === "pure") : fixtureDeclarations;
-    const result = fixtureCampaign(declarations, fault);
+    const result = await fixtureCampaign(declarations, fault);
     const events = (name: string) => result.events.filter(e => e.event === name);
     const launches = events("launch");
     const closes = events("close");
@@ -92,7 +105,7 @@ if (process.env.CAMPAIGN_FIXTURE_CHILD !== "1") test("independent actual-runner 
       });
       expect(launches).toHaveLength(0);
       expect(result.exit).not.toBe(0);
-      continue;
+      return;
     }
     expect(result.exit, result.work + "/runner.log").toBe(0);
     const verify = async () => {
@@ -107,7 +120,7 @@ if (process.env.CAMPAIGN_FIXTURE_CHILD !== "1") test("independent actual-runner 
         const fresh = completed.find(e => e.id === "fresh-a")!;
         expect(completed.filter(e => e.id !== "fresh-a" && e.pid).every(e => e.pid !== fresh.pid), "predicate:runner.fresh-pid").toBe(true);
         expect(completed.find(e => e.id === "plain-a")!.pid, "predicate:runner.compatible-pid").toBe(completed.find(e => e.id === "plain-b")!.pid);
-        const contexts = events("context").filter(e => !e.id.startsWith("probe-")), pages = events("page").filter(e => !e.id.startsWith("probe-"));
+        const contexts = events("context").filter(e => declarations.some(c => c.id === e.id)), pages = events("page").filter(e => declarations.some(c => c.id === e.id));
         expect(contexts.length, "predicate:runner.fixture-contexts").toBe(4);
         expect(new Set(pages.map(e => e.target)).size, "predicate:runner.fixture-pages").toBe(4);
         expect(new Set(contexts.map(e => e.origin)).size, "predicate:runner.fixture-origins").toBe(4);
@@ -131,14 +144,113 @@ for (const arm of pure) {
     record("executed-pure", { id: `self/${arm.title}`, title: arm.title });
   });
 }
+test("actual-owner narrow selection and shared-reader union @pure", async () => {
+  const run = async (args: string[]) => {
+    const work = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-selection-control-"));
+    const repo = process.env.CAMPAIGN_REPO!;
+    const result = await ownedChild([process.execPath, join(repo, "scripts/instrument.ts"), ...args], repo, join(work, "owner.log"), { ...process.env, CAMPAIGN_OUTPUT: work, KEX_SIMULATE_NO_DISPLAY: "1" });
+    const log = readFileSync(join(work, "owner.log"), "utf8");
+    const events = log.split("\n").filter(line => line.startsWith("campaign {")).map(line => JSON.parse(line.slice(9)));
+    expect(events.filter(e => ["launch", "build", "fixture-child-start", "playwright-start"].includes(e.event))).toEqual([]);
+    return { result, events, log, work };
+  };
+  const narrow = await run(["--only", "text", "--collect"]);
+  expect(narrow.result.exit, narrow.log).toBe(0);
+  const narrowCases = narrow.events.find(e => e.event === "collected").cases;
+  expect(narrowCases).toHaveLength(3);
+  expect(narrowCases.every((id: string) => id.startsWith("text/"))).toBe(true);
+  const staged = narrow.events.find(e => e.event === "owner-start").work;
+  writeFileSync(join(staged, "figures.spec.ts"), "export {};\n");
+  const missing = await ownedChild([process.execPath, join(process.env.CAMPAIGN_REPO!, "node_modules/@playwright/test/cli.js"), "test", "--config", "playwright.config.ts", "--list", "--reporter=json"], staged, join(narrow.work, "missing-body.log"), { ...process.env, CAMPAIGN_SELECTION: JSON.stringify({ only: ["text"], qualify: false }), CAMPAIGN_PENDING: JSON.stringify(narrowCases), KEX_SIMULATE_NO_DISPLAY: "1" });
+  expect(missing.exit).not.toBe(0);
+  expect(readFileSync(join(narrow.work, "missing-body.log"), "utf8")).toContain("No tests found");
+  const scriptReaders = changedReaders(["package.json"], JSON.parse('{"scripts":{"text":"old"}}'), JSON.parse('{"scripts":{"text":"new"}}'));
+  const packageScripts = await run(["--only", scriptReaders.join(","), "--collect"]);
+  expect(packageScripts.result.exit, packageScripts.log).toBe(0);
+  expect(packageScripts.events.find(e => e.event === "collected").cases).toEqual([]);
+  expect(packageScripts.events.find(e => e.event === "collected").titles.some((t: string) => t.endsWith("@runner"))).toBe(true);
+  const runner = await run(["--only", "runner", "--qualify", "--collect"]);
+  expect(runner.result.exit, runner.log).toBe(0);
+  const runnerCases: string[] = runner.events.find(e => e.event === "collected").cases;
+  expect(runnerCases).toHaveLength(10);
+  expect(runnerCases.every(id => id.startsWith("self/"))).toBe(true);
+  expect(runner.events.find(e => e.event === "collected").titles.filter((t: string) => t.endsWith("@runner"))).toHaveLength(9);
+  const readers = changedReaders(["scripts/region.ts", "scripts/figures.spec.ts"]);
+  expect(readers).toEqual(["pure", "figure", "text", "prose", "runtime"]);
+  const shared = await run(["--only", readers.join(","), "--collect"]);
+  expect(shared.result.exit, shared.log).toBe(0);
+  const ids: string[] = shared.events.find(e => e.event === "collected").cases;
+  expect(ids.filter(id => id.startsWith("figure/"))).toHaveLength(22);
+  expect(ids.filter(id => id.startsWith("text/"))).toHaveLength(3);
+  expect(ids.filter(id => id.startsWith("prose/"))).toHaveLength(3);
+  expect(ids.filter(id => id.startsWith("runtime/"))).toEqual(["runtime/article/plain/1", "runtime/article/plain/2", "runtime/article/plain/3", "runtime/article/gpu/1"]);
+  expect(shared.events.find(e => e.event === "collected").titles.filter((t: string) => t.endsWith("@pure"))).toHaveLength(37);
+  for (const args of [[], ["--only", ""], ["--only", "unknown"], ["--only", "text", "--full"], ["--only", "spectrum"], ["--only", "geometry"], ["--only", "text", "--qualify", "--witness", "neutral hierarchy"]]) {
+    const refusal = await run(args);
+    expect(refusal.result.exit).not.toBe(0);
+    expect(refusal.events).toEqual([]);
+    expect(refusal.log).not.toContain("no display detected");
+  }
+});
+
 test("changed subjects classify package keys and assertion consumers @pure", () => {
-  expect(changedClass(["scripts/region.ts"])).toBe(1);
+  expect(changedClass(["scripts/region.ts"])).toBe(3);
   expect(changedClass(["scripts/instrument.ts"])).toBe(2);
   expect(changedClass(["scripts/arms.ts", "scripts/instrument.ts"])).toBe(3);
   expect(changedClass(["package.json"], { scripts: { a: "old" } }, { scripts: { a: "new" } })).toBe(2);
   expect(changedClass(["package.json"], { dependencies: { a: "1" } }, { dependencies: { a: "2" } })).toBe(4);
   expect(changedClass(["src/App.svelte"])).toBe(4);
+  expect(changedReaders(["package.json"], { scripts: { a: "old" } }, { scripts: { a: "new" } })).toEqual(["pure", "runner"]);
+  expect(changedReaders(["package.json"], { dependencies: { a: "1" } }, { dependencies: { a: "2" } })).toContain("runtime");
 });
+
+if (process.env.CAMPAIGN_FIXTURE_CHILD !== "1") test("owned asynchronous cancellation retains incomplete results @runner", async () => {
+  const result = await fixtureCampaign([{ id: "plain-a", requirement: "plain" }], "cancel");
+  expect(result.exit).not.toBe(0);
+  const launches = result.events.filter(e => e.event === "launch");
+  expect(launches).toHaveLength(1);
+  expect(result.events.filter(e => e.event === "close" && !e.alive).map(e => e.pid)).toEqual(launches.map(e => e.pid));
+  expect(result.events.filter(e => e.event === "case-complete" && e.pass)).toEqual([]);
+  expect(result.log).toContain("<process did exit: exitCode=0, signal=null>");
+  record("cancellation-qualified", { work: result.work, launches: launches.map(e => e.pid), exit: result.exit });
+});
+if (process.env.CAMPAIGN_FIXTURE_CHILD !== "1") test("actual-owner immutable recovery and missing population @runner", async () => {
+  const baseline = await ownerControl(["--only", "text"]);
+  expect(baseline.result.exit, baseline.log).toBe(0);
+  const completed = baseline.events.filter(e => e.event === "case-complete" && e.pass);
+  expect(completed).toHaveLength(3);
+  const reused = await ownerControl(["--only", "text", "--resume", baseline.work!]);
+  expect(reused.result.exit, reused.log).toBe(0);
+  expect(reused.events.filter(e => ["build", "launch", "case-start"].includes(e.event))).toEqual([]);
+  expect(reused.events.find(e => e.event === "reused").ids).toHaveLength(3);
+  const copy = () => {
+    const root = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-recovery-control-"));
+    for (const file of ["cases.json", "source-before.json", "ledger.jsonl"]) cpSync(join(baseline.work!, file), join(root, file));
+    return root;
+  };
+  const missing = copy();
+  writeFileSync(join(missing, "ledger.jsonl"), baseline.events.filter(e => !(e.event === "case-complete" && e.id === completed[0].id)).map(e => JSON.stringify(e)).join("\n") + "\n");
+  const resumed = await ownerControl(["--only", "text", "--resume", missing]);
+  expect(resumed.result.exit, resumed.log).toBe(0);
+  expect(resumed.events.filter(e => e.event === "case-start").map(e => e.id)).toEqual([completed[0].id]);
+  expect(resumed.events.filter(e => e.event === "build")).toEqual([]);
+  const recoveredAgain = await ownerControl(["--only", "text", "--resume", resumed.work!]);
+  expect(recoveredAgain.result.exit, recoveredAgain.log).toBe(0);
+  expect(recoveredAgain.events.find(e => e.event === "reused").ids).toHaveLength(3);
+  expect(recoveredAgain.events.filter(e => ["build", "launch", "case-start"].includes(e.event))).toEqual([]);
+  for (const fault of ["hash", "observer", "configuration", "close", "native-close"]) {
+    const root = copy();
+    const cases = JSON.parse(readFileSync(join(root, "cases.json"), "utf8"));
+    if (fault === "hash") cases[0].input.hashes[Object.keys(cases[0].input.hashes)[0]] = "changed";
+    writeFileSync(join(root, "cases.json"), JSON.stringify(cases));
+    if (fault === "close" || fault === "native-close") writeFileSync(join(root, "ledger.jsonl"), baseline.events.filter(e => e.event !== (fault === "close" ? "close" : "child-close")).map(e => JSON.stringify(e)).join("\n") + "\n");
+    const refusal = await ownerControl(["--only", "text", "--resume", root], fault === "observer" || fault === "configuration" ? `changed-${fault}` : undefined);
+    expect(refusal.result.exit).not.toBe(0);
+    expect(refusal.log).toContain(`predicate:runner.recovery-${fault === "hash" ? "hashes" : fault === "observer" || fault === "configuration" ? "subject" : fault}`);
+    expect(refusal.events.filter(e => ["build", "launch", "case-start"].includes(e.event))).toEqual([]);
+  }
+});
+
 test("whole-source snapshots see path additions, deletions, bytes and enumeration refusal @pure", async () => {
   const owned = mkdtempSync(join(tmpdir(), "article-source-snapshot-"));
   const root = join(owned, "repo");

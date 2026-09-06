@@ -1,4 +1,4 @@
-import { campaign, type Mutation } from "./campaign";
+import { campaign, select, type Mutation } from "./campaign";
 
 export const mutations: Mutation[] = [
   {
@@ -270,6 +270,5 @@ export const mutations: Mutation[] = [
 ];
 
 if (import.meta.main) {
-  const selection = process.argv.includes("--runtime-witnesses") ? "runtime-witnesses" : process.argv.includes("--pure") ? "pure" : process.argv.includes("--narrow") ? "narrow" : process.argv.includes("--runner") ? "runner" : "R3";
-  await campaign(selection, mutations);
+  await campaign(select(process.argv.slice(2)), mutations);
 }
