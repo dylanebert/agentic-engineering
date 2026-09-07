@@ -54,6 +54,6 @@ export const concepts = {
   verifiability: { label: "verifiability", color: "verify", ...shape },
   context: { label: "context engineering", color: "context", ...shape },
   spec: { label: "spec", color: "context", ...shape },
-  stage: { label: "stage", color: "agentic", ...shape },
+  stage: { label: "implement", color: "agentic", ...shape },
   verify: { label: "verify", color: "verify", ...shape },
 } satisfies Record<string, Concept>;

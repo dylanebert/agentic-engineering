@@ -1,17 +1,21 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { cubeFrames } from "./cube-frames";
+  import { cubeFrame } from "./cube-frames";
   const loop = 12000;
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let root: HTMLElement; let canvas: HTMLCanvasElement;
   let clock = $state(0); let drawn = $state(false);
   const phase = $derived(reduced ? 1 : clock / loop);
+  // The dot travels the first 40% of each 3 s segment; the cube switches 75% of the way along.
+  const switchAt = 0.3;
   const treatment = $derived.by(() => {
     if (reduced) return "agentic";
     const segment = phase * 4;
-    const landed = Math.floor(segment) + (segment % 1 >= 0.7 ? 1 : 0);
+    const landed = Math.floor(segment) + (segment % 1 >= switchAt ? 1 : 0);
     return (["agentic", "vibe", "agentic", "human", "agentic"] as const)[landed];
   });
+  // Veil the canvas around the switch so the treatment change reads as a dissolve, not a cut.
+  const veil = $derived(reduced ? 0 : Math.max(0, 1 - Math.abs(((phase * 4) % 1) - switchAt) / 0.06));
   onMount(() => {
     let raf = 0;
     let last = 0;
@@ -77,16 +81,27 @@
     };
   });
 </script>
-<div class="hero" bind:this={root} data-hero-id="spectrum-hero" data-hero-state="agentic" style:--phase={phase} aria-hidden="true">
-  <svg class="spectrum" viewBox="0 0 548 96">
-    <path class="rail" d="M114 48H242 M306 48H434" />
-    <rect x="58" y="24" width="48" height="48" data-hero-state="human" data-role="prose" />
-    <rect x="250" y="24" width="48" height="48" data-hero-state="agentic" data-role="agentic" />
-    <rect x="442" y="24" width="48" height="48" data-hero-state="vibe" data-role="vibe" />
-    <circle class="dot" cx="0" cy="48" r="5" data-hero-part="dot" />
+<div class="hero" bind:this={root} data-hero-id="spectrum-hero" data-hero-state="agentic" style:--phase={phase} style:--veil={veil} aria-hidden="true">
+  <div class="canvas-wrap"><pre class:drawn>{cubeFrame.join("\n")}</pre><canvas bind:this={canvas} data-hero-canvas class:drawn></canvas></div>
+  <svg class="spectrum" viewBox="0 0 548 64">
+    <path class="rail" d="M82 40H466" />
+    <circle class="node" cx="82" cy="40" r="14" data-hero-state="human" data-role="prose" />
+    <circle class="node" cx="274" cy="40" r="14" data-hero-state="agentic" data-role="agentic" />
+    <circle class="node" cx="466" cy="40" r="14" data-hero-state="vibe" data-role="vibe" />
+    <circle class="dot" cx="0" cy="40" r="5" data-hero-part="dot" />
+    <defs><filter id="hero-ink" color-interpolation-filters="sRGB" x="-10%" y="-10%" width="120%" height="120%">
+      <feColorMatrix in="SourceGraphic" result="ink" type="matrix" values="0 0 0 0 .122  0 0 0 0 .435  0 0 0 0 .361  -1 0 0 1 0" />
+      <feGaussianBlur in="ink" stdDeviation="5" result="soft" />
+      <feComponentTransfer in="soft" result="glow"><feFuncA type="linear" slope=".9" /></feComponentTransfer>
+      <feMerge><feMergeNode in="glow" /><feMergeNode in="ink" /></feMerge>
+    </filter></defs>
   </svg>
-  <div class="canvas-wrap"><pre class:drawn>{cubeFrames[2].join("\n")}</pre><canvas bind:this={canvas} data-hero-canvas class:drawn></canvas></div>
+  <div class="captions">
+    <span class="caption" data-role="prose" class:live={treatment === "human"}>human</span>
+    <span class="caption" data-role="agentic" class:live={treatment === "agentic"}>agentic engineering</span>
+    <span class="caption" data-role="vibe" class:live={treatment === "vibe"}>vibe coding</span>
+  </div>
 </div>
 <style>
-.hero{width:100%;margin:40px 0 58px}.spectrum{width:100%;display:block;overflow:visible}.spectrum path,.spectrum rect,.spectrum circle{fill:none;stroke:currentColor;stroke-width:2;vector-effect:non-scaling-stroke}.spectrum rect[data-role="prose"]{color:var(--role-prose)}.spectrum rect[data-role="agentic"]{color:var(--role-agentic)}.spectrum rect[data-role="vibe"]{color:var(--role-vibe)}.spectrum .dot{fill:currentColor;stroke:none;animation:travel 12s paused both,dot-visible 12s steps(1,end) paused both;animation-delay:calc(-12s * var(--phase))}.spectrum rect{transform-box:fill-box;transform-origin:center;animation:middle-hit 12s paused both;animation-delay:calc(-12s * var(--phase))}.spectrum rect[data-role="prose"]{animation-name:human-hit}.spectrum rect[data-role="vibe"]{animation-name:vibe-hit}@keyframes dot-visible{0%,25%,50%,75%{opacity:1}17.5%,42.5%,67.5%,92.5%,100%{opacity:0}}@keyframes travel{0%{transform:translateX(274px);opacity:1;animation-timing-function:cubic-bezier(.2,.65,.3,1)}17.5%,24.99%{transform:translateX(466px);opacity:0}25%{transform:translateX(466px);opacity:1;animation-timing-function:cubic-bezier(.2,.65,.3,1)}42.5%,49.99%{transform:translateX(274px);opacity:0}50%{transform:translateX(274px);opacity:1;animation-timing-function:cubic-bezier(.2,.65,.3,1)}67.5%,74.99%{transform:translateX(82px);opacity:0}75%{transform:translateX(82px);opacity:1;animation-timing-function:cubic-bezier(.2,.65,.3,1)}92.5%,100%{transform:translateX(274px);opacity:0}}@keyframes vibe-hit{0%,17.49%,25%,100%{transform:scale(1);stroke-width:2}17.5%{transform:scale(1.12);stroke-width:3}21%{transform:scale(1.04);stroke-width:3}}@keyframes human-hit{0%,67.49%,75%,100%{transform:scale(1);stroke-width:2}67.5%{transform:scale(1.12);stroke-width:3}71%{transform:scale(1.04);stroke-width:3}}@keyframes middle-hit{0%,42.49%,50%,92.49%{transform:scale(1);stroke-width:2}42.5%,92.5%{transform:scale(1.12);stroke-width:3}46%,96%,100%{transform:scale(1.04);stroke-width:3}}@media(prefers-reduced-motion:reduce){.spectrum .dot{animation:none;transform:translateX(274px);opacity:1}.spectrum rect{animation:none}.spectrum rect[data-role="agentic"]{stroke-width:3}}.canvas-wrap{position:relative;width:100%;height:220px}canvas,pre{position:absolute;inset:0;width:100%;height:100%}canvas{display:block;opacity:0}canvas.drawn{opacity:1}pre{margin:0;display:grid;place-content:center;font-family:var(--mono);font-size:12px;line-height:1em;white-space:pre;color:var(--role-agentic)}pre.drawn{visibility:hidden}@media(max-width:560px){.hero{margin:28px 0 42px}}
+.hero{width:100%;margin:40px 0 58px}.spectrum{width:100%;display:block;overflow:visible;margin-top:10px}.spectrum .rail{fill:none;stroke:var(--border);stroke-width:2;vector-effect:non-scaling-stroke}.spectrum .node{fill:currentColor;stroke:currentColor;stroke-opacity:.22;stroke-width:0;transform-box:fill-box;transform-origin:center;animation:middle-hit 12s paused both;animation-delay:calc(-12s * var(--phase))}.spectrum [data-role="prose"]{color:var(--role-prose)}.spectrum [data-role="agentic"]{color:var(--role-agentic)}.spectrum [data-role="vibe"]{color:var(--role-vibe)}.spectrum .node[data-role="prose"]{animation-name:human-hit}.spectrum .node[data-role="vibe"]{animation-name:vibe-hit}.spectrum .dot{stroke:none;transform-box:fill-box;transform-origin:center;animation:travel 12s paused both,dot-size 12s paused both,dot-ink 12s steps(1,end) paused both;animation-delay:calc(-12s * var(--phase))}@keyframes dot-ink{0%,24.99%{fill:var(--role-vibe)}25%,49.99%{fill:var(--role-agentic)}50%,74.99%{fill:var(--role-prose)}75%,100%{fill:var(--role-agentic)}}@keyframes travel{0%{translate:274px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}10%,24.99%{translate:466px 0}25%{translate:466px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}35%,49.99%{translate:274px 0}50%{translate:274px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}60%,74.99%{translate:82px 0}75%{translate:82px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}85%,100%{translate:274px 0}}@keyframes dot-size{0%,10%,25%,35%,50%,60%,75%,85%,100%{scale:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}5%,30%,55%,80%{scale:1;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes vibe-hit{0%,35%,100%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}10%,25%{transform:scale(1.2);stroke-width:8;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes human-hit{0%,50%,85%,100%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}60%,75%{transform:scale(1.12);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes middle-hit{10%,25%,60%,75%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}0%,35%,50%,85%,100%{transform:scale(1.12);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@media(prefers-reduced-motion:reduce){.spectrum .dot{animation:none;translate:274px 0;scale:1;fill:var(--role-agentic)}.spectrum .node{animation:none}.spectrum .node[data-role="agentic"]{transform:scale(1.12)}}.canvas-wrap{position:relative;width:100%;height:280px}canvas,pre{position:absolute;top:0;bottom:0;left:50%;width:280px;height:100%;transform:translateX(-50%)}canvas{display:block;opacity:0}canvas.drawn{opacity:calc(1 - .9 * var(--veil));filter:blur(calc(6px * var(--veil)))}.hero:global([data-hero-treatment="agentic"]) canvas.drawn{filter:brightness(2.4) invert(1) url(#hero-ink) blur(calc(6px * var(--veil)))}pre{margin:0;display:grid;place-content:center;font-family:var(--mono);font-size:12px;line-height:9px;letter-spacing:1.8px;white-space:pre;color:var(--role-agentic)}pre.drawn{visibility:hidden}.captions{position:relative;height:20px;margin-top:2px;font-family:var(--mono);font-size:13px;letter-spacing:.04em;line-height:20px}.caption{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;color:currentColor;opacity:0}.caption.live{opacity:calc(.8 - .8 * var(--veil))}.caption[data-role="prose"]{left:15%;color:var(--role-prose)}.caption[data-role="agentic"]{left:50%;color:var(--role-agentic)}.caption[data-role="vibe"]{left:85%;color:var(--role-vibe)}@media(max-width:560px){.captions{font-size:12px}}.canvas-wrap{position:relative;width:100%;height:280px}canvas,pre{position:absolute;top:0;bottom:0;left:50%;width:280px;height:100%;transform:translateX(-50%)}canvas{display:block;opacity:0}canvas.drawn{opacity:calc(1 - .9 * var(--veil));filter:blur(calc(6px * var(--veil)))}.hero:global([data-hero-treatment="agentic"]) canvas.drawn{filter:brightness(2.4) invert(1) url(#hero-ink) blur(calc(6px * var(--veil)))}pre{margin:0;display:grid;place-content:center;font-family:var(--mono);font-size:12px;line-height:9px;letter-spacing:1.8px;white-space:pre;color:var(--role-agentic)}pre.drawn{visibility:hidden}@media(max-width:560px){.hero{margin:28px 0 42px}}
 </style>
