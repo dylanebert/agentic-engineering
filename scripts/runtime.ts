@@ -50,7 +50,7 @@ export function stageRuntime(baseline: Input, cases: Case[], control = process.e
     input = { ...baseline, id: control, root, runtimeControl: control as "healthy" | "error", hashes: bytes(root) };
   }
   if (!witness) {
-    const reads = control === "article" ? ["plain", "playback", "reduced"] : ["playback"];
+    const reads = control === "article" ? ["plain", "playback", "reduced", "unsupported"] : ["playback"];
     for (const read of reads) cases.push({ id: `runtime/${control}/${read}/1`, title: "bounded runtime", group: "figure", cohort: read === "plain" ? "plain" : "gpu", input });
     return;
   }
@@ -102,6 +102,36 @@ function instrument(diagnostic = true) {
   }
   if (diagnostic) requestAnimationFrame(tick);
 }
+/** Retain native adapters, but expose no optional features before article startup. */
+function missingFeatures() {
+  const w = window as any;
+  const s = w.__unsupported = { featureReads: 0, genuine: false, before: null as string | null, rejections: [] as string[] };
+  window.addEventListener("unhandledrejection", event => s.rejections.push(String(event.reason)));
+  if (typeof GPUAdapter === "undefined") return;
+  const features = Object.getOwnPropertyDescriptor(GPUAdapter.prototype, "features")!.get!;
+  Object.defineProperty(GPUAdapter.prototype, "features", { configurable: true, get() {
+    // Invoke the native getter too: a fabricated adapter cannot satisfy its brand check.
+    features.call(this);
+    s.genuine = this instanceof GPUAdapter;
+    s.featureReads++;
+    s.before ??= document.querySelector('[data-hero-id="spectrum-hero"] pre')?.textContent ?? null;
+    return new Set<string>();
+  } });
+}
+
+async function unsupportedRead(page: Page, check: Check, raw: Raw, warnings: string[]) {
+  try {
+    await page.waitForFunction(() => document.querySelector('[data-hero-id="spectrum-hero"]')?.getAttribute('data-hero-gpu') === 'unsupported' || (window as any).__unsupported.rejections.length > 0, undefined, { timeout: 5000 });
+  } catch (error) { raw("refusal-wait", String(error)); }
+  const rest = page.locator(hero + " pre");
+  const count = await rest.count();
+  const visible = count === 1 && await rest.isVisible();
+  const content = count === 1 ? await rest.textContent() : null;
+  const end = await snapshot(page);
+  const refusal = await page.evaluate(() => (window as any).__unsupported);
+  check("runtime.unsupported", refusal.genuine && refusal.featureReads > 0 && end.counters.successfulAdapters > 0 && end.counters.devices === 0 && end.counters.contextCalls === 0 && end.counters.contexts === 0 && refusal.rejections.length === 0 && count === 1 && visible && Boolean(content?.trim()) && content === refusal.before && end.drawn === "unsupported" && warnings.some(text => text.includes("Missing required WebGPU features")), { refusal, end, count, visible, content, warnings });
+}
+
 async function snapshot(page: Page) {
   return page.locator(hero).evaluate(h => {
     const s = (window as any).__runtime, c = h.querySelector('canvas')!;
@@ -220,6 +250,8 @@ async function boundedRead(page: Page, item: Case, info: TestInfo, check: Check,
 export async function observeRuntime(browser: Browser, pid: number, item: Case, info: TestInfo) {
   const started = Date.now();
   const bounded = item.title === "bounded runtime";
+  const unsupported = item.id === "runtime/article/unsupported/1";
+  const warnings: string[] = [];
   const reduced = item.id.includes("/reduced/") || bounded && item.cohort === "plain";
   const origin = await serve(item.input);
   const options = { viewport: { width: 1280, height: 900 }, deviceScaleFactor: 1, reducedMotion: reduced ? "reduce" as const : "no-preference" as const, serviceWorkers: "block" as const };
@@ -240,7 +272,8 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
   const control = Boolean(item.input.runtimeControl);
   const distPaths = Object.keys(bytes(join(item.input.root, "dist")));
   const articlePaths = control ? ["index.html"] : distPaths.filter(p => p !== "__case.json" && !p.endsWith(".map") && (item.cohort === "gpu" || !p.startsWith("fonts/") && !p.startsWith("assets/hero-engine-")));
-  const declared = [...articlePaths.map(p => origin.origin + base + (p === "index.html" ? "" : p)), origin.origin + "/favicon.ico", ...external].sort();
+  const requestedPaths = unsupported ? articlePaths.filter(p => !p.startsWith("fonts/")) : articlePaths;
+  const declared = [...requestedPaths.map(p => origin.origin + base + (p === "index.html" ? "" : p)), origin.origin + "/favicon.ico", ...external].sort();
   try {
     const page = await context.newPage();
     const session = await context.newCDPSession(page);
@@ -278,6 +311,10 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
     page.on("console", m => { if (m.type() === "error") error('console', m.text()); });
     page.on("pageerror", e => error('pageerror', e.message));
     await page.addInitScript(instrument, !bounded);
+    if (unsupported) {
+      page.on("console", m => { if (m.type() === "warning") { warnings.push(m.text()); raw("warning", m.text()); } });
+      await page.addInitScript(missingFeatures);
+    }
     const start = Date.now();
     await page.goto(origin.url, { waitUntil: "load" });
     // The S8r host fixture is an actual finite server response. Chromium may omit
@@ -297,7 +334,9 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
       const f = { before, after, image, region, file }; frames.push(f);
       raw("frame", { before, after, region, file }); return f;
     }
-    if (bounded) {
+    if (unsupported) {
+      await unsupportedRead(page, check, raw, warnings);
+    } else if (bounded) {
       await boundedRead(page, item, info, check, raw, reduced, started);
     } else if (item.cohort === "gpu") {
       // No drawn-state wait: an absent/late engine must not prevent other observations.
