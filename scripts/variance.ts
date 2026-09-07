@@ -65,6 +65,11 @@ export async function assertVaries(
   selector: string,
   driver: AxisDriver,
   steps: number,
+  // Fix 5 forces reduced motion so a driven state is final rather than mid-transition. A figure
+  // whose states are paused CSS animations is already final at every driven instant, and its
+  // reduced-motion rule deliberately freezes it, so such an arm drives natural playback instead
+  // and says so here. Reduced-motion rest stays the separate figure-22 read.
+  motion: "reduce" | "no-preference" = "reduce",
 ): Promise<VarianceResult> {
   // Fix 3: fewer than 2 states means the comparison loop never runs and the check returns green
   // for nothing. A driver asked for fewer states than this is an error, not a pass.
@@ -72,7 +77,7 @@ export async function assertVaries(
     throw new Error(`assertVaries needs ≥2 states to compare, got ${steps}`);
   }
   // Fix 5: force reduced-motion so each driven state is final, not mid-transition.
-  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.emulateMedia({ reducedMotion: motion });
 
   const failures: VarianceFailure[] = [];
   const screenshots: Buffer[] = [];

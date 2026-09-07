@@ -7,63 +7,56 @@
   <header class="head">
     <div class="meta">
       <a class="byline" href="https://dylanebert.com">dylan ebert</a>
-      <span class="sep">·</span> august 2026
+      <span class="sep">·</span> september 2026
     </div>
     <h1 class="title">agentic engineering</h1>
+    <p class="subtitle">for beginners</p>
   </header>
 
   <Overture />
 
-  <section class="section" id="definition">
-    <p>Agentic engineering is directing agents to make software.</p>
-  </section>
-
   <section class="section" id="spectrum">
     <h2>the spectrum</h2>
     <p>
-      <span class="term" data-role="vibe">vibe coding</span> sits at one end. Tell an agent "make me
-      some software," and software comes out. It might be good. It might be bad. And it's probably
-      <span class="term" data-role="vibe">purple</span>: a model given no direction reaches for the
-      same few defaults every time.
+      <span class="term" data-role="vibe">Vibe coding</span> sits at one end of the spectrum. Tell
+      an agent "make me some software," and some software comes out. It might be good. It might be
+      bad. And it's probably <span class="term" data-role="vibe">purple</span>. This is a bit like a
+      software slot machine.
     </p>
 
     <p>
-      <span class="term" data-role="prose">human code</span> sits at the other, every line typed by
-      a person. Slower per line, and the intent behind each one is known. For work where the design
-      is the hard part and the typing is incidental, it stays the right trade.
+      On the other end of the spectrum is <span class="term" data-role="prose">human code</span>,
+      written manually. This gives full control and has the highest ceiling of quality, but is slow.
     </p>
 
     <p>
-      <span class="term" data-role="agentic">agentic engineering</span> lives in the whole space
-      between them: the work is directed, and every step is checked.
+      There's a third option.
+      <span class="term" data-role="agentic">Agentic engineering</span> lives in the spectrum in
+      between: directing agents intentionally to build and verify software.
     </p>
   </section>
 
   <section class="section" id="principles">
     <h2>principles of agentic engineering</h2>
-    <p>After a lot of experimentation, the practice is beginning to converge on two principles.</p>
+    <p>
+      We're still in the early stages of agents. Best practices change rapidly. Two principles have
+      been converged on:
+    </p>
 
     <section class="principle" id="verifiability">
       <h3>1. verifiability</h3>
       <p>
-        Writing code is no longer the hard part. An agent writes some code. But does it work? Is it
-        fast? Is it secure? Is it what the task asks for?
-        <span class="term" data-role="verify">Verifiability</span> is how well those questions can
-        be answered, and it is the hard part.
+        An agent wrote some code. But does it work? Is it fast? Is it secure? Does it do what you
+        want it to do? That's <span class="term" data-role="verify">verifiability</span>, and it's
+        the hard part.
       </p>
     </section>
 
     <section class="principle" id="context-engineering">
       <h3>2. context engineering</h3>
       <p>
-        <span class="term" data-role="context">Context engineering</span> is giving an agent just
-        enough context to complete a task, and no more. Too little and it guesses, confidently. Too
-        much and the task sits buried under everything else in the context window.
-      </p>
-      <p>
-        A long conversation is the usual way to get too much. Deep into one, much of what the agent
-        can see is its own abandoned attempts. So the unit of work is one task plus its context, and
-        each unit gets a fresh conversation.
+        Give an agent just enough <span class="term" data-role="context">context</span> to complete
+        a task, and no more. Break the work into stages, and give each stage its own conversation.
       </p>
     </section>
   </section>
@@ -71,69 +64,54 @@
   <section class="section" id="loop">
     <h2>the loop</h2>
     <p>
-      The two principles meet in a loop. Say the job is a todo list app. The first conversation
-      writes no code. It produces a <span class="term" data-role="context">spec</span>, one file
-      naming what the software is and what done means.
+      Let's put these principles together. Suppose we want an agent to make a todo list app. In the
+      first conversation, implement nothing. Instead, tell the agent to write a
+      <span class="term" data-role="context">spec</span>: a file describing the work that needs to
+      be done, broken into stages.
     </p>
     <p>
-      The spec splits the work into small stages. Each <span class="term" data-role="agentic">stage</span>
-      gets a fresh conversation that implements only that part of the spec.
-    </p>
-    <p>
-      Verification closes each stage before the next conversation opens. Then repeat: implement a
-      stage, verify it, implement the next, until the spec is done.
+      Then <span class="term" data-role="agentic">implement</span> one stage in a fresh
+      conversation, and <span class="term" data-role="verify">verify</span> it before the next
+      conversation opens. Repeat: implement the next stage, verify again, until the spec is done.
     </p>
 
     <StageLoop />
     <p>
-      The spec is the one thing crossing between conversations. It carries the stages, what each
-      stage needs, and what done means, so a cold conversation can pick the work up. Stage
-      boundaries also stop errors: a mistake caught at stage three does not become the floor for
-      stage four.
+      The spec holds context across conversations, while each conversation is small and focused.
+      The crux of this loop is verification.
     </p>
   </section>
 
   <section class="section" id="verification">
-    <h2>but how do you verify?</h2>
+    <h2>how do you verify?</h2>
     <p>
-      Verification takes three forms, and each one reaches somewhere the other two do not.
+      An agent implemented a stage, but how do you trust what it implemented? The answer is
+      verification, and there are three types:
     </p>
-    <ul class="kinds">
+    <ol class="kinds">
       <li>
-        <strong>Machine verification.</strong> Typechecking and test suites. Fast, cheap, the same
-        answer every run. They catch what the checks were written to catch.
+        <strong>Human verification.</strong> Reading the code. This is the highest ceiling, but
+        also slow and expensive.
       </li>
       <li>
-        <strong>Agent verification.</strong> A second agent reads the code. It has no stake in
-        having written it, and it will read the whole diff without getting bored.
+        <strong>Machine verification.</strong> Code verifying code, e.g. test suites. This is fast
+        and efficient, but relies on correct assumptions.
       </li>
       <li>
-        <strong>Human verification.</strong> A person's feedback. Slowest, most expensive, and still
-        the last word on whether the software is any good.
+        <strong>Agent verification.</strong> Tell another agent: "this code is wrong. explain why."
       </li>
-    </ul>
+    </ol>
     <p>
-      Machine checks run on every save. Agent review runs at the end of a stage. Human review runs
-      where the other two cannot reach, and picking the mix is the judgment call.
+      Exactly how and when to use each isn't a recipe, but a whole domain. That's
+      <span class="term" data-role="agentic">agentic engineering</span>.
     </p>
   </section>
 
-  <section class="section" id="closing">
-    <h2>in practice</h2>
-    <p>
-      <span class="term" data-role="agentic">Agentic engineering</span> is one spec,
-      small stages, a fresh conversation for each, and a check before the next one opens.
-    </p>
-    <p>
-      The application of these principles is agentic engineering. Verifiability closes each stage;
-      context engineering keeps its work focused. Together they make the loop hold.
-    </p>
+  <footer class="foot">
     <p class="aside">
-      This page is the written version of my
-      <a href="https://www.youtube.com/c/IndividualKex">video</a> on the subject,<br /> with the details
-      and examples it had no room for.
+      Check out the <a href="https://www.youtube.com/c/IndividualKex">video version</a>.
     </p>
-  </section>
+  </footer>
 </article>
 
 <style>
@@ -174,6 +152,15 @@
     background: var(--heading-bg);
     padding: var(--heading-padding);
     margin-bottom: var(--heading-margin-bottom);
+  }
+
+  .subtitle {
+    margin: 6px 0 0;
+    font-family: var(--display);
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--text-muted);
   }
 
   .section {
@@ -251,6 +238,16 @@
 
   .kinds li {
     margin-top: 10px;
+  }
+
+  .foot {
+    margin-top: var(--section-margin-top);
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+
+  .foot .aside {
+    margin: 0;
   }
 
   .aside {

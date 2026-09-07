@@ -242,34 +242,51 @@ test("non-interference: story text remains intact", async ({ page }) => {
   const result = await page.evaluate(() => ({
     text: (document.querySelector(".page") as HTMLElement).innerText,
   }));
-  assertion(result.text, "predicate:figure-7.1").toContain("Agentic engineering is directing agents to make software.");
-  assertion(result.text, "predicate:figure-7.2").toContain("Verifiability is how well those questions can be answered");
-  assertion(result.text, "predicate:figure-7.3").toContain("The application of these principles is agentic engineering.");
+  // Three surviving sentences, one per surviving beat: the spectrum's definition, the
+  // verifiability principle, and the closing footer the hand repair added in place of the retired
+  // closing section.
+  assertion(result.text, "predicate:figure-7.1").toContain("lives in the spectrum in between: directing agents intentionally to build and verify software.");
+  assertion(result.text, "predicate:figure-7.2").toContain("That's verifiability, and it's the hard part.");
+  assertion(result.text, "predicate:figure-7.3").toContain("Check out the video version.");
 });
 
 // --- H3 hero register and degradation ---
 
-test("hero: exactly one unlabeled three-state hero sits above the opening", async ({ page }) => {
+test("hero: exactly one three-state hero sits above the opening", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const read = await page.evaluate(() => {
     const heroes = [...document.querySelectorAll("[data-hero-id]")];
     const hero = heroes[0]; const opening = document.querySelector("section.section");
-    return { count: heroes.length, states: hero ? [...hero.querySelectorAll("rect[data-hero-state]")].map((n) => n.getAttribute("data-hero-state")) : [], labels: hero?.querySelectorAll("[data-figure-label],figcaption").length ?? -1, canvases: hero?.querySelectorAll("canvas").length ?? 0, above: !!hero && !!opening && (hero.compareDocumentPosition(opening) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 };
+    // The repaired spectrum draws its three states as filled circles, and names them in three
+    // captions of which exactly one is live at a time. The hero still carries no figure label and
+    // no figcaption, so it is still not a figure.
+    return { count: heroes.length, states: hero ? [...hero.querySelectorAll("circle[data-hero-state]")].map((n) => n.getAttribute("data-hero-state")) : [], labels: hero?.querySelectorAll("[data-figure-label],figcaption").length ?? -1, canvases: hero?.querySelectorAll("canvas").length ?? 0, captions: hero ? [...hero.querySelectorAll(".caption")].map((n) => n.textContent) : [], live: hero?.querySelectorAll(".caption.live").length ?? -1, above: !!hero && !!opening && (hero.compareDocumentPosition(opening) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0 };
   });
   console.log(`hero register: ${JSON.stringify(read)}`);
-  assertion(read, "predicate:figure-8.1").toEqual({ count: 1, states: ["human", "agentic", "vibe"], labels: 0, canvases: 1, above: true });
+  assertion(read, "predicate:figure-8.1").toEqual({ count: 1, states: ["human", "agentic", "vibe"], labels: 0, canvases: 1, captions: ["human", "agentic engineering", "vibe coding"], live: 1, above: true });
 });
 
 test("hero: reduced motion rests on the captured agentic frame", async ({ page }) => {
   const result = await assertReducedMotion(page, '[data-hero-id="spectrum-hero"]', async (target, step) => { if (step === 0) await target.goto(url, { waitUntil: "networkidle" }); }, 1);
   const read = await page.locator('[data-hero-id="spectrum-hero"]').evaluate((element) => ({ phase: getComputedStyle(element).getPropertyValue("--phase").trim(), rows: element.querySelector("pre")?.textContent?.split("\n").length, state: element.getAttribute("data-hero-state") }));
-  console.log(`hero reduced rest: ${JSON.stringify(read)}`); assertion(result.pass, "predicate:figure-9.1").toBe(true); assertion(read, "predicate:figure-9.2").toEqual({ phase: "1", rows: 14, state: "agentic" });
+  console.log(`hero reduced rest: ${JSON.stringify(read)}`); assertion(result.pass, "predicate:figure-9.1").toBe(true); assertion(read, "predicate:figure-9.2").toEqual({ phase: "1", rows: 31, state: "agentic" });
 });
 
-test("hero: DOM spectrum uses strokes without area tint", async ({ page }) => {
+// The repaired spectrum fills its three station circles with their role color, so the earlier
+// "every hero shape is unfilled" reading is retired (checks.md, explicit coverage cut). The
+// property that survives is the one the ban was for: no element in the hero washes an area of the
+// page with a tint. Rails stay unfilled, and nothing paints a background.
+test("hero: rails stay unfilled and nothing tints an area of the page", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
-  const fills = await page.locator('[data-hero-id] path, [data-hero-id] rect').evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).fill));
-  assertion(fills.every((fill) => fill === "none"), "predicate:figure-10.1").toBe(true);
+  const read = await page.locator('[data-hero-id="spectrum-hero"]').evaluate((hero) => ({
+    rails: [...hero.querySelectorAll(".rail")].map((node) => getComputedStyle(node).fill),
+    railCount: hero.querySelectorAll(".rail").length,
+    backgrounds: [...hero.querySelectorAll("*")].map((node) => getComputedStyle(node).backgroundColor).filter((color) => color !== "rgba(0, 0, 0, 0)" && color !== "transparent"),
+  }));
+  console.log(`hero fills: ${JSON.stringify(read)}`);
+  assertion(read.railCount, "predicate:figure-10.1").toBeGreaterThan(0);
+  assertion(read.rails.every((fill) => fill === "none"), "predicate:figure-10.2").toBe(true);
+  assertion(read.backgrounds, "predicate:figure-10.3").toEqual([]);
 });
 
 // The plain-degradation boundary remains until its real-caller qualification.
@@ -384,11 +401,11 @@ test("figures: no figcaption anywhere, and no figure above the opening section",
 });
 
 // Ordered geometry for what is arranged (taste.md, one assertion per claim-kind). The expected
-// The expected order comes from the prose, not from the component: the loop runs spec → stage →
-// verify with a return edge spanning back from the last node to the middle one. The spec is
+// The expected order comes from the prose, not from the component: the loop runs spec → implement
+// → verify with a return edge spanning back from the last node to the middle one. The spec is
 // written once, so only stage and verify are inside the repeat.
 const ORDERS: Record<string, readonly string[]> = {
-  "stage-loop": ["spec", "stage", "verify"],
+  "stage-loop": ["spec", "implement", "verify"],
 };
 
 test("figures: arranged parts read left to right in the order the prose states", async ({ page }) => {
@@ -430,18 +447,20 @@ test("figures: arranged parts read left to right in the order the prose states",
   console.log(`return edge span: ${JSON.stringify(loop.span)} nodes=${JSON.stringify(loop.nodes)}`);
   assertion(loop.span, "predicate:figure-16.3").not.toBeNull();
   assertion(loop.span!.left, "predicate:figure-16.4").toBeGreaterThan(loop.nodes[0].right);
-  assertion(loop.span!.right, "predicate:figure-16.5").toBeGreaterThanOrEqual((loop.nodes[2].left + loop.nodes[2].right) / 2);
+  // The repaired edge leaves the last node exactly at its center, so the comparison carries a
+  // subpixel tolerance rather than reading an exact float equality off a scaled viewBox.
+  assertion(loop.span!.right, "predicate:figure-16.5").toBeGreaterThanOrEqual((loop.nodes[2].left + loop.nodes[2].right) / 2 - 0.5);
 });
 
 // Claim fidelity for the loop's one asserted ordering (criterion 12): the prose writes the spec
 // once and then says "repeat: stage, verify, stage again", so the arrow closing the cycle has to
-// land on `stage`. Terminating it at `spec` would publicly assert a structure the prose does not
+// land on `implement`. Terminating it at `spec` would publicly assert a structure the prose does not
 // claim, and the span check above is too coarse to see it. This arm reads the path's own final
 // point, transformed into client space, and requires it inside the stage node's horizontal
 // extent.
-// Mutation: move the return edge's last two x coordinates back to 88 in StageLoop.svelte and the
+// Mutation: move the return edge's last x coordinate back to 88 in StageLoop.svelte and the
 // endpoint lands on the spec node — red.
-test("figures: the loop's return edge lands on the stage node, not the spec", async ({ page }) => {
+test("figures: the loop's return edge lands on the implement node, not the spec", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const read = await page.evaluate(() => {
     const normalize = (text: string): string => text.replace(/\s+/g, " ").trim();
@@ -461,8 +480,8 @@ test("figures: the loop's return edge lands on the stage node, not the spec", as
   });
   console.log(`return edge endpoint: ${JSON.stringify(read)}`);
   assertion(read, "predicate:figure-17.1 " + ("no rendered stage-loop return edge")).not.toBeNull();
-  const stage = read!.nodes.find((node) => node.label === "stage");
-  assertion(stage, "predicate:figure-17.2 " + ("no stage node in the loop figure")).toBeDefined();
+  const stage = read!.nodes.find((node) => node.label === "implement");
+  assertion(stage, "predicate:figure-17.2 " + ("no implement node in the loop figure")).toBeDefined();
   assertion(read!.end.x, "predicate:figure-17.3").toBeGreaterThanOrEqual(stage!.left);
   assertion(read!.end.x, "predicate:figure-17.4").toBeLessThanOrEqual(stage!.right);
 });
@@ -508,105 +527,143 @@ test("figures: every figure label and return action is a substring of its claim"
 // Every figure's motion is a CSS function of one number: `--phase`, 0 to 1 over the cycle,
 // published on the figure element by Figure.svelte and pinned at 1 — the fully drawn resting
 // state — under reduced motion. So a figure can be read at any point of its cycle by setting
-// that property, which is what the variance driver below does.
+// that property, which is how the structural reads below drive it. The perceptual variance read
+// drives natural playback instead, because the repaired loop's reduced-motion rule freezes the
+// animations the driven property feeds.
 
 const figureSelector = (id: string): string => `figure[data-figure-id="${id}"]`;
 
-const phaseDriver = (id: string, steps: number) => async (page: import("@playwright/test").Page, step: number) => {
-  if (step === 0) await page.goto(url, { waitUntil: "networkidle" });
-  await page.locator(figureSelector(id)).evaluate((element, value) => {
-    (element as HTMLElement).style.setProperty("--phase", value);
-  }, String(step / (steps - 1)));
-};
 
 test("figures: every loop connector meets its node edges and remains visible", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const read = await page.locator(figureSelector("stage-loop")).evaluate((element) => {
-    const point = (line: SVGLineElement, end: "start" | "end") => {
-      const matrix = line.getScreenCTM()!;
-      const x = end === "start" ? line.x1.baseVal.value : line.x2.baseVal.value;
-      const y = end === "start" ? line.y1.baseVal.value : line.y2.baseVal.value;
-      return new DOMPoint(x, y).matrixTransform(matrix);
+    // The repaired loop draws its connectors as `path.rail` rather than `line.edge`, so the ends
+    // are read off the geometry itself and transformed into client space.
+    const end = (rail: SVGPathElement, at: "start" | "end") => {
+      const matrix = rail.getScreenCTM()!;
+      const local = rail.getPointAtLength(at === "start" ? 0 : rail.getTotalLength());
+      return new DOMPoint(local.x, local.y).matrixTransform(matrix);
     };
-    const nodes = [...element.querySelectorAll<SVGRectElement>("rect.node")].map((node) => node.getBoundingClientRect());
-    const lines = [...element.querySelectorAll<SVGLineElement>("line.edge")];
-    const gaps = [
-      Math.abs(point(lines[0], "start").x - nodes[0].right),
-      Math.abs(point(lines[0], "end").x - nodes[1].left),
-      Math.abs(point(lines[1], "start").x - nodes[1].right),
-      Math.abs(point(lines[1], "end").x - nodes[2].left),
+    const nodes = [...element.querySelectorAll<SVGRectElement>("g.node rect")].map((node) => node.getBoundingClientRect());
+    const rails = [...element.querySelectorAll<SVGPathElement>('path.rail:not([data-figure-part])')];
+    const gaps = rails.length < 2 ? [Number.POSITIVE_INFINITY] : [
+      Math.abs(end(rails[0], "start").x - nodes[0].right),
+      Math.abs(end(rails[0], "end").x - nodes[1].left),
+      Math.abs(end(rails[1], "start").x - nodes[1].right),
+      Math.abs(end(rails[1], "end").x - nodes[2].left),
     ];
     const phases = [0, 0.25, 0.5, 0.75, 1];
     const visibility = phases.map((phase) => {
       (element as HTMLElement).style.setProperty("--phase", String(phase));
-      return [...element.querySelectorAll<SVGGeometryElement>(".edge.base")].map((edge) => {
-        const style = getComputedStyle(edge);
+      return [...element.querySelectorAll<SVGGeometryElement>("path.rail")].map((rail) => {
+        const style = getComputedStyle(rail);
         return { opacity: Number(style.opacity), width: Number(style.strokeWidth.replace("px", "")) };
       });
     });
-    return { gaps, visibility };
+    return { gaps, rails: rails.length, nodeWidth: nodes[0].width, visibility };
   });
   console.log(`loop connector geometry: ${JSON.stringify(read)}`);
-  assertion(Math.max(...read.gaps), "predicate:figure-19.1").toBeLessThanOrEqual(0.5);
+  assertion(read.rails, "predicate:figure-19.0").toBe(2);
+  // Each connector stops one arrowhead short of its node rather than touching it, so the join is
+  // read as "small against the box it points at" (a tenth of a node) instead of pixel contact.
+  assertion(Math.max(...read.gaps), "predicate:figure-19.1").toBeLessThanOrEqual(read.nodeWidth * 0.1);
   assertion(read.visibility.flat().every(({ opacity, width }) => opacity > 0 && width > 0), "predicate:figure-19.2").toBe(true);
 });
 
 test("figures: the loop indicator approaches nodes at non-constant speed", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
+  // Easing is a property of one transit, not of the whole cycle: between stations the unit holds
+  // still, so sampling the cycle uniformly measures the holds rather than the approach. The unit
+  // crosses the first rail between 4% and 8% of the cycle, so this samples the interior of that
+  // crossing and compares the step it takes at the ends with the step it takes in the middle. The
+  // endpoints themselves are excluded: at exactly 8% the offset path hands the unit to the next
+  // subpath and it jumps, which would swamp the reading.
   const distances = await page.locator(figureSelector("stage-loop")).evaluate((element) => {
     const positions: { x: number; y: number }[] = [];
-    for (let index = 0; index <= 20; index += 1) {
-      (element as HTMLElement).style.setProperty("--phase", String(index / 40));
+    for (let index = 0; index <= 8; index += 1) {
+      (element as HTMLElement).style.setProperty("--phase", String(0.042 + (index / 8) * 0.036));
       const box = element.querySelector<SVGCircleElement>('[data-figure-part="unit"]')!.getBoundingClientRect();
       positions.push({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
     }
     return positions.slice(1).map((position, index) => Math.hypot(position.x - positions[index].x, position.y - positions[index].y));
   });
-  console.log(`loop indicator phase distances: ${distances.map((distance) => distance.toFixed(3)).join(",")}`);
-  assertion(Math.max(...distances) - Math.min(...distances), "predicate:figure-20.1").toBeGreaterThan(0.5);
+  console.log(`loop indicator transit distances: ${distances.map((distance) => distance.toFixed(3)).join(",")}`);
+  const total = distances.reduce((sum, distance) => sum + distance, 0);
+  assertion(total, "predicate:figure-20.0").toBeGreaterThan(1);
+  // A constant-speed crossing takes eight equal steps; an eased one takes its middle step at
+  // least twice the smallest.
+  assertion(Math.max(...distances), "predicate:figure-20.1").toBeGreaterThan(Math.min(...distances) * 2);
 });
 
 // Perceptual variance over a JND for the one traveling unit. The structural reads beside it pin
-// the three distinct channels: position advances spec → stage → verify → stage, occupied nodes
-// gain an emphasis stroke, and the return edge reveals by dash offset.
-test("figures: one unit travels spec to stage to verify to stage with stroke emphasis and a dashed return", async ({ page }) => {
-  const phases = [0, 186 / 668, 372 / 668, 1];
+// the repaired loop's three channels: the unit exists only on the rails, exactly one box is solid
+// at a time, and the solid box advances spec → implement → verify → implement.
+//
+// The retired design's stroke-emphasis opacity and dashed return offset are gone with it
+// (checks.md, explicit coverage cut): "the landed node is emphasized" now reads as the solid-box
+// leg below and at rest in figure-22, and "the return edge is drawn" reads as figure-22's
+// return-edge leg plus figure-16/17's geometry.
+test("figures: one unit travels the rails while one box is solid, spec to implement to verify", async ({ page }) => {
+  // Two beats per station: a phase where a box is solid and the unit is gone, and a phase where
+  // the unit is on the rail leading out of it and no box is solid.
+  const landed = [0.02, 0.16, 0.34, 0.6];
+  const travelling = [0.065, 0.245, 0.46, 0.68];
   await page.goto(url, { waitUntil: "networkidle" });
-  const reads = [];
-  for (const phase of phases) {
-    const read = await page.locator(figureSelector("stage-loop")).evaluate((element, value) => {
-      (element as HTMLElement).style.setProperty("--phase", String(value));
-      const unit = element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect();
-      const emphasis = [...element.querySelectorAll<SVGElement>(".emphasis")].map((node) => {
-        const box = node.getBoundingClientRect();
-        return {
-          node: node.dataset.node,
-          opacity: Number(getComputedStyle(node).opacity),
-          center: { x: box.x + box.width / 2, y: box.y + box.height / 2 },
-        };
-      });
-      const edge = getComputedStyle(element.querySelector('[data-figure-part="return-edge"]')!);
-      const fills = [...element.querySelectorAll("rect, circle, path, line")].map((node) => getComputedStyle(node).fill);
-      return { unit: { x: unit.x + unit.width / 2, y: unit.y + unit.height / 2 }, emphasis, dash: parseFloat(edge.strokeDashoffset), fills };
-    }, phase);
-    reads.push(read);
-  }
-  console.log(`loop channels: ${JSON.stringify(reads)}`);
-  assertion(reads.every((read) => read.fills.every((fill) => fill === "none")), "predicate:figure-21.1").toBe(true);
-  assertion(reads.map((read) => read.emphasis.find((node) => node.opacity > 0.9)?.node), "predicate:figure-21.2").toEqual(["spec", "stage", "verify", "stage"]);
-  for (const read of reads.slice(0, 3)) {
-    const landed = read.emphasis.find((node) => node.opacity > 0.9)!;
-    assertion(Math.hypot(read.unit.x - landed.center.x, read.unit.y - landed.center.y), "predicate:figure-21.3").toBeLessThanOrEqual(0.5);
-  }
-  assertion(reads[0].unit.x, "predicate:figure-21.4").toBeLessThan(reads[1].unit.x);
-  assertion(reads[1].unit.x, "predicate:figure-21.5").toBeLessThan(reads[2].unit.x);
-  assertion(reads[3].unit.x, "predicate:figure-21.6").toBeLessThan(reads[2].unit.x);
-  assertion(reads[3].unit.y, "predicate:figure-21.7").toBeGreaterThan(reads[2].unit.y);
-  assertion(reads.slice(0, 3).every((read) => read.dash === 100), "predicate:figure-21.8").toBe(true);
-  assertion(reads[3].dash, "predicate:figure-21.9").toBe(0);
+  const readAt = async (phase: number) => page.locator(figureSelector("stage-loop")).evaluate((element, value) => {
+    (element as HTMLElement).style.setProperty("--phase", String(value));
+    const unit = element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect();
+    const nodes = [...element.querySelectorAll<SVGGElement>('[data-figure-part="node"]')].map((node) => {
+      const rect = node.querySelector("rect")!;
+      return {
+        node: node.dataset.node,
+        // A box is solid when its rect is painted in the node's own color rather than the page.
+        solid: getComputedStyle(rect).fill === getComputedStyle(node).color,
+        box: rect.getBoundingClientRect(),
+      };
+    });
+    const rails = [...element.querySelectorAll("path.rail")].map((rail) => getComputedStyle(rail).fill);
+    return {
+      unit: { x: unit.x + unit.width / 2, y: unit.y + unit.height / 2, extent: unit.width },
+      solid: nodes.filter((node) => node.solid).map((node) => node.node),
+      inABox: nodes.some((node) => unit.x + unit.width / 2 >= node.box.left && unit.x + unit.width / 2 <= node.box.right && unit.y + unit.height / 2 >= node.box.top && unit.y + unit.height / 2 <= node.box.bottom),
+      rails,
+    };
+  }, phase);
 
+  const rested = [];
+  for (const phase of landed) rested.push(await readAt(phase));
+  const moving = [];
+  for (const phase of travelling) moving.push(await readAt(phase));
+  console.log(`loop channels: landed=${JSON.stringify(rested)} travelling=${JSON.stringify(moving)}`);
+
+  // Rails are strokes, never filled areas.
+  assertion(rested.concat(moving).every((read) => read.rails.length > 0 && read.rails.every((fill) => fill === "none")), "predicate:figure-21.1").toBe(true);
+  // One box solid at a time, advancing in the prose's order.
+  assertion(rested.map((read) => read.solid), "predicate:figure-21.2").toEqual([["spec"], ["implement"], ["verify"], ["implement"]]);
+  // The unit is absent wherever a box is solid, and present only between stations.
+  assertion(rested.every((read) => read.unit.extent === 0), "predicate:figure-21.3").toBe(true);
+  assertion(moving.every((read) => read.unit.extent > 0), "predicate:figure-21.4").toBe(true);
+  assertion(moving.map((read) => read.solid), "predicate:figure-21.5").toEqual([[], [], [], []]);
+  // It travels the rails, never across a box interior.
+  assertion(moving.every((read) => !read.inABox), "predicate:figure-21.6").toBe(true);
+  assertion(moving[0].unit.x, "predicate:figure-21.7").toBeLessThan(moving[1].unit.x);
+  // The return leg runs below the row of boxes and back to the left.
+  assertion(moving[2].unit.y, "predicate:figure-21.8").toBeGreaterThan(moving[1].unit.y + 20);
+  assertion(moving[3].unit.y, "predicate:figure-21.9").toBeLessThan(moving[2].unit.y - 20);
+
+  // The repaired loop freezes under reduced motion by design, so its axis is read as natural
+  // playback: four states 1.5 s apart across the 8 s cycle. The cycle's longest interval without
+  // a box switching state is under a second, so adjacent states cannot coincide.
   const steps = 4;
-  const result = await assertVaries(page, figureSelector("stage-loop"), phaseDriver("stage-loop", steps), steps);
+  const playbackDriver: AxisDriver = async (target, step) => {
+    if (step === 0) {
+      await target.goto(url, { waitUntil: "networkidle" });
+      await target.locator(figureSelector("stage-loop")).scrollIntoViewIfNeeded();
+      return;
+    }
+    await target.waitForTimeout(1500);
+  };
+  const result = await assertVaries(page, figureSelector("stage-loop"), playbackDriver, steps, "no-preference");
   console.log(`loop variance: steps=${result.steps} failures=${JSON.stringify(result.failures)}`);
   assertion(result.pass, "predicate:figure-21.10 " + (result.failures.map((failure) => failure.reason).join("; "))).toBe(true);
 });
@@ -623,19 +680,24 @@ test("figures: reduced-motion rest is fully drawn and byte-stable", async ({ pag
     const result = await assertReducedMotion(page, selector, async (target, step) => {
       if (step === 0) await target.goto(url, { waitUntil: "networkidle" });
     }, 1);
-    const rest = await page.locator(selector).evaluate((element) => ({
-      phase: getComputedStyle(element).getPropertyValue("--phase").trim(),
-      occupied: [...element.querySelectorAll<SVGElement>(".emphasis")]
-        .filter((node) => Number(getComputedStyle(node).opacity) > 0.9)
-        .map((node) => node.dataset.node),
-      returnDash: parseFloat(getComputedStyle(element.querySelector('[data-figure-part="return-edge"]')!).strokeDashoffset),
-      indicatorExtent: element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect().width,
-    }));
+    const rest = await page.locator(selector).evaluate((element) => {
+      const edge = element.querySelector<SVGPathElement>('[data-figure-part="return-edge"]')!;
+      return {
+        phase: getComputedStyle(element).getPropertyValue("--phase").trim(),
+        // The landed node now reads as the one solid box, not as an emphasis stroke.
+        occupied: [...element.querySelectorAll<SVGGElement>('[data-figure-part="node"]')]
+          .filter((node) => getComputedStyle(node.querySelector("rect")!).fill === getComputedStyle(node).color)
+          .map((node) => node.dataset.node),
+        // The return edge is drawn at rest: a real path, stroked and visible.
+        returnEdge: { length: edge.getTotalLength(), width: Number(getComputedStyle(edge).strokeWidth.replace("px", "")), opacity: Number(getComputedStyle(edge).opacity) },
+        indicatorExtent: element.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect().width,
+      };
+    });
     console.log(`reduced rest ${entry.id}: ${JSON.stringify(rest)} failures=${JSON.stringify(result.failures)}`);
     assertion(result.pass, "predicate:figure-22.1 " + (result.failures.map((failure) => failure.reason).join("; "))).toBe(true);
     assertion(Number(rest.phase), "predicate:figure-22.2").toBe(1);
-    assertion(rest.occupied, "predicate:figure-22.3").toEqual(["stage"]);
-    assertion(rest.returnDash, "predicate:figure-22.4").toBe(0);
+    assertion(rest.occupied, "predicate:figure-22.3").toEqual(["implement"]);
+    assertion(rest.returnEdge.length > 0 && rest.returnEdge.width > 0 && rest.returnEdge.opacity > 0, "predicate:figure-22.4").toBe(true);
     assertion(rest.indicatorExtent, "predicate:figure-22.5").toBe(0);
   }
 });
@@ -718,12 +780,17 @@ for (const view of views) {
       );
     }
 
-    // H5 round 1: keep the full-width canvas footprint compact enough that the cube and
-    // spectrum read as one overture rather than two marks separated by dead space.
-    const canvasHeight = await page.locator(".canvas-wrap").evaluate((node) =>
-      node.getBoundingClientRect().height,
-    );
-    assertion(canvasHeight, "predicate:capture-2.1").toBe(220);
+    // The hand repair centers a 280x280 square canvas inside a 280 px band, so the cube and the
+    // spectrum still read as one overture rather than two marks separated by dead space.
+    const band = await page.locator(".canvas-wrap").evaluate((node) => {
+      const canvas = node.querySelector("canvas")!.getBoundingClientRect();
+      const wrap = node.getBoundingClientRect();
+      return { height: wrap.height, canvas: { width: canvas.width, height: canvas.height }, offCenter: Math.abs((canvas.left + canvas.right) / 2 - (wrap.left + wrap.right) / 2) };
+    });
+    console.log(`overture band: ${JSON.stringify(band)}`);
+    assertion(band.height, "predicate:capture-2.1").toBe(280);
+    assertion(band.canvas, "predicate:capture-2.3").toEqual({ width: 280, height: 280 });
+    assertion(band.offCenter, "predicate:capture-2.4").toBeLessThanOrEqual(0.5);
 
     await page.evaluate(() => document.fonts.ready);
     // Always write the portable capture first, then compare only on the stamped seat. A WSL

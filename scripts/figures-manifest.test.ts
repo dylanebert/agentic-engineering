@@ -59,10 +59,13 @@ describe("figure manifest", () => {
       (match) => match[1],
     );
     expect(paragraphs).toHaveLength(3);
-    expect(paragraphs.map((paragraph) => paragraph.match(/^<span class="term" data-role="([^"]+)">/)?.[1]))
+    // The hand repair opens the third paragraph with "There's a third option.", so the role term
+    // no longer leads its paragraph; the ordered disclosure of the three roles is the surviving
+    // property. Mutation: swap two paragraphs and the order reds.
+    expect(paragraphs.map((paragraph) => paragraph.match(/<span class="term" data-role="([^"]+)">/)?.[1]))
       .toEqual(["vibe", "prose", "agentic"]);
     expect(app).toContain('<h2>principles of agentic engineering</h2>');
-    expect(app).toContain('<h2>but how do you verify?</h2>');
+    expect(app).toContain('<h2>how do you verify?</h2>');
     expect(app).not.toContain('class="point"');
     expect(app).not.toContain('href="/verifiability/"');
 
@@ -75,34 +78,29 @@ describe("figure manifest", () => {
   });
 
   // P2 discloses the loop one concept at a time and reserves "stage" for the noun. The figure
-  // follows the third paragraph, whose claim names every rendered label plus repeat. Its closing
-  // heading also stands alone instead of being echoed by the first sentence. Mutations: move the
-  // figure back to paragraph 1, restore "do the stage", or begin the closing "In practice" — red.
-  test("P2 progressively discloses the loop and keeps the closing heading standalone", () => {
+  // follows the second paragraph, whose claim names every rendered label plus repeat. The hand
+  // repair retired the standalone closing section, so the closing-heading leg is gone with the
+  // section it read; the surviving footer is read as rendered text by the capture goldens and the
+  // figure-7 prose arm. Mutations: move the figure back to paragraph 0, or restore "do the
+  // stage" — red.
+  test("P2 progressively discloses the loop", () => {
     const app = appSource();
     const loop = app.match(/<section class="section" id="loop">([\s\S]*?)<StageLoop \/>/)?.[1];
     expect(loop).toBeDefined();
     const paragraphs = [...(loop?.matchAll(/<p>\s*([\s\S]*?)<\/p>/g) ?? [])]
       .map((match) => match[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
-    expect(paragraphs).toHaveLength(3);
+    expect(paragraphs).toHaveLength(2);
     expect(paragraphs[0]).toContain("spec");
-    expect(paragraphs[0]).not.toContain("stage");
-    expect(paragraphs[1]).toContain("stage");
-    expect(paragraphs[1]).not.toContain("Verification");
-    expect(paragraphs[2]).toContain(figures[0].claim);
-    expect(figures[0].paragraph).toBe(2);
+    expect(paragraphs[0]).not.toContain("verify");
+    expect(paragraphs[1]).toContain("implement");
+    expect(paragraphs[1]).toContain("verify");
+    expect(paragraphs[1]).toContain(figures[0].claim);
+    expect(figures[0].paragraph).toBe(1);
     expect(loop?.toLowerCase()).not.toMatch(/\b(?:do|doing|stage|staged|staging) the stage\b/);
-    for (const label of ["spec", "stage", "verify", "repeat"]) {
+    for (const label of ["spec", "implement", "verify", "repeat"]) {
       expect(figures[0].claim.toLowerCase()).toContain(label);
     }
-
-    const closing = app.match(/<section class="section" id="closing">([\s\S]*?)<\/section>/)?.[1];
-    const heading = closing?.match(/<h2>([^<]+)<\/h2>/)?.[1].trim().toLowerCase();
-    const opener = closing?.match(/<p>\s*([\s\S]*?)<\/p>/)?.[1]
-      .replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().toLowerCase();
-    expect(heading).toBe("in practice");
-    expect(opener).toBeDefined();
-    expect(opener?.startsWith(heading!)).toBe(false);
+    expect(app).not.toContain('id="closing"');
   });
 
   test("every beat anchor is a verbatim manuscript line, in the manuscript's order", () => {
@@ -163,7 +161,9 @@ describe("figure manifest", () => {
     const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
     for (const state of overture.states) {
       expect(roles, `overture role ${state.role}`).toContain(state.role);
-      expect(app, `overture term "${state.term}" is not in the prose`).toContain(state.term);
+      // The prose capitalizes a term at the head of a sentence, so the term is matched the way
+      // the page spends it: case-insensitively.
+      expect(app.toLowerCase(), `overture term "${state.term}" is not in the prose`).toContain(state.term);
     }
   });
 });
