@@ -16,8 +16,8 @@ const treatments = ["agentic", "vibe", "human"];
 /** Control uses real WebGPU APIs; instrumentation never manufactures acquisitions. */
 function healthy(error: boolean) {
   return `<!doctype html><link rel="icon" href="/favicon.ico"><link rel="stylesheet" href="${external[1].replaceAll("&", "&amp;")}"><script async crossorigin="anonymous" src="${external[0]}"></script>
-<style>body{margin:0;background:rgb(251,252,253)}[data-hero-id]{margin:40px;width:500px;height:320px}canvas,pre{position:absolute;top:100px;width:500px;height:220px}pre{color:#673baa}main{height:2000px}</style>
-<div data-hero-id="spectrum-hero" data-hero-state="agentic" style="--phase:0"><pre>Captured unchanged agentic rest\n[] [] [] []\n[] [] [] []</pre><canvas width="500" height="220"></canvas></div><main>Runtime synthetic control. Not article evidence.</main>
+<style>body{margin:0;background:rgb(251,252,253)}[data-hero-id]{margin:40px;width:500px;height:420px}canvas,pre{position:absolute;top:100px;left:110px;width:280px;height:280px}pre{color:#673baa}main{height:2000px}</style>
+<div data-hero-id="spectrum-hero" data-hero-state="agentic" style="--phase:0"><pre>Captured unchanged agentic rest\n[] [] [] []\n[] [] [] []</pre><canvas width="280" height="280"></canvas></div><main>Runtime synthetic control. Not article evidence.</main>
 <script type="module">
 const h=document.querySelector('[data-hero-id]'),c=h.querySelector('canvas'),pre=h.querySelector('pre');
 let phase=0,last=0,elapsed=0,active=false,raf=0;
@@ -171,17 +171,23 @@ async function boundedRead(page: Page, item: Case, info: TestInfo, check: Check,
     const last = await capture("rest");
     const register = await page.locator(hero).evaluate(h => ({
       count: document.querySelectorAll('[data-hero-id]').length,
-      states: [...h.querySelectorAll('rect[data-hero-state]')].map(n => n.getAttribute('data-hero-state')),
+      states: [...h.querySelectorAll('circle[data-hero-state]')].map(n => n.getAttribute('data-hero-state')),
       labels: h.querySelectorAll('[data-figure-label],figcaption').length,
-      fills: [...h.querySelectorAll('path,rect')].map(n => getComputedStyle(n).fill),
+      // The repaired stations are filled circles; the rails stay strokes and nothing paints a
+      // background, which is the area-tint property the earlier all-fills-none read stood for.
+      railFills: [...h.querySelectorAll('.rail')].map(n => getComputedStyle(n).fill),
+      backgrounds: [...h.querySelectorAll('*')].map(n => getComputedStyle(n).backgroundColor).filter(c => c !== 'rgba(0, 0, 0, 0)' && c !== 'transparent'),
+      captions: [...h.querySelectorAll('.caption')].map(n => n.textContent),
+      live: h.querySelectorAll('.caption.live').length,
       phase: getComputedStyle(h).getPropertyValue('--phase').trim(),
       height: h.querySelector('.canvas-wrap')?.getBoundingClientRect().height,
+      canvas: (({ width, height }) => ({ width, height }))(h.querySelector('canvas')!.getBoundingClientRect()),
       overflow: document.documentElement.scrollWidth > innerWidth,
     }));
-    check("runtime.hero-register", register.count === 1 && JSON.stringify(register.states) === JSON.stringify(['human','agentic','vibe']) && register.labels === 0 && register.fills.every(f => f === 'none'), register);
-    check("runtime.layout", register.height === 220 && !register.overflow, register);
-    check("runtime.agentic-rest", first.state === 'agentic' && last.state === 'agentic' && first.phase === last.phase && content?.split('\n').length === 14, { first, last, content });
-    check("runtime.prose-rest", text === await page.locator('.page').innerText() && text.includes('Agentic engineering is directing agents to make software.') && text.includes('The application of these principles is agentic engineering.'), text);
+    check("runtime.hero-register", register.count === 1 && JSON.stringify(register.states) === JSON.stringify(['human','agentic','vibe']) && register.labels === 0 && register.railFills.length > 0 && register.railFills.every(f => f === 'none') && register.backgrounds.length === 0 && JSON.stringify(register.captions) === JSON.stringify(['human','agentic engineering','vibe coding']) && register.live === 1, register);
+    check("runtime.layout", register.height === 280 && register.canvas.width === 280 && register.canvas.height === 280 && !register.overflow, register);
+    check("runtime.agentic-rest", first.state === 'agentic' && last.state === 'agentic' && first.phase === last.phase && content?.split('\n').length === 31, { first, last, content });
+    check("runtime.prose-rest", text === await page.locator('.page').innerText() && text.includes('lives in the spectrum in between: directing agents intentionally to build and verify software.') && text.includes("That's verifiability, and it's the hard part.") && text.includes('Check out the video version.'), text);
     if (gpu) check("runtime.reduced-drawn", first.drawn === 'drawn' && last.drawn === 'drawn' && readFileSync(join(info.outputDir, 'rest-first.png')).equals(readFileSync(join(info.outputDir, 'rest.png'))), { first, last });
     else check("runtime.plain.rest", await rest.isVisible() && Boolean(content?.trim()) && content === await rest.textContent() && first.drawn !== 'drawn' && last.drawn !== 'drawn', { first, last });
     // Read the existing loop rest, without a phase driver or another navigation.
@@ -191,8 +197,19 @@ async function boundedRead(page: Page, item: Case, info: TestInfo, check: Check,
     if (await loop.count() === 1) {
       await loop.scrollIntoViewIfNeeded();
       await loop.screenshot({ path: join(info.outputDir, 'loop-rest.png') });
-      const read = await loop.evaluate(h => ({ phase: getComputedStyle(h).getPropertyValue('--phase').trim(), occupied: [...h.querySelectorAll<SVGElement>('.emphasis')].filter(n => Number(getComputedStyle(n).opacity) > 0.9).map(n => n.dataset.node), returnDash: parseFloat(getComputedStyle(h.querySelector('[data-figure-part="return-edge"]')!).strokeDashoffset), indicatorExtent: h.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect().width }));
-      check("runtime.loop-rest", Number(read.phase) === 1 && JSON.stringify(read.occupied) === '["stage"]' && read.returnDash === 0 && read.indicatorExtent === 0, read);
+      // The repaired loop marks its landed node with a solid box instead of an emphasis stroke,
+      // and draws the return edge as a plain rail instead of revealing it by dash offset.
+      const read = await loop.evaluate(h => {
+        const edge = h.querySelector<SVGPathElement>('[data-figure-part="return-edge"]')!;
+        return {
+          phase: getComputedStyle(h).getPropertyValue('--phase').trim(),
+          nodes: [...h.querySelectorAll<SVGGElement>('[data-figure-part="node"]')].map(n => n.dataset.node),
+          occupied: [...h.querySelectorAll<SVGGElement>('[data-figure-part="node"]')].filter(n => getComputedStyle(n.querySelector('rect')!).fill === getComputedStyle(n).color).map(n => n.dataset.node),
+          returnEdge: { length: edge.getTotalLength(), width: Number(getComputedStyle(edge).strokeWidth.replace('px', '')) },
+          indicatorExtent: h.querySelector('[data-figure-part="unit"]')!.getBoundingClientRect().width,
+        };
+      });
+      check("runtime.loop-rest", Number(read.phase) === 1 && JSON.stringify(read.nodes) === '["spec","implement","verify"]' && JSON.stringify(read.occupied) === '["implement"]' && read.returnEdge.length > 0 && read.returnEdge.width > 0 && read.indicatorExtent === 0, read);
     }
   }
   const end = await snapshot(page);

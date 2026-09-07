@@ -7,7 +7,9 @@
 // are no figcaptions.
 //
 // H2 retires the duplicated spectrum axis after H1 moved that vocabulary into the overture. P2
-// moves the loop after the full spec → stage → verify disclosure; its return geometry stays intact.
+// moves the loop after the full spec → implement → verify disclosure; its return geometry stays
+// intact. The hand repair dropped the standalone definition and closing sections, so their beats
+// are gone with them and the section order is the six ids the page still renders.
 
 export type FigureKind = "loop";
 export type LabelPolicy = "none" | "required";
@@ -30,8 +32,8 @@ export const figures = [
   {
     id: "stage-loop",
     section: "loop",
-    paragraph: 2,
-    claim: "Then repeat: implement a stage, verify it, implement the next, until the spec is done.",
+    paragraph: 1,
+    claim: "Repeat: implement the next stage, verify again, until the spec is done.",
     kind: "loop",
     labels: "required",
   },
@@ -96,14 +98,12 @@ export type Beat = {
 };
 
 export const beats = [
-  { anchor: "directing agents", section: "definition", level: "section" },
   { anchor: "you may have heard of vibe coding", section: "spectrum", level: "section" },
   { anchor: "but we've tried enough things", section: "principles", level: "section" },
   { anchor: "principle number 1", section: "verifiability", level: "subsection" },
   { anchor: "context engineering", section: "context-engineering", level: "subsection" },
   { anchor: "let's put these principles together", section: "loop", level: "section" },
   { anchor: "how exactly do you \"verify\"?", section: "verification", level: "section" },
-  { anchor: "the application of these principles", section: "closing", level: "section" },
 ] satisfies readonly Beat[];
 
 /** Section and subsection ids in the manuscript's beat order, which is also document order. */
