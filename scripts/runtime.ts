@@ -239,7 +239,7 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
   raw('subject', { id: item.id, observer: 'bounded-runtime-1', input: item.input.hashes, options, started: new Date(started).toISOString() });
   const control = Boolean(item.input.runtimeControl);
   const distPaths = Object.keys(bytes(join(item.input.root, "dist")));
-  const articlePaths = control ? ["index.html"] : distPaths.filter(p => p !== "__case.json" && (item.cohort === "gpu" || !p.startsWith("fonts/") && !p.startsWith("assets/hero-engine-")));
+  const articlePaths = control ? ["index.html"] : distPaths.filter(p => p !== "__case.json" && !p.endsWith(".map") && (item.cohort === "gpu" || !p.startsWith("fonts/") && !p.startsWith("assets/hero-engine-")));
   const declared = [...articlePaths.map(p => origin.origin + base + (p === "index.html" ? "" : p)), origin.origin + "/favicon.ico", ...external].sort();
   try {
     const page = await context.newPage();
