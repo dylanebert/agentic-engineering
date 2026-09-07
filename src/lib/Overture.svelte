@@ -43,18 +43,23 @@
     };
     const initialize = async () => {
       if (!("gpu" in navigator)) return;
-      const adapter = await navigator.gpu.requestAdapter();
-      if (!adapter || disposed) return;
-      const { mountHero } = await import("./hero-engine");
-      if (disposed) return;
-      const style = getComputedStyle(root);
-      const mounted = await mountHero(canvas, {
-        human: style.getPropertyValue("--role-prose").trim(),
-        agentic: style.getPropertyValue("--role-agentic").trim(),
-        vibe: style.getPropertyValue("--role-vibe").trim(),
-      }, getComputedStyle(document.body).backgroundColor);
-      if (disposed) { mounted.dispose(); return; }
-      engine = mounted;
+      try {
+        const adapter = await navigator.gpu.requestAdapter();
+        if (!adapter || disposed) return;
+        const { mountHero } = await import("./hero-engine");
+        if (disposed) return;
+        const style = getComputedStyle(root);
+        const mounted = await mountHero(canvas, {
+          human: style.getPropertyValue("--role-prose").trim(),
+          agentic: style.getPropertyValue("--role-agentic").trim(),
+          vibe: style.getPropertyValue("--role-vibe").trim(),
+        }, getComputedStyle(document.body).backgroundColor);
+        if (disposed) { mounted.dispose(); return; }
+        engine = mounted;
+      } catch (error) {
+        if (!disposed) root.dataset.heroGpu = "unsupported";
+        console.warn("Hero WebGPU initialization refused:", error);
+      }
     };
     const observer = new IntersectionObserver(([entry]) => {
       active = entry.isIntersecting;
