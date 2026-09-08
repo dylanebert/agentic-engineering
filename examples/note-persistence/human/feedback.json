@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-08",
+  "source": "Dylan's conversation, relayed in the same-owner revision brief",
+  "functionalQuote": "it works.",
+  "functionalOutcome": "confirmed by actual use",
+  "readingCommit": "0b266edc701e3e37c71c3bb1a7ad2d91643a630b",
+  "readingQuote": "oh i found it. it's a little bit in the weeds. look at the writing style of the rest of our blog post. consdier our principles - conciseness, progressive disclosure, multimodal reinforcement, everything being earned. revise.",
+  "educationalOutcome": "revision requested; not accepted",
+  "codeRefinementRequested": false,
+  "additionalE1Seconds": 0,
+  "access": {
+    "operator": "coordinator, not experimental subject",
+    "userSeat": "Omarchy",
+    "route": "Mac static server through SSH reverse tunnel to Omarchy loopback",
+    "tunnel": "ssh -R 127.0.0.1:18765:127.0.0.1:18765 omarchy",
+    "boundedSeconds": 300,
+    "browserOpenedBy": "remote xdg-open",
+    "exactBrowserEngine": "not established"
+  },
+  "followOn": "Starting/implemented/polished live embeds and blog-matching design iteration require separate scope; no concrete styling is accepted and none is implemented here."
+}

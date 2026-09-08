@@ -29,7 +29,9 @@ gtimeout --signal=TERM --kill-after=5 300 \
 
 Open **http://127.0.0.1:18765/** in your browser. Use a short real note, reload it, then Clear and reload. The server serves only `app/`; it must fail if the port is occupied. Do not kill another listener. Stop your server with Ctrl+C when finished and close the tab; timeout is a backstop, not a background service to leave running.
 
-Text stays in that browser at that origin. It is not backed up or synced. Feedback sought: whether the note behaves as expected and the [short reading](reading.md) makes the process understandable. A small real refinement or no change is valid; neither is invented in this record.
+Text stays in that browser at that origin. It is not backed up or synced. The loopback address belongs to the machine running the server; a browser on another machine needs a configured connection, not the same-looking local URL.
+
+Dylan has confirmed the note works through a coordinator-operated tunnel to Omarchy. Current feedback concerns only the [revised short reading](reading.md), not repeated functional testing. The [human record](human/feedback.json) separates that confirmation from the rejected prose and the separately scoped embed/design proposal.
 
 ## Inspect The Evidence
 

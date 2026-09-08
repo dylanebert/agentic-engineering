@@ -13,7 +13,8 @@
   "modelCorrectiveFollowUps": 0,
   "operatorLaunchCorrections": 1,
   "humanRefinements": 0,
-  "humanDecision": "pending actual use and educational feedback",
+  "humanDecision": "functional use confirmed; revised-reading feedback pending",
+  "humanFeedback": "human/feedback.json",
   "gatewayBilling": "unknown",
   "publicProviderParity": "unverified",
   "historicalCampaign": {

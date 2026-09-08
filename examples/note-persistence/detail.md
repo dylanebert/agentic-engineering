@@ -63,7 +63,11 @@ The public reader archive at `2705f3340a45424aa3cf447a1d59177b224e06cc` was then
 
 One fresh read-only Sol-low review found no consequential gap. It checked the request, source, tests, outcomes and draft explanation using only the new bounded corpus. It specifically distinguished the required empty textbox from an unrequested requirement that a storage key remain present. [Full review](evidence/review/review-response.md), [prompt](evidence/review/review-prompt.txt), [stock session](evidence/review/review.jsonl), [events](evidence/review/review-events.jsonl) and [actual read audit](evidence/review/review-audit.json) are retained; its 131-file input corpus was unchanged. No second review or model correction followed.
 
-Actual human use and educational feedback are pending. No acceptance, refinement or no-change response is invented. The result is not shipped, and a later human request that changes code requires agent-operated checks again.
+Dylan confirmed functional use, not educational acceptance. After using the note on Omarchy, he said “it works.” The coordinator supplied a bounded Mac-to-Omarchy SSH reverse tunnel because the initial Mac-local link was not on Dylan's machine. This was access setup, not a task-browser check or E1 model work; the exact user browser engine is not established. [Human feedback and access attribution](human/feedback.json) records the distinction.
+
+Dylan then rejected the [previous short reading](https://github.com/dylanebert/agentic-engineering/blob/0b266edc701e3e37c71c3bb1a7ad2d91643a630b/examples/note-persistence/reading.md) as “a little bit in the weeds” and asked for the surrounding article's conciseness, progressive disclosure, multimodal reinforcement and earned explanation. The revised reading awaits feedback; functional success is not prose acceptance. Astra made only an editorial revision, not another experiment or Sol review.
+
+No code refinement was requested. Proposed starting/implemented/polished live embeds and blog-matching design iteration are a separately scoped follow-on; no concrete styling is accepted or implemented here. No new screenshot or embed is claimed. The result is not shipped, and a later human request that changes code requires agent-operated checks again.
 
 ## Historical Campaign And Limits
 
@@ -71,4 +75,4 @@ The original campaign exhausted all three attempts and its one setup adjustment.
 
 The original pilot read prior transcript bytes; later separated-setup runs retained tool failures and an outside-folder write. Original simulations printed values rather than supplying these agent-operated browser assertions. Their repaired disclosures and immutable manifests remain in the old corpus. The new run does not erase those qualifications or establish model rankings.
 
-This note stores text only in the same browser context and origin. It is not an account, backup or sync service. Denied storage, cross-tab coordination and other browser engines are outside the correctness claim. Replaying saved code/tests proves artifact/check replay, not that another model reproduces the recipe. Original and new member integration, the private report and final human decision remain outstanding.
+This note stores text only in the same browser context and origin. It is not an account, backup or sync service. Denied storage, cross-tab coordination and other browser engines are outside the correctness claim. Replaying saved code/tests proves artifact/check replay, not that another model reproduces the recipe. Original and new member integration, private-report landing and revised-reading feedback remain outstanding.

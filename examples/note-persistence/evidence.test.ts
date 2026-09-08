@@ -3,7 +3,7 @@ import { mkdtempSync, cpSync, writeFileSync, rmSync, readFileSync } from 'node:f
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { checkBrowserReport, checkRecording, checkSnapshot, jsonl, sha } from './evidence';
-import { checkFidelity, requiredDisclosures } from './fidelity';
+import { checkFidelity, checkMainReading, mainReadingClaims, requiredDisclosures } from './fidelity';
 
 const root = import.meta.dir;
 const s4 = join(root, 'evidence/S4');
@@ -128,6 +128,15 @@ test('fresh Sol review is read-only, complete and bound to its unchanged corpus'
   expect(after.files).toEqual(before.files);
 });
 
+test('shorter reading preserves every semantic obligation and the actual human quote', () => {
+  const reading = readFileSync(join(root, 'reading.md'), 'utf8');
+  const human = readJson(join(root, 'human/feedback.json'));
+  checkMainReading(reading, human);
+  for (const [meaning, clause] of mainReadingClaims) expect(() => checkMainReading(reading.replace(clause, ''), human)).toThrow(`main reading ${meaning}`);
+  expect(() => checkMainReading(reading.replace('“it works.”', '“the explanation is accepted.”'), human)).toThrow('actual human quote');
+  expect(readJson(join(root, 'campaign.json')).humanDecision).toBe('functional use confirmed; revised-reading feedback pending');
+});
+
 test('whole source population and both campaign identities have visible dispositions', () => {
   const detail = readFileSync(join(root, 'detail.md'), 'utf8');
   const mapping = readJson(join(root, 'sources.json'));
@@ -160,6 +169,15 @@ test('production comparison CLI refuses a removed intervention and changed outco
       if (predicate) expect(child.stderr.toString()).toContain(predicate);
       console.log(`fidelity CLI ${name}: exit ${child.exitCode}; ${predicate || 'complete source and prose checks'}`);
     }
+    const reading = readFileSync(join(copy, 'reading.md'), 'utf8');
+    writeFileSync(join(copy, 'reading.md'), reading.replace('The tests passed.', 'The tests failed.'));
+    const changed = Bun.spawnSync(['bun', join(copy, 'compare.ts'), captures], { stdout: 'pipe', stderr: 'pipe' });
+    expect(changed.exitCode).toBe(1);
+    expect(changed.stderr.toString()).toContain('main reading machine outcome');
+    writeFileSync(join(copy, 'reading.md'), reading);
+    const restored = Bun.spawnSync(['bun', join(copy, 'compare.ts'), captures], { stdout: 'pipe', stderr: 'pipe' });
+    expect(restored.exitCode).toBe(0);
+    console.log(`fidelity CLI changed-main-outcome: exit ${changed.exitCode}; restored ${restored.exitCode}`);
   } finally { rmSync(copy, { recursive: true }); }
 });
 

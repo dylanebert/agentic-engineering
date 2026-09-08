@@ -1296,27 +1296,39 @@
     "disposition": "First committed S4 archive refused missing ignored logs; operator explicitly retains full evidence without changing task bytes."
   },
   {
+    "file": "human/feedback.json",
+    "sha256": "b9b79b329bc36f32a65a4b6fdb23cb81ffd6ff4804e39d3615c7932682d208b0",
+    "section": "independent-and-human-judgment",
+    "disposition": "Actual functional confirmation, separate prose rejection and coordinator-operated access; no new E1 work or accepted embed design."
+  },
+  {
     "file": "references/adaptive-ml-rl-visualized.html",
     "sha256": "b268905ffd8594bab3503f14565adab01c04b2b1b226465f3b2f55c3a71472ac",
     "section": "historical-campaign-and-limits",
-    "disposition": "Unchanged human-marked capture excerpts: prose, reduced sequence and optional disclosure, not a generated taste score."
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
   },
   {
     "file": "references/adaptive-ml-speculative-decoding.html",
     "sha256": "7a0ead1e66d1b04dfcf75f76193c01b68992eab360ed86eb6c0b5bb14ee36070",
     "section": "historical-campaign-and-limits",
-    "disposition": "Unchanged human-marked capture excerpts: prose, reduced sequence and optional disclosure, not a generated taste score."
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
+  },
+  {
+    "file": "references/article-context.json",
+    "sha256": "c83d3fb5a71f2b3afbb0f2a6bb43384d16879c103768c7147f299438e822e912",
+    "section": "historical-campaign-and-limits",
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
   },
   {
     "file": "references/karpathy-training-recipe.txt",
     "sha256": "2cce5844dfb7d1cdac466ffde89248fb22ab30ecd3ec92c5cd7c385b42ab902b",
     "section": "historical-campaign-and-limits",
-    "disposition": "Unchanged human-marked capture excerpts: prose, reduced sequence and optional disclosure, not a generated taste score."
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
   },
   {
     "file": "references/taste-loops-latency-figure.txt",
     "sha256": "306c5796b973dd47794e4c380996a0e363758ee17909ee89def516570c497e9b",
     "section": "historical-campaign-and-limits",
-    "disposition": "Unchanged human-marked capture excerpts: prose, reduced sequence and optional disclosure, not a generated taste score."
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
   }
 ]

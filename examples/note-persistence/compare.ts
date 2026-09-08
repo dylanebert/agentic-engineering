@@ -17,6 +17,8 @@ console.log('=== SOURCE COVERAGE ===');
 console.log(checkFidelity(root, text('detail.md'), mapping));
 for (const [group, section, disposition] of sourceGroups) console.log(JSON.stringify({ group, section, disposition, files: mapping.filter((r: any) => r.file.startsWith(group + '/')).length }));
 for (const row of mapping) console.log(JSON.stringify(row));
+console.log('=== USER-SELECTED SURROUNDING ARTICLE AND VISUAL BEAT ===');
+console.log(text('references/article-context.json'));
 console.log('=== HUMAN-MARKED REFERENCES; NOT A TASTE SCORE ===');
 for (const [file, channel] of [
   ['taste-loops-latency-figure.txt', 'concise prose; not page styling'],
