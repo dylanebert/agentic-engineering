@@ -114,7 +114,7 @@ function missingFeatures() {
     features.call(this);
     s.genuine = this instanceof GPUAdapter;
     s.featureReads++;
-    s.before ??= document.querySelector('[data-hero-id="spectrum-hero"] pre')?.textContent ?? null;
+    s.before ??= document.querySelector('[data-hero-id="spectrum-hero"] [data-hero-poster]')?.getAttribute('src') ?? null;
     return new Set<string>();
   } });
 }
@@ -123,10 +123,10 @@ async function unsupportedRead(page: Page, check: Check, raw: Raw, warnings: str
   try {
     await page.waitForFunction(() => document.querySelector('[data-hero-id="spectrum-hero"]')?.getAttribute('data-hero-gpu') === 'unsupported' || (window as any).__unsupported.rejections.length > 0, undefined, { timeout: 5000 });
   } catch (error) { raw("refusal-wait", String(error)); }
-  const rest = page.locator(hero + " pre");
+  const rest = page.locator(hero + " [data-hero-poster]");
   const count = await rest.count();
   const visible = count === 1 && await rest.isVisible();
-  const content = count === 1 ? await rest.textContent() : null;
+  const content = count === 1 ? await rest.getAttribute('src') : null;
   const end = await snapshot(page);
   const refusal = await page.evaluate(() => (window as any).__unsupported);
   check("runtime.unsupported", refusal.genuine && refusal.featureReads > 0 && end.counters.successfulAdapters > 0 && end.counters.devices === 0 && end.counters.contextCalls === 0 && end.counters.contexts === 0 && refusal.rejections.length === 0 && count === 1 && visible && Boolean(content?.trim()) && content === refusal.before && end.drawn === "unsupported" && warnings.some(text => text.includes("Missing required WebGPU features")), { refusal, end, count, visible, content, warnings });
@@ -195,8 +195,9 @@ async function boundedRead(page: Page, item: Case, info: TestInfo, check: Check,
     await page.setViewportSize(gpu ? { width: 1440, height: 900 } : { width: 390, height: 844 });
     const first = await capture("rest-first");
     const text = await page.locator('.page').innerText();
-    const rest = page.locator(hero + ' pre');
-    const content = await rest.textContent();
+    const rest = page.locator(hero + ' [data-hero-poster]');
+    const content = await rest.getAttribute('src');
+    const loaded = await rest.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth === 560 && img.naturalHeight === 560);
     await page.waitForTimeout(1000);
     const last = await capture("rest");
     const register = await page.locator(hero).evaluate(h => ({
@@ -216,10 +217,10 @@ async function boundedRead(page: Page, item: Case, info: TestInfo, check: Check,
     }));
     check("runtime.hero-register", register.count === 1 && JSON.stringify(register.states) === JSON.stringify(['human','agentic','vibe']) && register.labels === 0 && register.railFills.length > 0 && register.railFills.every(f => f === 'none') && register.backgrounds.length === 0 && JSON.stringify(register.captions) === JSON.stringify(['human','agentic engineering','vibe coding']) && register.live === 1, register);
     check("runtime.layout", register.height === 280 && register.canvas.width === 280 && register.canvas.height === 280 && !register.overflow, register);
-    check("runtime.agentic-rest", first.state === 'agentic' && last.state === 'agentic' && first.phase === last.phase && content?.split('\n').length === 31, { first, last, content });
+    check("runtime.agentic-rest", first.state === 'agentic' && last.state === 'agentic' && first.phase === last.phase && loaded, { first, last, content });
     check("runtime.prose-rest", text === await page.locator('.page').innerText() && text.includes('lives in the spectrum in between: directing agents intentionally to build and verify software.') && text.includes("That's verifiability, and it's the hard part.") && text.includes('Check out the video version.'), text);
     if (gpu) check("runtime.reduced-drawn", first.drawn === 'drawn' && last.drawn === 'drawn' && readFileSync(join(info.outputDir, 'rest-first.png')).equals(readFileSync(join(info.outputDir, 'rest.png'))), { first, last });
-    else check("runtime.plain.rest", await rest.isVisible() && Boolean(content?.trim()) && content === await rest.textContent() && first.drawn !== 'drawn' && last.drawn !== 'drawn', { first, last });
+    else check("runtime.plain.rest", await rest.isVisible() && Boolean(content?.trim()) && content === await rest.getAttribute('src') && first.drawn !== 'drawn' && last.drawn !== 'drawn', { first, last });
     // Read the existing loop rest, without a phase driver or another navigation.
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const loop = page.locator('[data-figure-id]');
@@ -382,12 +383,14 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
       check("runtime.lifetime", end.canvasCount === 1 && end.counters.canvases === 1 && end.counters.contexts === 1 && end.counters.contextCalls === 1 && end.counters.successfulAdapters === 1 && end.counters.devices === 1 && end.counters.successfulDevices === 1, end);
     } else {
       await page.waitForTimeout(600);
-      const before = await snapshot(page), rest = page.locator(hero + " pre");
-      const text = await page.locator('body').innerText(), content = await rest.textContent(), visible = await rest.isVisible(), first = await rest.screenshot();
+      // Synthetic runtime controls retain their independent text rest; the article uses an image.
+      const before = await snapshot(page), rest = page.locator(hero).locator("[data-hero-poster], pre");
+      const source = () => rest.evaluate(node => node.getAttribute('src') ?? node.textContent);
+      const text = await page.locator('body').innerText(), content = await source(), visible = await rest.isVisible(), first = await rest.screenshot();
       await page.waitForTimeout(2500);
       const end = await snapshot(page), second = await rest.screenshot();
       check("runtime.plain.no-adapter", end.counters.adapters === 1 && end.counters.successfulAdapters === 0 && end.counters.devices === 0 && end.counters.contextCalls === 0 && end.counters.contexts === 0, end);
-      check("runtime.plain.rest", visible && await rest.isVisible() && Boolean(content?.trim()) && content === await rest.textContent() && text === await page.locator('body').innerText() && first.equals(second) && before.drawn !== "drawn" && end.drawn !== "drawn", { before, end, visible, content, text });
+      check("runtime.plain.rest", visible && await rest.isVisible() && Boolean(content?.trim()) && content === await source() && text === await page.locator('body').innerText() && first.equals(second) && before.drawn !== "drawn" && end.drawn !== "drawn", { before, end, visible, content, text });
       writeFileSync(join(info.outputDir,"rest.png"),second);
     }
     const instrumentation = await page.evaluate(() => (window as any).__runtime);

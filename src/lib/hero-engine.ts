@@ -1,5 +1,6 @@
 import { build } from "@dylanebert/shallot/src/engine/app/index.ts";
 import { aim } from "@dylanebert/shallot/src/engine/utils/index.ts";
+import { Compute } from "@dylanebert/shallot/runtime";
 import { cells, cellsGridFor } from "@dylanebert/shallot/src/extras/cells/index.ts";
 import { Glaze, GlazePlugin, Tonemap } from "@dylanebert/shallot/src/standard/glaze/index.ts";
 import { Color, Part, PartPlugin } from "@dylanebert/shallot/src/standard/part/index.ts";
@@ -59,15 +60,15 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
   })) };
   const app = await build({
     plugins: [SlabPlugin, TransformsPlugin, RenderPlugin, PartPlugin, SearPlugin, GlowPlugin, gated, GlazePlugin],
-    defaults: false, scene,
+    defaults: false, scene, pixelRatio: 2,
   });
   const camera = [...app.state.query([Camera])][0];
   const parts = [...app.state.query([Part])];
   const box = parts[0];
   const glow = parts[1];
   const ambient = [...app.state.query([AmbientLight])][0];
-  // Cells slightly finer than the 11 px default so the glyph field reveals more of the cube's geometry.
-  Object.assign(canvas, { cellWidth: 9, cellHeight: 9 });
+  // Fixed 2x backing and 9 CSS-pixel cells keep the poster and live grid identical across displays.
+  Object.assign(canvas, { cellWidth: 18, cellHeight: 18 });
   try { attachCanvas(camera, canvas, app.state); }
   catch (error) { app.dispose(); throw error; }
   // Sear's unpackColor linearizes these sRGB bytes; Glaze.None only re-encodes them.
@@ -75,12 +76,10 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
   const clear = (channels[0] << 16) | (channels[1] << 8) | channels[2];
   const render = (next: HeroTreatment, phase: number, dt = 0) => {
     treatment = next;
-    // Cells fixes its cell background at black. The article inverts the agentic canvas in CSS
-    // (Overture.svelte), so draw the ASCII pre-inverted: black becomes the page, glyphs land on
-    // the real agentic color.
+    // The shared poster/canvas tint maps black to transparent and glyph luminance to green ink.
     Camera.clearColor.set(camera, next === "agentic" ? 0 : clear);
     Glaze.tonemap.set(camera, Tonemap.None);
-    const yaw = phase * Math.PI * 2;
+    const yaw = (phase % 1) * Math.PI * 2 + 0.6;
     const pitch = 0.55;
     const x = 1.95 * Math.cos(pitch) * Math.sin(yaw);
     const y = 1.95 * Math.sin(pitch);
@@ -92,8 +91,7 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
     Transform.pos.set(camera, x, y, z, 0);
     Transform.rot.set(camera, rotation.x, rotation.y, rotation.z, rotation.w);
     const color = rgb(colors[next]);
-    // ASCII renders a white cube: Cells picks glyph density from luma, and the CSS chain in
-    // Overture.svelte (brightness, invert, tint matrix) maps every glyph onto the agentic green.
+    // Cells selects glyph density from the white cube's lighting; the shared tint carries its ink.
     // Shading faces get a lighter, pastel albedo so the solid cube reads soft against the page.
     if (next === "agentic") Color.rgba.set(box, 1, 1, 1, 1);
     else {
@@ -105,5 +103,5 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
     const grid = next === "agentic" ? cellsGridFor(camera) : undefined;
     return grid ? `${grid.cols}x${grid.rows}` : undefined;
   };
-  return { render, dispose: () => app.dispose() };
+  return { render, presented: () => Compute.device.queue.onSubmittedWorkDone(), dispose: () => app.dispose() };
 }

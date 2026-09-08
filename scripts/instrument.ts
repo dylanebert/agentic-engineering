@@ -75,11 +75,11 @@ export const mutations: Mutation[] = [
     "label": "static hero import",
     "path": "src/lib/Overture.svelte",
     "needle": [
-      "  import { cubeFrame } from \"./cube-frames\";",
+      "  import poster from \"./hero-poster.png\";", 
       "      const { mountHero } = await import(\"./hero-engine\");"
     ],
     "replacement": [
-      "  import { cubeFrame } from \"./cube-frames\";\n  import { mountHero } from \"./hero-engine\";",
+      "  import poster from \"./hero-poster.png\";\n  import { mountHero } from \"./hero-engine\";",
       ""
     ],
     "predicate": "",
@@ -228,24 +228,18 @@ export const mutations: Mutation[] = [
     "predicate": "capture-2.2"
   },
   {
-    "label": "new hero captured rest rows",
+    "label": "new hero captured rest absent",
     "path": "src/lib/Overture.svelte",
-    "needle": "cubeFrame.join(\"\\n\")",
-    "replacement": "cubeFrame.slice(1).join(\"\\n\")",
+    "needle": "data-hero-poster",
+    "replacement": "data-wrong-poster",
     "grep": "reduced motion rests",
     "predicate": "figure-9.2"
   },
   {
     "label": "new hero invisible GPU canvas",
     "path": "src/lib/Overture.svelte",
-    "needle": [
-      "canvas.drawn{opacity:calc(1 - .9 * var(--veil))",
-      "canvas.drawn{opacity:calc(1 - .9 * var(--veil))"
-    ],
-    "replacement": [
-      "canvas.drawn{opacity:calc(0 * var(--veil))",
-      "canvas.drawn{opacity:calc(0 * var(--veil))"
-    ],
+    "needle": "canvas.drawn{opacity:calc(1 - .9 * var(--veil))",
+    "replacement": "canvas.drawn{opacity:calc(0 * var(--veil))",
     "predicate": "runtime.agentic.region",
     "runtime": true,
     "cohort": "gpu"
@@ -253,14 +247,8 @@ export const mutations: Mutation[] = [
   {
     "label": "new hero Cells identity malformed",
     "path": "src/lib/Overture.svelte",
-    "needle": [
-      "root.dataset.heroCells = grid",
-      "root.dataset.heroCells = grid"
-    ],
-    "replacement": [
-      "root.dataset.heroCells = \"invalid\"",
-      "root.dataset.heroCells = \"invalid\""
-    ],
+    "needle": "root.dataset.heroCells = grid",
+    "replacement": "root.dataset.heroCells = \"invalid\"",
     "predicate": "runtime.agentic.identity",
     "runtime": true,
     "cohort": "gpu"
@@ -268,14 +256,8 @@ export const mutations: Mutation[] = [
   {
     "label": "plain fallback hidden",
     "path": "src/lib/Overture.svelte",
-    "needle": [
-      "pre{margin:0;",
-      "pre{margin:0;"
-    ],
-    "replacement": [
-      "pre{visibility:hidden;margin:0;",
-      "pre{visibility:hidden;margin:0;"
-    ],
+    "needle": "img.hidden{visibility:hidden}",
+    "replacement": "img{visibility:hidden}",
     "grep": "plain Chromium keeps silent rest",
     "predicate": "figure-11.7"
   }
