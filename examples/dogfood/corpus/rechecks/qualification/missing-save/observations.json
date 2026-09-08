@@ -1,0 +1,88 @@
+[
+  {
+    "at": "2026-09-08T16:52:33.801Z",
+    "event": "start",
+    "root": "/tmp/note-dogfood-PdqO1q/controls/missing-save",
+    "command": [
+      "node",
+      "/tmp/note-dogfood-PdqO1q/pilot/tools/node_modules/http-server/bin/http-server",
+      "/tmp/note-dogfood-PdqO1q/controls/missing-save",
+      "-a",
+      "127.0.0.1",
+      "-p",
+      "8765",
+      "-c-1"
+    ],
+    "origin": "http://127.0.0.1:8765",
+    "stage": 2,
+    "hashes": {
+      "index.html": "7277045c8ab9efa90288dcf08b2d9ff51cad4223b00abf63b59ae0a11e51d062"
+    },
+    "node": "v26.3.0",
+    "serverPid": 3387
+  },
+  {
+    "at": "2026-09-08T16:52:33.968Z",
+    "event": "browser",
+    "version": "151.0.7922.34",
+    "pid": 3390
+  },
+  {
+    "at": "2026-09-08T16:52:34.023Z",
+    "event": "assertion",
+    "id": "empty-start",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:34.045Z",
+    "event": "assertion",
+    "id": "multiline-edit",
+    "expected": "First line\nSecond line",
+    "actual": "First line\nSecond line",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:34.067Z",
+    "event": "assertion",
+    "id": "clear",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:34.109Z",
+    "event": "assertion",
+    "id": "saved-reload",
+    "expected": "Saved line\nKeep this",
+    "actual": "",
+    "outcome": "fail"
+  },
+  {
+    "at": "2026-09-08T16:52:34.122Z",
+    "event": "error",
+    "message": "Error: behavior: saved-reload",
+    "outcome": "fail"
+  },
+  {
+    "at": "2026-09-08T16:52:34.124Z",
+    "event": "context-close"
+  },
+  {
+    "at": "2026-09-08T16:52:34.138Z",
+    "event": "browser-close"
+  },
+  {
+    "at": "2026-09-08T16:52:34.141Z",
+    "event": "server-close",
+    "code": 0,
+    "signal": null
+  },
+  {
+    "at": "2026-09-08T16:52:34.141Z",
+    "event": "end",
+    "outcome": "fail",
+    "unchanged": true
+  }
+]

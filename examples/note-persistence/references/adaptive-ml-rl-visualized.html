@@ -1,0 +1,46 @@
+<!-- capture: adaptive-ml/blog-assets rl-visualized/inline.html @ 5d62db7 — iframe=1, img=8 (raster stills), figcaption=0, katex=0 -->
+<script type="module" crossorigin src="https://adaptive-ml.github.io/blog-assets/rl-visualized/assets/components-DhiWkIOc.js"></script>
+<link rel="stylesheet" crossorigin href="https://adaptive-ml.github.io/blog-assets/rl-visualized/assets/components-CYGwLzI4.css">
+<div class="blog-content">
+  <h1>Reinforcement Learning, Visualized</h1>
+
+  <p>
+    <a href="https://dev.adaptive-ml.com/training/post-training/rl">Reinforcement learning</a> trains a model from rewards. A model generates a few outputs for a prompt, a <a href="https://dev.adaptive-ml.com/rewards">reward</a> is assigned to each one, and the model is updated toward the better ones.
+  </p>
+
+  <p>Let's walk through how it works step-by-step with an example.</p>
+
+  <div class="demo-wrapper">
+    <iframe
+      src="https://dev.adaptive-ml.com/embed/rl-painters?theme=light"
+      class="demo-frame"
+      title="RL Painters interactive walkthrough"
+    ></iframe>
+  </div>
+
+  <p style="text-align: center;">
+    <a href="https://dev.adaptive-ml.com/training/post-training/rl" target="_blank" rel="noopener">Open in a new tab →</a>
+  </p>
+
+  <h2>The task</h2>
+
+  <p>
+    The model is a base <a href="https://dev.adaptive-ml.com/training/llm">LLM</a>. It's tasked with naming paint colors:
+  </p>
+
+  <blockquote>Name this paint color: #d48475</blockquote>
+
+  <p>
+    There's no single right answer. Two people can disagree about whether "Sunset Dust" beats "Sandy Beige" and both be right. We'll use RL to train the model toward different tastes.
+  </p>
+
+  <h2>Rollout</h2>
+
+  <p>
+    The model generates one output for the prompt. That single output is called a <strong>rollout</strong>.
+  </p>
+
+  <p>For <code>#d48475</code>, the base model says <strong>Sandy Beige</strong>.</p>
+
+  <p><img alt="Base model produces a single rollout: Sandy Beige." src="https://adaptive-ml.github.io/blog-assets/rl-visualized/images/01-rollout-light.png" /></p>
+

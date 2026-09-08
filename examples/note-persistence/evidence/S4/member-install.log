@@ -1,0 +1,17 @@
+bun install v1.4.0 (34cbb9a40)
+
++ @playwright/test@1.62.1
++ @sveltejs/vite-plugin-svelte@7.3.0
++ @tsconfig/svelte@5.0.8
++ @types/bun@1.4.0
++ @types/node@24.13.3
++ @typescript/native@7.0.2
++ svelte@5.56.10
++ svelte-check@4.7.6
++ typescript@6.0.3
++ vite@8.0.16
++ @dylanebert/shallot@vendor/shallot-0.10.0-5fa98bb.tgz
++ typegpu@0.12.4
++ unplugin-typegpu@0.12.3
+
+88 packages installed [163.00ms]

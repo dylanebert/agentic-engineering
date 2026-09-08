@@ -1,0 +1,18 @@
+{
+  "at": "2026-09-08T16:49:51.284Z",
+  "root": "/tmp/note-dogfood-PdqO1q/snapshots/stage-two",
+  "excludedSetupDirectories": [
+    "tools",
+    "config",
+    "records"
+  ],
+  "hashes": {
+    "index.html": "335536b20d1d8ea19a3915ae21351a02c36df288984172a634c456b885e6923b",
+    "README.md": "d39a3f75e3728da2ab02c0e68eaf9065da87cebce080a9c07e4bf08c6cfc5222",
+    "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b",
+    "SPEC.md": "1ad20d103fcdd36fcfa152fb4313bd19c96a07147c505f8ece14dd4468c6dc53",
+    "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+    "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+    "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+  }
+}

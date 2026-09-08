@@ -1,0 +1,21 @@
+{
+  "model": "openai/gpt-5.6-sol",
+  "seconds": 26.51,
+  "receipts": {
+    "detail.md": "65625fb5a68513231295da608d3837cc76dce55e7ac826e6df4e8f9b61f54c82",
+    "E1-review.sh": "02edf43d620f86cca0fa899c497d70b1924b290cbe94a920b40e1836569a8273",
+    "reading.md": "29b24dc9232b7d6683fea54ae3fc180d32ebc2e53b6b6017df6fcb0e942286d0",
+    "review-after-inventory.json": "538e43ca4979f3445bbb0aed4e0dde9bac84a6667e6d1c54412a2ac368912441",
+    "review-audit.json": "84b9e77736ee20565f29bd35fde475d93d62310e6d5163a1a2aacf5f3f0e4119",
+    "review-before-inventory.json": "e762448f2b540f21dbd6148033ebed61a379cbdaa2bfb8eb6f9ce49d4da0ddc8",
+    "review-end.txt": "c4497fba2d7c885bc7b07199847c79db62632e108f486c29a5fcb3f2c24b824a",
+    "review-events.jsonl": "e966510949f51ec0c43ba15dc59e8d80e995f3529403cb30ee03573cab6df480",
+    "review-prompt.txt": "a6e60f9126c0ca21f4ab321f17e1297e820b95aba24c38fca619f8c61b5668dd",
+    "review-response.md": "a5d3d04ab1f467f92a53097b3f7d73f9deb1b334ed8bc1d15e312a4a03da2ffd",
+    "review-start.txt": "85bd765891a73509760f54c1d9c379fa65ecec452cccd5c5774352aaf5ea2c46",
+    "review-stderr.log": "7fc4433fa70e4d82b380e1d77b60f5d46ba21b663b1647ef6a368fd1c8111eaf",
+    "review.exit": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "review.jsonl": "a5fafce486d1df09e86725bab47f4337109986bb4f829bcd71bc51df48e25383",
+    "SETUP.md": "a885d8e131ec017f18fce6d62eb597ff9d6e892f1387b3292c0e899c976387cf"
+  }
+}

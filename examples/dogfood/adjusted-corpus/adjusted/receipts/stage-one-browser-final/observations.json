@@ -1,0 +1,78 @@
+[
+  {
+    "at": "2026-09-08T17:31:23.398Z",
+    "event": "start",
+    "root": "/tmp/saved-note-support-wmwflV/snapshots/stage-one",
+    "command": [
+      "node",
+      "/tmp/saved-note-support-wmwflV/tools/node_modules/http-server/bin/http-server",
+      "/tmp/saved-note-support-wmwflV/snapshots/stage-one",
+      "-a",
+      "127.0.0.1",
+      "-p",
+      "8765",
+      "-c-1"
+    ],
+    "origin": "http://127.0.0.1:8765",
+    "stage": 1,
+    "hashes": {
+      "index.html": "4e38f0468e342b602ae04433abe031c501434900dee7b286ac049c338098a07e",
+      "SPEC.md": "b9f380f2b0928ea3c883132641ac7e1468bccf93bd4210362fcd98d78571f226",
+      "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+      "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+      "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+    },
+    "node": "v26.3.0",
+    "serverPid": 65852
+  },
+  {
+    "at": "2026-09-08T17:31:23.561Z",
+    "event": "browser",
+    "version": "151.0.7922.34",
+    "pid": 65854
+  },
+  {
+    "at": "2026-09-08T17:31:23.629Z",
+    "event": "assertion",
+    "id": "empty-start",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T17:31:23.653Z",
+    "event": "assertion",
+    "id": "multiline-edit",
+    "expected": "First line\nSecond line",
+    "actual": "First line\nSecond line",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T17:31:23.684Z",
+    "event": "assertion",
+    "id": "clear",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T17:31:23.709Z",
+    "event": "context-close"
+  },
+  {
+    "at": "2026-09-08T17:31:23.720Z",
+    "event": "browser-close"
+  },
+  {
+    "at": "2026-09-08T17:31:23.722Z",
+    "event": "server-close",
+    "code": 0,
+    "signal": null
+  },
+  {
+    "at": "2026-09-08T17:31:23.723Z",
+    "event": "end",
+    "outcome": "pass",
+    "unchanged": true
+  }
+]

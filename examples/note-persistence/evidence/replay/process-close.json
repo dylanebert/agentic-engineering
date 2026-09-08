@@ -1,0 +1,17 @@
+{
+  "at": "2026-09-08T20:49:40.337Z",
+  "browserPids": [
+    "70397",
+    "70641",
+    "71089",
+    "71226",
+    "71752",
+    "72171"
+  ],
+  "psExit": 1,
+  "ps": "  PID  PPID COMMAND\n",
+  "listenerExit": 1,
+  "listeners": "",
+  "allRecordedBrowserLogsHaveGracefulClose": true,
+  "allRecordedServerLogsHaveClose": true
+}

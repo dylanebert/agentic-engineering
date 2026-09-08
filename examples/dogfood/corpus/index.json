@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "taskAttempts": 1,
+  "recordings": [
+    {
+      "id": "qualification",
+      "session": "qualification/session.jsonl",
+      "events": "qualification/events.jsonl",
+      "exit": 0
+    },
+    {
+      "id": "pilot/spec",
+      "session": "pilot/spec/session.jsonl",
+      "events": "pilot/spec/events.jsonl",
+      "exit": 0
+    },
+    {
+      "id": "pilot/stage-one",
+      "session": "pilot/stage-one/session.jsonl",
+      "events": "pilot/stage-one/events.jsonl",
+      "exit": 0
+    },
+    {
+      "id": "pilot/stage-two",
+      "session": "pilot/stage-two/session.jsonl",
+      "events": "pilot/stage-two/events.jsonl",
+      "exit": 0
+    }
+  ],
+  "snapshots": [
+    {
+      "id": "initial",
+      "path": "initial",
+      "hashes": {
+        "README.md": "d39a3f75e3728da2ab02c0e68eaf9065da87cebce080a9c07e4bf08c6cfc5222",
+        "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "recording-input",
+      "path": "qualification/input",
+      "hashes": {
+        "prompt.txt": "e7084575860020711abbd35479b19f67c5998a20fb8df2b864428be2996253ec"
+      }
+    },
+    {
+      "id": "correct",
+      "path": "qualification/controls/correct",
+      "hashes": {
+        "index.html": "4e282a8084d184784810a4c983deae30fe46b35e9910efb92c16649955f27f10"
+      }
+    },
+    {
+      "id": "missing-save",
+      "path": "qualification/controls/missing-save",
+      "hashes": {
+        "index.html": "7277045c8ab9efa90288dcf08b2d9ff51cad4223b00abf63b59ae0a11e51d062"
+      }
+    },
+    {
+      "id": "missing-restore",
+      "path": "qualification/controls/missing-restore",
+      "hashes": {
+        "index.html": "833b7fa236a7a96692c835893e5c12587563f8339478f4cf522c5c4b8609ec56"
+      }
+    },
+    {
+      "id": "nonpersisted-clear",
+      "path": "qualification/controls/nonpersisted-clear",
+      "hashes": {
+        "index.html": "c48882317723b20685185346dd62e7c3f317d0746737f04501370ea33a0ddb5c"
+      }
+    },
+    {
+      "id": "pilot/before-spec",
+      "path": "pilot/snapshots/before-spec",
+      "hashes": {
+        "README.md": "d39a3f75e3728da2ab02c0e68eaf9065da87cebce080a9c07e4bf08c6cfc5222",
+        "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "pilot/after-spec",
+      "path": "pilot/snapshots/after-spec",
+      "hashes": {
+        "README.md": "d39a3f75e3728da2ab02c0e68eaf9065da87cebce080a9c07e4bf08c6cfc5222",
+        "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b",
+        "SPEC.md": "1ad20d103fcdd36fcfa152fb4313bd19c96a07147c505f8ece14dd4468c6dc53",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "pilot/stage-one",
+      "path": "pilot/snapshots/stage-one",
+      "hashes": {
+        "index.html": "aab420eedae9f12472fe6a2146133ab519ec5018fc86ba6b6e80d94946b6e6d2",
+        "README.md": "d39a3f75e3728da2ab02c0e68eaf9065da87cebce080a9c07e4bf08c6cfc5222",
+        "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b",
+        "SPEC.md": "1ad20d103fcdd36fcfa152fb4313bd19c96a07147c505f8ece14dd4468c6dc53",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "pilot/stage-two",
+      "path": "pilot/snapshots/stage-two",
+      "hashes": {
+        "index.html": "335536b20d1d8ea19a3915ae21351a02c36df288984172a634c456b885e6923b",
+        "README.md": "d39a3f75e3728da2ab02c0e68eaf9065da87cebce080a9c07e4bf08c6cfc5222",
+        "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b",
+        "SPEC.md": "1ad20d103fcdd36fcfa152fb4313bd19c96a07147c505f8ece14dd4468c6dc53",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    }
+  ]
+}

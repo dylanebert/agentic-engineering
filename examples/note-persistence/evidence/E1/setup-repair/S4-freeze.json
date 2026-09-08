@@ -1,0 +1,31 @@
+{
+  "at": "2026-09-08T20:29:41.011Z",
+  "condition": "extend-note",
+  "attempt": "E1",
+  "member": "9c1a7bff4ff72162aedd73e4ecf36957df349fae",
+  "starter": {
+    ".gitignore": "36d4d6f33a3ef86b6527552b92a2e9d8215ed6dcd7cbcb967efae5f38bb452a4",
+    "app/index.html": "4d876680b47f44e387f6b9e4c4e1cf054383c2c062210a77a29a4ac703b59131",
+    "bun.lock": "f78b15bde034841cbcf21d9057ceafbde6dac6282956a02cd96e3192b2cfe19f",
+    "package.json": "834ac7070bac7aace7f41a0787865fdcb483b4868144dc1a42ae9427acda3fd9",
+    "playwright.config.ts": "abd3cb0ada217b193422be62bf3571c0b32cb9b3cf32e14faa1d6dd31ffb56bf",
+    "REQUEST.md": "13e4a8266efdde35742c58426e69569165b3b95b916fb436fd9b9125199fc9a5"
+  },
+  "hashes": {
+    "support/spec-prompt.txt": "b0ac313d6562a5fea7a894dc08c080177d42e6c91311b07fe92351b916991f64",
+    "support/implementation-prompt.txt": "0fa944dd6a9729f22cbd06e08be82a8eaea4148a820b92ceea5caf68ce75b028",
+    "support/E1-spec.sh": "aa42b2c14abab66afc315fc49ae3fde30149d9c1ba265a9ea3ebe65d08399214",
+    "support/E1-implementation.sh": "a3655dcc185444be12fc2dca6d2e8aecab0ee02e88a20fbbcb6184dd93b4ba53",
+    "support/config/settings.json": "57eef616b0f96995f791facc47879e0f6349447ee98bae156f2e88e5de3a3a2e",
+    "acquired-starter/starter.tar.gz": "46de6791639f6893abd5898bb41a1cdde6e1fb78467d841ae0da48d2620b0928"
+  },
+  "budget": {
+    "seconds": 600,
+    "spent": 0,
+    "correctivePrompts": 2,
+    "humanRefinements": 1
+  },
+  "setupCanarySeconds": 4.39,
+  "context": "Only starter public files; fresh implementation additionally receives generated SPEC. No transcripts, editorial corpus, credential/config/support links in either task. Stock tools; cleared environment; ordinary shell is not containment.",
+  "qualification": "acquired-starter success=0/one pass; intentional failure=1/one fail; qualification occupied-port driver=0; stock recording two reads/one error/terminal agent_settled; clock helper repair separately recorded, no task sent."
+}

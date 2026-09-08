@@ -1,0 +1,138 @@
+{
+  "at": "2026-09-08T17:32:07.225Z",
+  "credentialsRemoved": true,
+  "processRecords": [
+    {
+      "source": "adjusted/receipts/stage-one-browser/observations.json",
+      "pid": 49101,
+      "alive": false
+    },
+    {
+      "source": "adjusted/receipts/stage-one-browser/observations.json",
+      "pid": 49104,
+      "alive": false
+    },
+    {
+      "source": "adjusted/receipts/stage-one-browser-final/observations.json",
+      "pid": 65852,
+      "alive": false
+    },
+    {
+      "source": "adjusted/receipts/stage-one-browser-final/observations.json",
+      "pid": 65854,
+      "alive": false
+    },
+    {
+      "source": "adjusted/receipts/stage-two-browser/observations.json",
+      "pid": 55595,
+      "alive": false
+    },
+    {
+      "source": "adjusted/receipts/stage-two-browser/observations.json",
+      "pid": 55603,
+      "alive": false
+    },
+    {
+      "source": "adjusted/receipts/stage-two-browser-final/observations.json",
+      "pid": 65867,
+      "alive": false
+    },
+    {
+      "source": "adjusted/receipts/stage-two-browser-final/observations.json",
+      "pid": 65884,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/broken-setup/observations.json",
+      "pid": 32567,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/correct/observations.json",
+      "pid": 32375,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/correct/observations.json",
+      "pid": 32376,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/missing-restore/observations.json",
+      "pid": 32511,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/missing-restore/observations.json",
+      "pid": 32512,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/missing-save/observations.json",
+      "pid": 32485,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/missing-save/observations.json",
+      "pid": 32486,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/nonpersisted-clear/observations.json",
+      "pid": 32531,
+      "alive": false
+    },
+    {
+      "source": "qualification/receipts/browser-controls/nonpersisted-clear/observations.json",
+      "pid": 32542,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-one-browser/observations.json",
+      "pid": 60806,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-one-browser/observations.json",
+      "pid": 60807,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-one-browser-final/observations.json",
+      "pid": 65922,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-one-browser-final/observations.json",
+      "pid": 65924,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-two-browser/observations.json",
+      "pid": 65754,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-two-browser/observations.json",
+      "pid": 65761,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-two-browser-final/observations.json",
+      "pid": 65956,
+      "alive": false
+    },
+    {
+      "source": "replay/receipts/stage-two-browser-final/observations.json",
+      "pid": 65958,
+      "alive": false
+    }
+  ],
+  "outsideScratch": {
+    "path": "/tmp/note-script.js",
+    "sha256": "91cc58767ed5a11cf95720cd34bf78c60a1f837faa9df5105f39ac7d451040f6",
+    "retained": "adjusted/receipts/subject-note-script.js",
+    "removed": false,
+    "reason": "Pre-existence not observed; do not claim absent-only ownership or delete unknown prior path."
+  }
+}

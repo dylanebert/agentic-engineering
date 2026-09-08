@@ -1,0 +1,7 @@
+{
+  "packages": [],
+  "compaction": { "enabled": false },
+  "retry": { "enabled": false, "provider": { "maxRetries": 0 } },
+  "enableInstallTelemetry": false,
+  "defaultProjectTrust": "never"
+}

@@ -1,0 +1,1 @@
+<!doctype html><meta charset="utf-8"><label>Note<textarea id="note"></textarea></label><button id="clear">Clear</button><script>const n=document.querySelector("textarea");n.value=localStorage.getItem("note")??"";n.addEventListener("input",()=>{});document.querySelector("button").onclick=()=>{n.value="";localStorage.setItem("note",n.value)};</script>

@@ -1,0 +1,55 @@
+{
+  "condition": "original",
+  "attempts": 1,
+  "correctiveFollowUps": 0,
+  "conversations": [
+    {
+      "id": "spec",
+      "requests": 6,
+      "tools": 8,
+      "toolErrors": 0,
+      "usage": {
+        "input": 22167,
+        "output": 1152,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 23319
+      },
+      "subjectWallSeconds": 15.15,
+      "exit": 0
+    },
+    {
+      "id": "stage-one",
+      "requests": 7,
+      "tools": 6,
+      "toolErrors": 0,
+      "usage": {
+        "input": 35763,
+        "output": 2041,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 37804
+      },
+      "subjectWallSeconds": 31.81,
+      "exit": 0
+    },
+    {
+      "id": "stage-two",
+      "requests": 7,
+      "tools": 12,
+      "toolErrors": 0,
+      "usage": {
+        "input": 34237,
+        "output": 3136,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 37373
+      },
+      "subjectWallSeconds": 37.07,
+      "exit": 0
+    }
+  ],
+  "subjectWallSeconds": 84.03,
+  "billingCost": "unknown: gateway metadata has zero-valued unpriced rates",
+  "publicProviderParity": "unverified"
+}

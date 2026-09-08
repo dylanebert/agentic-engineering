@@ -1,0 +1,4 @@
+[
+  {"file":"adjusted-corpus/replay/stage-two/session.jsonl","entry":"d098c486","text":"My test harness had a bug (called `note.listeners.click` instead of `clear.listeners.click`). Let me fix the test:"},
+  {"file":"adjusted-corpus/replay/stage-two/session.jsonl","entry":"d2d1ddb8","text":"All six assertions passed."}
+]

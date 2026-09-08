@@ -1,0 +1,158 @@
+{
+  "summary": {
+    "requests": 4,
+    "tools": 14,
+    "toolErrors": 0,
+    "usage": {
+      "input": 818,
+      "output": 1104,
+      "cacheRead": 9486,
+      "cacheWrite": 11665,
+      "totalTokens": 23073
+    }
+  },
+  "unchangedCorpus": true,
+  "files": 131,
+  "calls": [
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_Xqbiyu7YX09Uiu8Xpv6Uozpo|fc_06c0d555900f0e2c016aa072dd70a487d28c120c409455259d",
+      "toolName": "read",
+      "args": {
+        "path": "reading.md",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_TiNmUyfXjYFGu1aL9cLMmtGr|fc_06c0d555900f0e2c016aa072dd70b887d281f0f9d6d078ca6a",
+      "toolName": "read",
+      "args": {
+        "path": "detail.md",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_YU0wAJaiaUpMpEb6owFaeb0H|fc_06c0d555900f0e2c016aa072e0f63887d2b45532bf5d97d53f",
+      "toolName": "read",
+      "args": {
+        "path": "starter/REQUEST.md",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_MF21s7cw8EArFGasDLzdyk8e|fc_06c0d555900f0e2c016aa072e0f65487d2881f6b59d57df43c",
+      "toolName": "read",
+      "args": {
+        "path": "starter/app/index.html",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_eXNCnk3K9df1ASp5o0HPABzy|fc_06c0d555900f0e2c016aa072e0f66087d291d76f84e4070d0a",
+      "toolName": "read",
+      "args": {
+        "path": "final/SPEC.md",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_NETdcSFW4C64Y3DLksOtvLNp|fc_06c0d555900f0e2c016aa072e0f66887d287beea63704e0cc8",
+      "toolName": "read",
+      "args": {
+        "path": "final/app/index.html",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_ETEVN1jtFAuYfMWYdC2fp0XA|fc_06c0d555900f0e2c016aa072e0f67087d28e377dd0188076f1",
+      "toolName": "read",
+      "args": {
+        "path": "final/tests/note.spec.ts",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_vJNoINnt9ZME0njcivqDyzrS|fc_06c0d555900f0e2c016aa072e0f67c87d2bf57a83bc332caaa",
+      "toolName": "read",
+      "args": {
+        "path": "final/RESULT.md",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_tR0pjZtR50buDF6BXjdRrcOd|fc_06c0d555900f0e2c016aa072e0f68487d2a645c9f29c810b7e",
+      "toolName": "read",
+      "args": {
+        "path": "starter/playwright.config.ts",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_U46hvYGE1Sht00uZ0pBuLKyc|fc_06c0d555900f0e2c016aa072ed294087d2a7639f6253b64e4e",
+      "toolName": "read",
+      "args": {
+        "path": "evidence/E1/task/receipts/starter-red-results/playwright.json",
+        "offset": 1,
+        "limit": 120
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_QeB7IlVgTgu97c6NX0Mxsfl9|fc_06c0d555900f0e2c016aa072ed295487d2a4abbb6f8055cf83",
+      "toolName": "read",
+      "args": {
+        "path": "evidence/E1/task/receipts/good-run-1-results/playwright.json",
+        "offset": 1,
+        "limit": 100
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_TbCqEtiXRqGdypAo60gKXTDK|fc_06c0d555900f0e2c016aa072ed297c87d2afb43a0816794095",
+      "toolName": "read",
+      "args": {
+        "path": "evidence/E1/task/receipts/good-run-2-results/playwright.json",
+        "offset": 1,
+        "limit": 100
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_nLqA4oyHLY5WI66pG44Dc8Lw|fc_06c0d555900f0e2c016aa072ed299887d2b548faec4e8c8499",
+      "toolName": "read",
+      "args": {
+        "path": "evidence/E1/task/regression/receipts/regression-results/playwright.json",
+        "offset": 1,
+        "limit": 140
+      }
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_li2Ej0cIf9TwsZktfzO91pum|fc_06c0d555900f0e2c016aa072ed29bc87d287653816b5daac11",
+      "toolName": "read",
+      "args": {
+        "path": "evidence/E1/task/receipts/good-final-results/playwright.json",
+        "offset": 1,
+        "limit": 100
+      }
+    }
+  ]
+}

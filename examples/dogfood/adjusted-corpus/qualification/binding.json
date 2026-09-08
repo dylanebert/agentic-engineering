@@ -1,0 +1,36 @@
+{
+  "label": "qualification",
+  "app": "/tmp/saved-note-app-hwFYAU",
+  "support": "/tmp/saved-note-support-fwQW4L",
+  "kit": "/Users/dylan.ebert/kex-wt/kex-agentic-engineering-dogfood-pilot/projects/agentic-engineering/examples/dogfood/adjusted-reader",
+  "started": "2026-09-08T17:22:25.864Z",
+  "ended": "2026-09-08T17:22:28.005Z",
+  "installExit": 0,
+  "versionExit": 0,
+  "version": "0.85.1",
+  "node": "v26.3.0",
+  "bun": "1.4.0",
+  "initial": {
+    "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+    "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+    "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+  },
+  "kitHashes": {
+    "app/stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+    "app/stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+    "app/task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863",
+    "README.md": "11f441c1e5a5a4e6fd65ff67efb5011410da5e479af65c45ab91d3a5191549e2",
+    "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b"
+  },
+  "model": "ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731",
+  "effort": "max",
+  "directAccess": {
+    "environment": false,
+    "authEntry": false,
+    "customProvider": false,
+    "publicParity": "unverified"
+  },
+  "credentialPreparation": "Existing gateway provider/model only; existing credential command resolved privately; interpolated attribution headers replaced with nonsecret label. No raw config retained publicly.",
+  "server": "/tmp/saved-note-support-fwQW4L/tools/node_modules/http-server/bin/http-server",
+  "pi": "/tmp/saved-note-support-fwQW4L/tools/node_modules/@earendil-works/pi-coding-agent/dist/cli.js"
+}

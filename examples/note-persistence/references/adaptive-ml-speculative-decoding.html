@@ -1,0 +1,68 @@
+<!-- capture: adaptive-ml/blog-assets speculative-decoding/inline.html @ 5d62db7 — iframe=4 (one per demo), canvas=0, figcaption=0; colors from assets/colors-CJQja38C.css -->
+<script type="module" crossorigin src="https://adaptive-ml.github.io/blog-assets/speculative-decoding/assets/modulepreload-polyfill-B5Qt9EMX.js"></script>
+<script type="module" crossorigin src="https://adaptive-ml.github.io/blog-assets/speculative-decoding/assets/main-BrUrH6Hs.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+<link rel="stylesheet" crossorigin href="https://adaptive-ml.github.io/blog-assets/speculative-decoding/assets/main-CNwqprpz.css">
+<div class="blog-content">
+<h1>Speculative Decoding, Visualized</h1>
+
+<p>Large language models generate text one token at a time. Each token requires a full forward pass through billions of parameters. Speculative decoding makes this faster by using a small <span class="term-draft-model">draft model</span> to propose tokens, then verifying them all at once with the large <span class="term-target-model">target model</span>.</p>
+
+<div class="demo-wrapper">
+  <iframe src="https://adaptive-ml.github.io/blog-assets/speculative-decoding/demos/overview.html" class="demo-frame"></iframe>
+</div>
+
+<h2>Why Generation Is Slow</h2>
+
+<p>You can't predict token 5 without first knowing token 4. The process is inherently sequential. A 70-billion parameter model that takes 50ms per token needs 5 full seconds to generate 100 tokens, waiting for each step to complete before starting the next.</p>
+
+<p>But here's the asymmetry that makes speculative decoding possible: <em>verifying</em> N tokens takes one forward pass, while <em>generating</em> N tokens takes N forward passes. A language model can score an entire sequence in parallel, computing the probability distribution at every position simultaneously. If we could guess the next several tokens correctly, we could verify all of them in a single pass rather than generating them one by one.</p>
+
+<h2>How It Works</h2>
+
+<p>The algorithm follows a draft-then-verify loop:</p>
+
+<ol>
+  <li>Generate K draft tokens using the <span class="term-draft-model">draft model</span></li>
+  <li>Verify all K tokens in one <span class="term-target-model">target model</span> forward pass</li>
+  <li><span class="term-accept">Accept</span> tokens until a mismatch, then <span class="term-residual">resample</span> and discard the rest</li>
+</ol>
+
+<p>In the best case, all K tokens are accepted, plus a <span style="color: #c084fc">bonus</span> token sampled by the target model. That's K+1 tokens from a single pass. Even when some are rejected, you're guaranteed at least one token of progress.</p>
+
+<p>The <span class="term-draft-model">draft model</span> proposes several tokens. The <span class="term-target-model">target model</span> scores them all in one forward pass, then we check each position in order. When a token is <span class="term-reject">rejected</span>, we <span class="term-residual">resample</span> a replacement and discard the remaining drafts.</p>
+
+<div class="demo-wrapper">
+  <iframe src="https://adaptive-ml.github.io/blog-assets/speculative-decoding/demos/step-by-step.html" class="demo-frame"></iframe>
+</div>
+
+<a
+  class="newsletter-cta ml-onclick-form"
+  href="javascript:void(0)"
+  onclick="ml('show', 'Kponfi', true)"
+>
+  Want more visual explanations like this? <span>Subscribe to our newsletter</span>
+</a>
+
+
+<!-- semantic color roles, speculative-decoding/assets/colors-CJQja38C.css: -->
+--color-draft-input-text: #6a9092
+--color-draft-input: #8ebfc1
+--color-draft-model: #b8864a
+--color-draft-output-text: #5a9580
+--color-draft-output: #7dc4ab
+--color-input-text: #4a7072
+--color-input: #6b9ea0
+--color-line-active: #4b5563
+--color-line: #6b7280
+--color-output-text: #3d7560
+--color-output: #5aaa8f
+--color-residual-text: #634278
+--color-residual: #7c5295
+--color-surface-alt: #f8f9fa
+--color-surface: #ffffff
+--color-target-model: #2a4a6d
+--color-text-muted: #6c757d
+--color-text: #212529
+--color-validation-text: #a63d3d
+--color-validation: #c94a4a

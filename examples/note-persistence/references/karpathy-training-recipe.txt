@@ -1,0 +1,27 @@
+A Recipe for Training Neural Networks — prose-channel capture
+
+Source: https://github.com/karpathy/karpathy.github.io/blob/717b06d57b7834e27ca4bd55bda0a79d16dddeca/_posts/2019-04-25-recipe.markdown
+Pin: karpathy/karpathy.github.io @ 717b06d57b7834e27ca4bd55bda0a79d16dddeca
+Selected by Dylan Ebert: 2026-09-03
+Channel: prose
+
+Representative structure and short excerpts:
+
+- “Neural net training is a leaky abstraction”
+- “Neural net training fails silently”
+- “The recipe” — builds from simple to complex
+- “Become one with the data” — begin by thoroughly inspecting the data
+- “Set up the end-to-end training/evaluation skeleton + get dumb baselines” — gain trust in correctness
+- “Overfit”
+- “Regularize”
+- “Tune”
+- “Squeeze out the juice”
+
+Selected observables:
+
+- Failure modes establish the need before the procedure begins.
+- Short imperative section titles keep a long technical sequence moving.
+- The article advances from inspection and baselines through overfitting, regularization, tuning, and final refinements.
+- Caveats attach to concrete checks rather than floating as general warnings.
+
+Not selected as current training guidance; the reference is its prose structure and operational sequencing.

@@ -1,0 +1,13 @@
+bun add v1.4.0 (34cbb9a40)
+Resolving dependencies
+Resolved, downloaded and extracted [200]
+Saved lockfile
+
+installed @earendil-works/pi-coding-agent@0.85.1 with binaries:
+ - pi
+installed http-server@14.1.1 with binaries:
+ - http-server
+
+172 packages installed [1055.00ms]
+
+Blocked 2 postinstalls. Run `bun pm untrusted` for details.
