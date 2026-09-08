@@ -1,0 +1,106 @@
+[
+  {
+    "at": "2026-09-08T16:52:33.220Z",
+    "event": "start",
+    "root": "/tmp/note-dogfood-PdqO1q/controls/correct",
+    "command": [
+      "node",
+      "/tmp/note-dogfood-PdqO1q/pilot/tools/node_modules/http-server/bin/http-server",
+      "/tmp/note-dogfood-PdqO1q/controls/correct",
+      "-a",
+      "127.0.0.1",
+      "-p",
+      "8765",
+      "-c-1"
+    ],
+    "origin": "http://127.0.0.1:8765",
+    "stage": 2,
+    "hashes": {
+      "index.html": "4e282a8084d184784810a4c983deae30fe46b35e9910efb92c16649955f27f10"
+    },
+    "node": "v26.3.0",
+    "serverPid": 3343
+  },
+  {
+    "at": "2026-09-08T16:52:33.528Z",
+    "event": "browser",
+    "version": "151.0.7922.34",
+    "pid": 3370
+  },
+  {
+    "at": "2026-09-08T16:52:33.592Z",
+    "event": "assertion",
+    "id": "empty-start",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:33.615Z",
+    "event": "assertion",
+    "id": "multiline-edit",
+    "expected": "First line\nSecond line",
+    "actual": "First line\nSecond line",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:33.645Z",
+    "event": "assertion",
+    "id": "clear",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:33.682Z",
+    "event": "assertion",
+    "id": "saved-reload",
+    "expected": "Saved line\nKeep this",
+    "actual": "Saved line\nKeep this",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:33.711Z",
+    "event": "assertion",
+    "id": "edited-reload",
+    "expected": "Edited note",
+    "actual": "Edited note",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:33.745Z",
+    "event": "assertion",
+    "id": "clear-before-reload",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:33.766Z",
+    "event": "assertion",
+    "id": "empty-reload",
+    "expected": "",
+    "actual": "",
+    "outcome": "pass"
+  },
+  {
+    "at": "2026-09-08T16:52:33.782Z",
+    "event": "context-close"
+  },
+  {
+    "at": "2026-09-08T16:52:33.797Z",
+    "event": "browser-close"
+  },
+  {
+    "at": "2026-09-08T16:52:33.800Z",
+    "event": "server-close",
+    "code": 0,
+    "signal": null
+  },
+  {
+    "at": "2026-09-08T16:52:33.800Z",
+    "event": "end",
+    "outcome": "pass",
+    "unchanged": true
+  }
+]

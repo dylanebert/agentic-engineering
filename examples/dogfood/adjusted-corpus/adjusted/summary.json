@@ -1,0 +1,60 @@
+{
+  "id": "adjusted",
+  "attempt": 2,
+  "condition": "separated-app-runtime",
+  "conversations": [
+    {
+      "id": "spec",
+      "requests": 4,
+      "tools": 4,
+      "toolErrors": 0,
+      "usage": {
+        "input": 9658,
+        "output": 1075,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 10733
+      },
+      "reportedReasoning": 265,
+      "subjectWallSeconds": 54.05,
+      "exit": 0
+    },
+    {
+      "id": "stage-one",
+      "requests": 8,
+      "tools": 7,
+      "toolErrors": 2,
+      "usage": {
+        "input": 27604,
+        "output": 2164,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 29768
+      },
+      "reportedReasoning": 381,
+      "subjectWallSeconds": 88.47,
+      "exit": 0
+    },
+    {
+      "id": "stage-two",
+      "requests": 8,
+      "tools": 8,
+      "toolErrors": 1,
+      "usage": {
+        "input": 39501,
+        "output": 4626,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 44127
+      },
+      "reportedReasoning": 1713,
+      "subjectWallSeconds": 62.86,
+      "exit": 0
+    }
+  ],
+  "correctiveFollowUps": 0,
+  "subjectWallSeconds": 205.38,
+  "billing": "unknown",
+  "publicProviderParity": "unverified",
+  "contextAudit": "No recorded prior-context/solution access. Work-only-in-folder violated by own extracted /tmp/note-script.js; bytes exactly own script. No strict folder compliance claim."
+}

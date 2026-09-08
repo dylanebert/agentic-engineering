@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>One Note</title>
+</head>
+<body>
+  <h1>Note</h1>
+  <textarea id="note" rows="10" cols="60" placeholder="Write your note here..."></textarea>
+  <br>
+  <button id="clear" type="button">Clear</button>
+
+  <script>
+    const note = document.getElementById("note");
+    const clear = document.getElementById("clear");
+
+    clear.addEventListener("click", () => {
+      note.value = "";
+      note.focus();
+    });
+  </script>
+</body>
+</html>

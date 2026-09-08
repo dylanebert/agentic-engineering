@@ -1,0 +1,5 @@
+I want a plain browser page with one editable note and a Clear button.
+First write a short spec in SPEC.md. Do not implement yet.
+Split the work into two stages: first make editing and clearing work; then preserve the current text, including an empty note, across a reload in the same browser at the same address.
+Include how a person can check each stage in a browser. Keep it small: no accounts, server-side data, sync, framework, deployment, or styling brief.
+Work only in this folder. Do not read other projects, prior conversations, credentials, or outside solutions. Do not start servers or browsers; a person will run the browser checks between stages.

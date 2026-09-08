@@ -1,0 +1,100 @@
+[
+  {
+    "path": "qualification/canary/session.jsonl",
+    "rawSha256": "8f1bad3f3f4fce5635d6aa9a7ca001c8ee851e0ec2a2fc174a6eceef26c1116a",
+    "sha256": "e7d7c005b606cb20f6bf6ea97800f5b583c85b51f814aaad521762ec2dde8be1",
+    "removedResponseIds": 2,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "qualification/canary/events.jsonl",
+    "rawSha256": "91d366a80325f5d2a156abfc329eab83b1b0eec4c17cade899436a92ed14825b",
+    "sha256": "a2c3509165cb489bede21470df149086e4140112a2463afb4bfe613a0260fe25",
+    "removedResponseIds": 8,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "adjusted/spec/session.jsonl",
+    "rawSha256": "28aa401334342730db673cf87cc72fd4e743047aac231f4e78d26eff7a8fe4f9",
+    "sha256": "9608dd1737e8d73013d3d440006e7687b8280b9e305c3a7c590b1e7a33cd67fa",
+    "removedResponseIds": 4,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "adjusted/spec/events.jsonl",
+    "rawSha256": "c42df536c53a3bea9f2ddd55053c1b8230508cac65b40f282c5fc710e3e705b7",
+    "sha256": "349b38c68c0efd343911f3e13377325135490a975a9a15e51ba854691396b703",
+    "removedResponseIds": 16,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "adjusted/stage-one/session.jsonl",
+    "rawSha256": "91ed105b42548e005ade1b47a38fd7b27d1f3c9bbd842920684bb0069896d58c",
+    "sha256": "4623f6eda9186616a861730b6e1b7083354245b6dde788a3bf81ee9c1544f04d",
+    "removedResponseIds": 8,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "adjusted/stage-one/events.jsonl",
+    "rawSha256": "01c6a9b14c515411f3e55844a9f2c5e81d9542b0451b2ee18a55725542ddb1ce",
+    "sha256": "66793b8c4dad10113ae2b7e98e5f01cf57d52233dfeaed2d34b258ee946b2b07",
+    "removedResponseIds": 31,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "adjusted/stage-two/session.jsonl",
+    "rawSha256": "05f039b57a59443173ef175fd6b63e1e5e949b694095f076e37b5750815eab6a",
+    "sha256": "ac6e3e7b971a4c7898cd807e13077dade5542987c832bf4d1a760269e04c0a1b",
+    "removedResponseIds": 8,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "adjusted/stage-two/events.jsonl",
+    "rawSha256": "7cb2e1df751e93a36ef93e2763d56649cf1c9cede0b23407ebb4e11c8e23d524",
+    "sha256": "97d8197398dfab3c9f1e590fc4846f71593657286cbd13d600e01c24d7f90a2c",
+    "removedResponseIds": 32,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "replay/spec/session.jsonl",
+    "rawSha256": "3e7a92b787ef4054fa0776917cbf0e90da74069d4a8c24ca7e5bdd7cd55b16b6",
+    "sha256": "31ab2f694fcd7993bc80340d3282dec9f81da9c7f5521e55f2fa922b2f5de1c3",
+    "removedResponseIds": 4,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "replay/spec/events.jsonl",
+    "rawSha256": "87a0e77f36881ad878ec6bfa7c17820e67ea3cfb456d898819eecbf261428ca8",
+    "sha256": "dc71009f7a0a885b1a2813dc549480692467caad2aa77452b15461633d459dac",
+    "removedResponseIds": 14,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "replay/stage-one/session.jsonl",
+    "rawSha256": "8b70ddb54035b208c48041ae2863fa006a2937f38b416ae83f5602c2d8016e41",
+    "sha256": "d1e964bda9327b2736b36d567addad4c1b7c8a032a5f96a75c081495b972b37a",
+    "removedResponseIds": 7,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "replay/stage-one/events.jsonl",
+    "rawSha256": "6397c1be5d8915f32bdd96a3253fe9bc956ab23de7ca284e4ee21202bb45c7d2",
+    "sha256": "fc6ccfd831e608847700060b7c4b243e45bde110b3e459be475e9253ff0c55b8",
+    "removedResponseIds": 28,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "replay/stage-two/session.jsonl",
+    "rawSha256": "60cc026431ad4bd41e54d1f51705f38627d748e0980352fcb6ae27fb58cdb4b9",
+    "sha256": "a976d8ed7ab917790b3dface11318552672a15a319f76b67fa618eff5bdc3cb5",
+    "removedResponseIds": 7,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  },
+  {
+    "path": "replay/stage-two/events.jsonl",
+    "rawSha256": "dc2e5bca2e4b355a74e5b89513710cfa5311361c1194198f52069e19fd704287",
+    "sha256": "66b1bdd3266226d5f319d085278f0a5058e3d61ff394fd710d28197ea9faaae8",
+    "removedResponseIds": 28,
+    "reason": "Provider request/account identifiers only. Tool IDs, messages, arguments, errors, usage unchanged."
+  }
+]

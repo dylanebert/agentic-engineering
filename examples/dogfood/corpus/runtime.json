@@ -1,0 +1,41 @@
+{
+  "condition": "pilot-original",
+  "runtime": "Pi 0.85.1 installed in clean reader copy",
+  "node": "26.7.0",
+  "bun": "1.4.0",
+  "browser": "Chromium 151.0.7922.34",
+  "provider": "ai-gw-baseten",
+  "model": "baseten/deepseek-ai/DeepSeek-V4-Flash-0731",
+  "effort": "max",
+  "api": "openai-completions",
+  "compat": { "thinkingFormat": "deepseek" },
+  "modelContextWindow": 1048576,
+  "modelMaxTokens": 262144,
+  "modelThinkingLevelMap": { "off": "none", "minimal": null, "low": "low", "medium": null, "high": "high", "xhigh": null, "max": "max" },
+  "priceSource": "Local custom-provider declaration, inspected 2026-09-08. No cost field; Pi defaults to zero-valued metadata, which is unpriced rather than free.",
+  "billingCost": "unknown",
+  "publicProviderAccess": "not observed: no authorized direct DeepSeek credential present in environment or Pi auth file",
+  "shellEnvironment": {
+    "HOME": "/tmp/note-dogfood-PdqO1q/home",
+    "PATH": "/tmp/note-dogfood-PdqO1q/pilot/tools/node_modules/.bin:/opt/homebrew/bin:/usr/bin:/bin",
+    "PI_CODING_AGENT_DIR": "/tmp/note-dogfood-PdqO1q/pilot/config",
+    "PI_OFFLINE": "1",
+    "PI_TELEMETRY": "0",
+    "otherInheritedVariables": "none (env -i); stock Pi adds its session metadata to shell tools"
+  },
+  "cwd": "/tmp/note-dogfood-PdqO1q/pilot",
+  "resolvedCwd": "/private/tmp/note-dogfood-PdqO1q/pilot",
+  "argvTemplate": ["pi", "--no-approve", "--no-extensions", "--no-skills", "--no-prompt-templates", "--no-themes", "--no-context-files", "--tools", "read,bash,edit,write", "--model", "ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731", "--thinking", "max", "--session-dir", "/tmp/note-dogfood-PdqO1q/pilot/records/STAGE", "--mode", "json", "-p", "@PROMPT"],
+  "conversations": [
+    { "stage": "spec", "prompt": "task.txt", "capSeconds": 600 },
+    { "stage": "stage-one", "prompt": "stage-one.txt", "capSeconds": 584 },
+    { "stage": "stage-two", "prompt": "stage-two.txt", "capSeconds": 553 }
+  ],
+  "processWrapper": "/usr/bin/time -p gtimeout -k 5 CAP env -i DECLARED_ENV PI_ARGV; stdout, stderr, exit, UTC start and end saved separately",
+  "systemPrompt": "Unmodified stock Pi prompt; no SYSTEM.md, append prompt, context files or extensions supplied. Persistent stock sessions do not contain a wire-level system-prompt dump.",
+  "privateConfiguration": "Only selected gateway provider/model copied; credential command resolved locally before launch. Endpoint, resolved credential, organization/user/header values are not public artifacts. These settings are not reader prerequisites.",
+  "containment": "Not an OS sandbox. Stage two accessed transcript bytes with wc -l; only names/counts were returned. See pilot/session records and public README.",
+  "server": "http-server 14.1.1, loopback 127.0.0.1:8765, cache disabled; never file: storage",
+  "observerPreparation": "Coordinator-authored explicit reader prompts/manual checks, stock-runtime setup, separate recording canary and browser controls. No subject solution or spec supplied.",
+  "finalObserverRepair": "Nested finally blocks strengthened after pilot; original receipts retained, controls and both untouched subject snapshots rechecked under corpus/rechecks. Not a new task attempt."
+}

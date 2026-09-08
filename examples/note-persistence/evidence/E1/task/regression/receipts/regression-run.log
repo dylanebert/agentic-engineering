@@ -1,0 +1,102 @@
+2026-09-08T20:35:14.573Z pw:webserver HTTP GET: http://127.0.0.1:18765/
+2026-09-08T20:35:14.578Z pw:webserver Error while checking if http://127.0.0.1:18765/ is available: connect ECONNREFUSED 127.0.0.1:18765
+2026-09-08T20:35:14.578Z pw:webserver Starting WebServer process node node_modules/http-server/bin/http-server app -a 127.0.0.1 -p 18765 -c-1...
+2026-09-08T20:35:14.579Z pw:webserver Process started
+2026-09-08T20:35:14.579Z pw:webserver Waiting for availability...
+2026-09-08T20:35:14.579Z pw:webserver HTTP GET: http://127.0.0.1:18765/
+2026-09-08T20:35:14.580Z pw:webserver Error while checking if http://127.0.0.1:18765/ is available: connect ECONNREFUSED 127.0.0.1:18765
+2026-09-08T20:35:14.580Z pw:webserver Waiting 100ms
+[WebServer] Starting up http-server, serving app
+[WebServer] 
+[WebServer] http-server version: 14.1.1
+[WebServer] 
+[WebServer] http-server settings: 
+[WebServer] CORS: disabled
+[WebServer] Cache: -1 seconds
+[WebServer] Connection Timeout: 120 seconds
+[WebServer] Directory Listings: visible
+[WebServer] AutoIndex: visible
+[WebServer] Serve GZIP Files: false
+[WebServer] Serve Brotli Files: false
+[WebServer] Default File Extension: none
+[WebServer] 
+[WebServer] Available on:
+[WebServer]   http://127.0.0.1:18765
+[WebServer] Hit CTRL-C to stop the server
+[WebServer] 
+2026-09-08T20:35:14.682Z pw:webserver HTTP GET: http://127.0.0.1:18765/
+[WebServer] [2026-09-08T20:35:14.684Z]  "GET /" "undefined"
+2026-09-08T20:35:14.687Z pw:webserver HTTP Status: 200
+2026-09-08T20:35:14.688Z pw:webserver WebServer available
+
+Running 4 tests using 1 worker
+
+2026-09-08T20:35:14.892Z pw:browser <launching> /tmp/agentic-engineering-dogfood-loop-20260908-2012/acquired-starter/browsers/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/agentic-engineering-dogfood-loop-20260908-2012/support/tmp/playwright_chromiumdev_profile-MROZL1 --remote-debugging-pipe --no-startup-window
+2026-09-08T20:35:14.895Z pw:browser <launched> pid=71752
+[WebServer] [2026-09-08T20:35:15.004Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:15.018Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+  ✓  1 tests/note.spec.ts:10:1 › fresh context has one empty textbox and one Clear button (93ms)
+[WebServer] [2026-09-08T20:35:15.096Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:15.107Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+  ✓  2 tests/note.spec.ts:17:1 › multiline editing and Clear work (105ms)
+[WebServer] [2026-09-08T20:35:15.204Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:15.216Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:15.232Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:15.247Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+  ✓  3 tests/note.spec.ts:26:1 › text survives reload and replacement survives reload (101ms)
+[WebServer] [2026-09-08T20:35:15.310Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:15.321Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:15.354Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+2026-09-08T20:35:18.392Z pw:browser [pid=71752] <gracefully close start>
+2026-09-08T20:35:18.402Z pw:browser [pid=71752] <process did exit: exitCode=0, signal=null>
+2026-09-08T20:35:18.402Z pw:browser [pid=71752] starting temporary directories cleanup
+2026-09-08T20:35:18.404Z pw:browser [pid=71752] finished temporary directories cleanup
+2026-09-08T20:35:18.404Z pw:browser [pid=71752] <gracefully close end>
+  ✘  4 tests/note.spec.ts:37:1 › Clear survives reload and another Clear/reload remains empty (3.1s)
+2026-09-08T20:35:18.419Z pw:webserver Terminating the WebServer
+[WebServer] http-server stopped.
+2026-09-08T20:35:18.421Z pw:webserver Terminated the WebServer
+
+
+  1) tests/note.spec.ts:37:1 › Clear survives reload and another Clear/reload remains empty ────────
+
+    Error: expect(locator).toHaveValue(expected) failed
+
+    Locator:  locator('textarea#note')
+    Expected: ""
+    Received: "to be cleared"
+    Timeout:  3000ms
+
+    Call log:
+      - Expect "toHaveValue" with timeout 3000ms
+      - waiting for locator('textarea#note')
+        10 × locator resolved to <textarea rows="8" id="note" cols="40"></textarea>
+           - unexpected value "to be cleared"
+
+
+      41 |   await page.getByRole('button', { name: 'Clear' }).click();
+      42 |   await page.reload();
+    > 43 |   await expect(note).toHaveValue('');
+         |                      ^
+      44 |   await page.getByRole('button', { name: 'Clear' }).click();
+      45 |   await page.reload();
+      46 |   await expect(note).toHaveValue('');
+        at /private/tmp/agentic-engineering-dogfood-loop-20260908-2012/E1-implementation/starter/regression/tests/note.spec.ts:43:22
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/trace.zip
+    Usage:
+
+        npx playwright show-trace results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests/note.spec.ts:37:1 › Clear survives reload and another Clear/reload remains empty ─────────
+  3 passed (3.8s)

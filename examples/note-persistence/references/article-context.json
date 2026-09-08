@@ -1,0 +1,35 @@
+{
+  "selectedBy": "Dylan, 2026-09-08 revision feedback",
+  "sourceRef": "fe0b070e3a5bd1c22f0d645023550246c7cb9fe6",
+  "files": {
+    "src/App.svelte": "e6159cdac5a28a260ad32ad6802d74444c35eb9ca6cea3124368b89483686db6",
+    "src/lib/figures.ts": "b9bbf42b6b58e54eb64c0f32028a4b2e90f243671455132aacdd2dd4402dc003"
+  },
+  "paragraphs": [
+    {
+      "id": "verifiability",
+      "sourceBytes": "<h3>1. verifiability</h3>\n      <p>\n        An agent wrote some code. But does it work? Is it fast? Is it secure? Does it do what you\n        want it to do? That's <span class=\"term\" data-role=\"verify\">verifiability</span>, and it's\n        the hard part.\n      </p>\n    </section>",
+      "revisionUse": "Start from losing the note, not the run ledger; name the verification concept after the need."
+    },
+    {
+      "id": "context-engineering",
+      "sourceBytes": "<h3>2. context engineering</h3>\n      <p>\n        Give an agent just enough <span class=\"term\" data-role=\"context\">context</span> to complete\n        a task, and no more. Break the work into stages, and give each stage its own conversation.\n      </p>\n    </section>",
+      "revisionUse": "Give the spec and fresh conversation one paragraph each; carry requirements through runnable tests."
+    },
+    {
+      "id": "loop",
+      "sourceBytes": "<section class=\"section\" id=\"loop\">\n    <h2>the loop</h2>\n    <p>\n      Let's put these principles together. Suppose we want an agent to make a todo list app. In the\n      first conversation, implement nothing. Instead, tell the agent to write a\n      <span class=\"term\" data-role=\"context\">spec</span>: a file describing the work that needs to\n      be done, broken into stages.\n    </p>\n    <p>\n      Then <span class=\"term\" data-role=\"agentic\">implement</span> one stage in a fresh\n      conversation, and <span class=\"term\" data-role=\"verify\">verify</span> it before the next\n      conversation opens. Repeat: implement the next stage, verify again, until the spec is done.\n    </p>\n\n    <StageLoop />\n    <p>\n      The spec holds context across conversations, while each conversation is small and focused.\n      The crux of this loop is verification.\n    </p>\n  </section>",
+      "revisionUse": "Follow spec then implement/verify; the StageLoop follows its explanatory claim rather than receiving a narrated play-by-play."
+    },
+    {
+      "id": "verification",
+      "sourceBytes": "<section class=\"section\" id=\"verification\">\n    <h2>how do you verify?</h2>\n    <p>\n      An agent implemented a stage, but how do you trust what it implemented? The answer is\n      verification, and there are three types:\n    </p>\n    <ol class=\"kinds\">\n      <li>\n        <strong>Human verification.</strong> Reading the code. This is the highest ceiling, but\n        also slow and expensive.\n      </li>\n      <li>\n        <strong>Machine verification.</strong> Code verifying code, e.g. test suites. This is fast\n        and efficient, but relies on correct assumptions.\n      </li>\n      <li>\n        <strong>Agent verification.</strong> Tell another agent: \"this code is wrong. explain why.\"\n      </li>\n    </ol>\n    <p>\n      Exactly how and when to use each isn't a recipe, but a whole domain. That's\n      <span class=\"term\" data-role=\"agentic\">agentic engineering</span>.\n    </p>\n  </section>",
+      "revisionUse": "Earn machine, agent and human verification through different jobs in the note example."
+    }
+  ],
+  "visualBeat": {
+    "site": "loop, paragraph 1",
+    "claim": "Repeat: implement the next stage, verify again, until the spec is done.",
+    "use": "Prose explains why to run checks; existing visual beat carries the loop. No figure placement, new screenshot or embed is implemented. The note reading remains standalone."
+  }
+}

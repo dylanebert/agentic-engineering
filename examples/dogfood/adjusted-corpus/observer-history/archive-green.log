@@ -1,0 +1,16 @@
+bun test v1.4.0 (34cbb9a40)
+
+../../../../../../private/tmp/dogfood-archive-green-R40fwo/examples/dogfood/evidence.test.ts:
+(pass) nonempty stock corpus, frozen snapshots and completed process exits [4.22ms]
+(pass) recording qualifies a successful tool and deliberate error, not a task failure [0.17ms]
+(pass) missing result and missing terminal stream are rejected [0.65ms]
+(pass) a changed snapshot fails the actual filesystem reader [2.74ms]
+(pass) pilot starts from the frozen kit and browser results bind to unchanged stage sources [2.18ms]
+(pass) final observer lifecycle rechecks retain every original behavior and control outcome [0.58ms]
+(pass) all retained corpus bytes match the frozen artifact manifest [6.62ms]
+(pass) browser controls distinguish three defects from a setup failure [0.23ms]
+
+ 8 pass
+ 0 fail
+ 87 expect() calls
+Ran 8 tests across 1 file. [29.00ms]

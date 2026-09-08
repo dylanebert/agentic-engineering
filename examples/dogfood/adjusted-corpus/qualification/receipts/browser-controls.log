@@ -1,0 +1,17 @@
+campaign {"at":"2026-09-08T17:22:53.346Z","event":"launch-request","runner":32374,"cohort":"plain","options":{}}
+campaign {"at":"2026-09-08T17:22:53.670Z","event":"launch","runner":32374,"cohort":"plain","pid":32376,"options":{}}
+campaign {"at":"2026-09-08T17:22:54.654Z","event":"close-request","runner":32374,"pid":32376}
+campaign {"at":"2026-09-08T17:22:54.670Z","event":"close","runner":32374,"pid":32376,"alive":false}
+campaign {"at":"2026-09-08T17:22:54.776Z","event":"launch-request","runner":32374,"cohort":"plain","options":{}}
+campaign {"at":"2026-09-08T17:22:54.949Z","event":"launch","runner":32374,"cohort":"plain","pid":32486,"options":{}}
+campaign {"at":"2026-09-08T17:22:55.125Z","event":"close-request","runner":32374,"pid":32486}
+campaign {"at":"2026-09-08T17:22:55.137Z","event":"close","runner":32374,"pid":32486,"alive":false}
+campaign {"at":"2026-09-08T17:22:55.242Z","event":"launch-request","runner":32374,"cohort":"plain","options":{}}
+campaign {"at":"2026-09-08T17:22:55.301Z","event":"launch","runner":32374,"cohort":"plain","pid":32512,"options":{}}
+campaign {"at":"2026-09-08T17:22:55.445Z","event":"close-request","runner":32374,"pid":32512}
+campaign {"at":"2026-09-08T17:22:55.457Z","event":"close","runner":32374,"pid":32512,"alive":false}
+campaign {"at":"2026-09-08T17:22:55.562Z","event":"launch-request","runner":32374,"cohort":"plain","options":{}}
+campaign {"at":"2026-09-08T17:22:55.620Z","event":"launch","runner":32374,"cohort":"plain","pid":32542,"options":{}}
+campaign {"at":"2026-09-08T17:22:55.845Z","event":"close-request","runner":32374,"pid":32542}
+campaign {"at":"2026-09-08T17:22:55.857Z","event":"close","runner":32374,"pid":32542,"alive":false}
+qualification: correct pass; three behavioral controls fail at expected assertions; broken setup unavailable

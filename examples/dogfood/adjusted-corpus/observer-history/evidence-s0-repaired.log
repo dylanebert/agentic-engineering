@@ -1,0 +1,13 @@
+bun test v1.4.0 (34cbb9a40)
+
+examples/dogfood/evidence.test.ts:
+(pass) nonempty stock corpus, frozen snapshots and completed process exits [1.79ms]
+(pass) recording qualifies a successful tool and deliberate error, not a task failure [0.24ms]
+(pass) missing result and missing terminal stream are rejected [0.77ms]
+(pass) a changed snapshot fails the actual filesystem reader [3.19ms]
+(pass) browser controls distinguish three defects from a setup failure [0.33ms]
+
+ 5 pass
+ 0 fail
+ 26 expect() calls
+Ran 5 tests across 1 file. [19.00ms]

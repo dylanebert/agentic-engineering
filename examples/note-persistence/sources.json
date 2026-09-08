@@ -1,0 +1,1334 @@
+[
+  {
+    "file": "starter/.gitignore",
+    "sha256": "36d4d6f33a3ef86b6527552b92a2e9d8215ed6dcd7cbcb967efae5f38bb452a4",
+    "section": "supplied-context",
+    "disposition": "Supplied edit/Clear kit; no persistence, SPEC or assertion bodies."
+  },
+  {
+    "file": "starter/app/index.html",
+    "sha256": "4d876680b47f44e387f6b9e4c4e1cf054383c2c062210a77a29a4ac703b59131",
+    "section": "supplied-context",
+    "disposition": "Supplied edit/Clear kit; no persistence, SPEC or assertion bodies."
+  },
+  {
+    "file": "starter/bun.lock",
+    "sha256": "f78b15bde034841cbcf21d9057ceafbde6dac6282956a02cd96e3192b2cfe19f",
+    "section": "supplied-context",
+    "disposition": "Supplied edit/Clear kit; no persistence, SPEC or assertion bodies."
+  },
+  {
+    "file": "starter/package.json",
+    "sha256": "834ac7070bac7aace7f41a0787865fdcb483b4868144dc1a42ae9427acda3fd9",
+    "section": "supplied-context",
+    "disposition": "Supplied edit/Clear kit; no persistence, SPEC or assertion bodies."
+  },
+  {
+    "file": "starter/playwright.config.ts",
+    "sha256": "abd3cb0ada217b193422be62bf3571c0b32cb9b3cf32e14faa1d6dd31ffb56bf",
+    "section": "supplied-context",
+    "disposition": "Supplied edit/Clear kit; no persistence, SPEC or assertion bodies."
+  },
+  {
+    "file": "starter/REQUEST.md",
+    "sha256": "13e4a8266efdde35742c58426e69569165b3b95b916fb436fd9b9125199fc9a5",
+    "section": "supplied-context",
+    "disposition": "Supplied edit/Clear kit; no persistence, SPEC or assertion bodies."
+  },
+  {
+    "file": "final/.gitignore",
+    "sha256": "36d4d6f33a3ef86b6527552b92a2e9d8215ed6dcd7cbcb967efae5f38bb452a4",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/app/index.html",
+    "sha256": "8a788aa3c24da1c3b86778b5fa815a56252a8dbb1443049cf74405dafc4822c1",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/bun.lock",
+    "sha256": "f78b15bde034841cbcf21d9057ceafbde6dac6282956a02cd96e3192b2cfe19f",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/package.json",
+    "sha256": "834ac7070bac7aace7f41a0787865fdcb483b4868144dc1a42ae9427acda3fd9",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/playwright.config.ts",
+    "sha256": "abd3cb0ada217b193422be62bf3571c0b32cb9b3cf32e14faa1d6dd31ffb56bf",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/REQUEST.md",
+    "sha256": "13e4a8266efdde35742c58426e69569165b3b95b916fb436fd9b9125199fc9a5",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/RESULT.md",
+    "sha256": "04f97711912e12ead55b9d45ef108987a7ff450f4513361e2a13d3b4cc95b3a9",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/SPEC.md",
+    "sha256": "3d719c2e84e219dd505c688e953fe44314fec2444302adaff517ab8bb73536da",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "final/tests/note.spec.ts",
+    "sha256": "3574fc5716dcfbc3f0ebbb4a47b644c25fd28bd0cd7afdd7251913154873fe6d",
+    "section": "browser-results",
+    "disposition": "Luna-authored spec, source, unchanged tests and result; public replay inputs."
+  },
+  {
+    "file": "evidence/S4/browser-end.txt",
+    "sha256": "6c74dbfbe51b68a0e55667f3328f4e3248bb56d577930c89c985f7b4f040f775",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/browser-install.log",
+    "sha256": "01d4a63fcf823f240cfbc3a5fe3499f4264166e657e17b8dd727179dd5c5d72a",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/browser-start.txt",
+    "sha256": "9dc6416241a29fb27c562922ee6614bb78ff20473fb3ea443d9eda11b7615aee",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/bun.lock",
+    "sha256": "c72392ac61ccaa5e5824d8c1db13902b2797f3fc257b4930be798004f7abb3ad",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/events.jsonl",
+    "sha256": "c8c283b7baa44635777eaff9992d3ee72d95b4c6a3ccbf84f9d021515f5230ff",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/failure-results/artifacts/.last-run.json",
+    "sha256": "d5dfbf82c9d9045bc9df9730331e96de07bd97cd8c12c4e4601f334470867a27",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/failure-results/artifacts/setup-supplied-editing-and-Clear-qualification-only/error-context.md",
+    "sha256": "fba0e9250a249bd7b4e53269ee73c73ecb8aabfc728dd709b0076eca9b470aac",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/failure-results/artifacts/setup-supplied-editing-and-Clear-qualification-only/test-failed-1.png",
+    "sha256": "d2284aceb5afaf54b7b45504eb7143f4fbd408231ae2d4b27c99417e1871ff51",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/failure-results/artifacts/setup-supplied-editing-and-Clear-qualification-only/trace.zip",
+    "sha256": "ae3f4bc1764314f355bc5225bdc73eb4a24c93d5c1d5353597117cbcf70f0ed6",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/failure-results/playwright.json",
+    "sha256": "0365be4803e028b77d257c3c9584d2064225b3eafbc8263b0a1bf4f2aeb58601",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/failure.exit",
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/failure.log",
+    "sha256": "b1e40119a2dbb05135ba15e86518559ea94f00023549b65707f37e42e484d332",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/frozen-install.log",
+    "sha256": "fd0ed41b0c44fe784d1f6033d9d7ba525304b0efab4033a0efbd0321244e82f3",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/install-end.txt",
+    "sha256": "21a9ce7ee8449e9463cf8e7bebd0344c0f704a51f35ace7fd28cc25c2c832662",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/install-start.txt",
+    "sha256": "6dfb445784a17dd606178c3315924d5f44cc3804ba96b929a553af0cee2ab449",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/install.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/install.log",
+    "sha256": "c6e652d5ba21156cbed3b29379db17252339ea27d3f8c569f97e14d0f6e00a04",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/member-build-installed.log",
+    "sha256": "5d57acb5043b211a4394fc106f5f161cf36c1c3338316975337650e8a21f6c44",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/member-build.log",
+    "sha256": "3e7b87700371103a7e001d5f4dc0da1489ab3ed6be9db660293972ecbfd59a89",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/member-check-installed.log",
+    "sha256": "f8add6e918afbb36329c71b90e40a2f4129935298756eb6960ad32b4832665d8",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/member-check.log",
+    "sha256": "8e3f908cd14797445e732c83c04a815295c68ecb18e66f10da21c1fb3dd4bbc5",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/member-install.log",
+    "sha256": "8d03b68878f5f7b8fa3a387af15eff20b35d2b7cc94f8e16fcbf831ffb1474cb",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/occupied-port.json",
+    "sha256": "999f9252ea1f2f690401022822aa220f32b482d3a4b6b073f1dc7e3702fe48bf",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/occupied-port.log",
+    "sha256": "69ea2428e2cf5d7dfdd2251d126429290e985e58457c9113c9a5043e44b62765",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/occupied-port.mjs",
+    "sha256": "d092f789485e54682da26593909da08e427366376c050af7d962693b6a486fc5",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/package.json",
+    "sha256": "a7bbd954559a322d4cb7ab6a2c433fc2f0557980bb9d3b6b29075cddfb7fbfaa",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/pi-install.log",
+    "sha256": "377eff1d995b58f84ac05b5c1544c3dd62c0ec2cec43ea5104d411e5f3e72bc5",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/process-final.txt",
+    "sha256": "a779f9c27193dea9ab67f9db0a88e462d718fff374a9cb7c2d94b1672024ea7c",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/recording-audit.json",
+    "sha256": "b433e3a94407b687a3ef9465a7f422796806368da9d6e93787b6c891c4442cf4",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/recording-launch-original.sh",
+    "sha256": "40115f7ceabd09db1b99afbc140424f988c5f47fb428c0f8a9e9ed828e320300",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/recording-prompt.txt",
+    "sha256": "189813110ae86e19ab443f2b0239dd7a77890cd39f97e75ebea62afca8349d70",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/recording-stderr.log",
+    "sha256": "ee2bfb6bb0649ecfbacca52f89cb1281bd384f2322bacb6d379f7bcae2538da0",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/recording.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/session.jsonl",
+    "sha256": "78ac60ba98e2fa5e1c426f9f48d7f2db15eb94e49b031834af2f51c708c87e89",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/setup.spec.ts.txt",
+    "sha256": "4a826853670a733539f3234a71e98d3a1b30a5239e289609c7718d505efe856e",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/success-results/artifacts/.last-run.json",
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/success-results/playwright.json",
+    "sha256": "3cd8db26c026ae4be7dc757791ca2329f172c2cb9f3a0596d7cef40254b4e042",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/success.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/S4/success.log",
+    "sha256": "a0d58e1aceeffe1e49c8708ef3b700ca7903dd2ab79807d7cae5fabe735b2d3d",
+    "section": "supplied-context",
+    "disposition": "Setup-only acquisition, initial behavior, intentional error and lifecycle qualification; includes operator repairs."
+  },
+  {
+    "file": "evidence/acquisition/acquire-end.txt",
+    "sha256": "e918d41fe7d00811c023a5481822b0e4772d267e5ac29ceed715623d2e529145",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/acquire-start.txt",
+    "sha256": "8b14984433f1409ce25ed78f14e9f95fafd9f5e28fb9c90333b0ea66e5a14d9d",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/acquire.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/browser-install.log",
+    "sha256": "224096772b39057a8587196dd91b769236c6e9153e1bc04336378be36925c05c",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/checksum.log",
+    "sha256": "754c99174d195664ce9ac4b92911c8e4b7c2e73cbfdf2fb31e12b1aced4f3e18",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/failure-results/artifacts/.last-run.json",
+    "sha256": "d5dfbf82c9d9045bc9df9730331e96de07bd97cd8c12c4e4601f334470867a27",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/failure-results/artifacts/setup-supplied-editing-and-Clear-qualification-only/error-context.md",
+    "sha256": "fba0e9250a249bd7b4e53269ee73c73ecb8aabfc728dd709b0076eca9b470aac",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/failure-results/artifacts/setup-supplied-editing-and-Clear-qualification-only/test-failed-1.png",
+    "sha256": "d2284aceb5afaf54b7b45504eb7143f4fbd408231ae2d4b27c99417e1871ff51",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/failure-results/artifacts/setup-supplied-editing-and-Clear-qualification-only/trace.zip",
+    "sha256": "f902c69c76338f82bf831a71180ff7e80ad0e35893fc28fd838e3fa5c5e28358",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/failure-results/playwright.json",
+    "sha256": "a35255c67599a40b3a4a73acc7073539dd58610ac3e52f656897db33c5b8cf98",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/failure.log",
+    "sha256": "51609cf9b278a0e9f0e624c15de8b39842f444445bfa980a9f4822c8077f286f",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/install.log",
+    "sha256": "f33ea311efc61225584335417d17663d11e6039af0fce9ee9169509fffe126a0",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/starter.tar.gz.sha256",
+    "sha256": "7cbf6513ae7d36f83a32beb1e0bb3a180aeb5ab26386e787aff1e96ab1a97bf4",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/success-results/artifacts/.last-run.json",
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/success-results/playwright.json",
+    "sha256": "179610c839cebe9a6a3cd7f735be52f2710e27da1c7b00d6831518f5e3b16b38",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/acquisition/success.log",
+    "sha256": "1c7719936c444b4aaaa39bd36afeb72bd563d2087896721b77c467af2802f04f",
+    "section": "supplied-context",
+    "disposition": "Pinned published starter download, checksum, clean install and repeated setup-only browser qualification."
+  },
+  {
+    "file": "evidence/E1/spec/E1-spec.sh",
+    "sha256": "aa42b2c14abab66afc315fc49ae3fde30149d9c1ba265a9ea3ebe65d08399214",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec-after-inventory.json",
+    "sha256": "c474c2513e194adebb1875c0d4e472fda0ea4627865658658873c168ab5084df",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec-audit.json",
+    "sha256": "13017abcd71093bcafb630e6f94be7903ca69de268f31f8e50c8c2e8c2bf8830",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec-end.txt",
+    "sha256": "763267ce0b390ee30c5f5665518e3f4cb829394503eac9ba6c348208589d4212",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec-events.jsonl",
+    "sha256": "a21762f69539130e9340b5c486c921b9978c74f74ee934792393f533820faea2",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec-prompt.txt",
+    "sha256": "b0ac313d6562a5fea7a894dc08c080177d42e6c91311b07fe92351b916991f64",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec-start.txt",
+    "sha256": "82451b7f474d76482870701dd1b25177fb2c619741c9be15da7f56a105deb889",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec-stderr.log",
+    "sha256": "b5cce652a4ae6ede3485dba42983ffbd9b7a339126a6e49782c357538c1ba2d3",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/spec/spec.jsonl",
+    "sha256": "6e2199c39e1feae37885d3fc254b0f7ba0fa8a91fbb66c065ff05d2acaad0ee0",
+    "section": "conversations-and-assistance",
+    "disposition": "Spec-only Luna-low prompt, launch, complete stock conversation and source audit."
+  },
+  {
+    "file": "evidence/E1/implementation/browser-summary.jsonl",
+    "sha256": "f6e47024d0b143b876d4945a1d9a52336098a24ecfa1cafa78b03d2de2f3e1a0",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/E1-implementation.sh",
+    "sha256": "241a733852d4bc5ad4876a2102b73bc6215b3b5fd5c80ce8234671b28f60825a",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-audit.json",
+    "sha256": "c0ee2ccb399effb6b5ce729af3cb5a166cc49cfd9d42d3b75afd330939c36f31",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-end.txt",
+    "sha256": "866406c0dfdee6686a6ca2a66c2a453068ddb693754423bf1612b44b902250bf",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-events.jsonl",
+    "sha256": "afc8002093a9b96a797d37ef1b544f0900a5bced4a86532bd6273f1325c87826",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-full-inventory.json",
+    "sha256": "7a424f2b8af6b513d667aceee8fce90d0b69466e5bf762d17c78bc0591782a8d",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-operations.jsonl",
+    "sha256": "755fb2fe2f1e05fc6d8ad058036baf4d05562ca0e2f8e03c842f79a0079f4916",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-prompt.txt",
+    "sha256": "0fa944dd6a9729f22cbd06e08be82a8eaea4148a820b92ceea5caf68ce75b028",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-receipt-paths.txt",
+    "sha256": "8231ee593cc5d23650430cf7f1612310754bc11da5b318d34881b4a05ae574b7",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-start.txt",
+    "sha256": "7c9db19cf47322c4a76dcc01efd8d84abf3a50c784f4beb22ca3be31090997ef",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation-stderr.log",
+    "sha256": "6ae607cfec653a83beeac4be0c0d92d3f132b78f1a6ccebc964c4a1b634cd6a1",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/implementation/implementation.jsonl",
+    "sha256": "e4f6d167cde6a331b99168503ab9dd6bb4d565be925478d3cc120ddc93802a58",
+    "section": "conversations-and-assistance",
+    "disposition": "Fresh Luna-low implementation, all actual calls/results and usage, including browser operations."
+  },
+  {
+    "file": "evidence/E1/setup-repair/E1-implementation-argv.sh",
+    "sha256": "a3655dcc185444be12fc2dca6d2e8aecab0ee02e88a20fbbcb6184dd93b4ba53",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure/implementation-end.txt",
+    "sha256": "827776b26d052fc34af5d998005074ba87042ae50eb8fb0e4f53efacfc64b887",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure/implementation-events.jsonl",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure/implementation-start.txt",
+    "sha256": "f67c38406ad96d537846b5b0f1721f1b417ff077c952317df3f4732190c235f3",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure/implementation-stderr.log",
+    "sha256": "1df26cafdd8d03163805264fe4b737b0f65986b6704301e1f68a3c3aabde572b",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure/implementation.exit",
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure-2/implementation-end.txt",
+    "sha256": "419093220b77ff22119e4728b7b51403c34e07c7f4f334080fd8a4eb7672db2c",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure-2/implementation-events.jsonl",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure-2/implementation-start.txt",
+    "sha256": "90bb7d06c804a8f03daee3268dbf318c3c2c839203a72bd3a220645e5a143dc9",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure-2/implementation-stderr.log",
+    "sha256": "48ee740b5486e966661f46a308b783000c006467486f738905967faeb9626f11",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/implementation-launch-failure-2/implementation.exit",
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-short-end.txt",
+    "sha256": "fc15bfafd12ffac134dac4bd0e5bca8baab4b64e7ed745ac49afb3993053730d",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-short-events.jsonl",
+    "sha256": "276d7afed85e36c1bad5a23f80d7362eea7a550c2a2f0086c5b5b0c8d3e41b71",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-short-start.txt",
+    "sha256": "c4480070aa430a05907be8d5fd6d1dfcdbd3b442226e153435aa24056925a694",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-short-stderr.log",
+    "sha256": "3f86805f92dffe91c6aa0065f967c89ccbb4d5c3a477c13671dc2c696a8c7e0a",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-short.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-short.sh",
+    "sha256": "0b2c2bcc0c0bd646490a0d9c25bed57f5af624f9b62d5720a58fcfd0a6b08ad2",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-stdin-end.txt",
+    "sha256": "e33e4ec1dbef2aadec56f4f82a64c3f67ceaf4f9c5bef8f0a52ea68f3864299d",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-stdin-events.jsonl",
+    "sha256": "276d7afed85e36c1bad5a23f80d7362eea7a550c2a2f0086c5b5b0c8d3e41b71",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-stdin-start.txt",
+    "sha256": "609add3ac2d14a06bf2d4e2a088036ad9f4183d0bf222a0b5a1d6d4b930ccb33",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-stdin-stderr.log",
+    "sha256": "54a8dae92160e8ea7e7f2a9e331cd453381e5dbfb9aaa60e81c460320d3e12d7",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-stdin.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-stdin.sh",
+    "sha256": "d4c71737533a612bf746286924f2b6abb0dba7849d90e7410627d3bdce15ecfa",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-version-end.txt",
+    "sha256": "66e0baf196a4f947e0f32205b2ed38c2fe380317f0ba3fa7f43dc75dd951a883",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-version-events.jsonl",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-version-start.txt",
+    "sha256": "6fcdb7d8ce70fbc06ffb22e25326d42555624da917da920cdd7f4b4c2ca4b42e",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-version-stderr.log",
+    "sha256": "1df26cafdd8d03163805264fe4b737b0f65986b6704301e1f68a3c3aabde572b",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-version.exit",
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/no-model-version.sh",
+    "sha256": "2cf2c82639d652fd13db6b11e5fa64deae7d8fa46658d33a19cb810734961b3e",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/python-version.txt",
+    "sha256": "917601090ffb73a030e3eaa8b7a01c41400cad4b61366b4218d7756a5733b66c",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/S4-freeze.json",
+    "sha256": "d0791d5bd1d61e54339c1491aeb459568f671e909e69f8daec4c0ae79c431e34",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/setup-repair/S4-launch-correction.json",
+    "sha256": "6863fded849b0d4c744bc8a1cccf53e98bde57ca873d803e65f1f1a04a1afa6a",
+    "section": "conversations-and-assistance",
+    "disposition": "Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue."
+  },
+  {
+    "file": "evidence/E1/task/.gitignore",
+    "sha256": "36d4d6f33a3ef86b6527552b92a2e9d8215ed6dcd7cbcb967efae5f38bb452a4",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/app/index.html",
+    "sha256": "8a788aa3c24da1c3b86778b5fa815a56252a8dbb1443049cf74405dafc4822c1",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/bun.lock",
+    "sha256": "f78b15bde034841cbcf21d9057ceafbde6dac6282956a02cd96e3192b2cfe19f",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/package.json",
+    "sha256": "834ac7070bac7aace7f41a0787865fdcb483b4868144dc1a42ae9427acda3fd9",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/playwright.config.ts",
+    "sha256": "abd3cb0ada217b193422be62bf3571c0b32cb9b3cf32e14faa1d6dd31ffb56bf",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/before-tests-app-index.html",
+    "sha256": "4d876680b47f44e387f6b9e4c4e1cf054383c2c062210a77a29a4ac703b59131",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/before-tests-tests/.keep",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/before-tests-tests/note.spec.ts",
+    "sha256": "3574fc5716dcfbc3f0ebbb4a47b644c25fd28bd0cd7afdd7251913154873fe6d",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-final-results/artifacts/.last-run.json",
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-final-results/playwright.json",
+    "sha256": "d25bd92001dc5338a8b9a617e8b949aefa788789fd367a81933dff53977679c5",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-final.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-final.log",
+    "sha256": "f829edf3a7a013d30570bd462a4c8c593f781793d495e291c50d3fde786c7181",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-1-results/artifacts/.last-run.json",
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-1-results/playwright.json",
+    "sha256": "98b266a379c1728167e919589c4da35896824875c52c41f19293e228944054e9",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-1.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-1.log",
+    "sha256": "2ea7d5fd6d10cd66c9e9ca124d22d2cc24e6f9dfd5efeb95bd817a9368a3d33c",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-2-results/artifacts/.last-run.json",
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-2-results/playwright.json",
+    "sha256": "9f0dbbaa14f325836335861ad76fa6773ed4a4c3dd1ee994e38391b28743ad59",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-2.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/good-run-2.log",
+    "sha256": "4feecea0346a3d8420dec5c2b6cb8a2bbfe4e274b67a78aee292c59724169ef2",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/implemented-app-index.html",
+    "sha256": "8a788aa3c24da1c3b86778b5fa815a56252a8dbb1443049cf74405dafc4822c1",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/implemented-tests/note.spec.ts",
+    "sha256": "3574fc5716dcfbc3f0ebbb4a47b644c25fd28bd0cd7afdd7251913154873fe6d",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/regression-app-index.html",
+    "sha256": "5ab4b19a143c38046d3a84b804bcce0a544c237041085f7fc02e1e6be1a89ec3",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/regression-tests-note.spec.ts",
+    "sha256": "3574fc5716dcfbc3f0ebbb4a47b644c25fd28bd0cd7afdd7251913154873fe6d",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red-results/artifacts/.last-run.json",
+    "sha256": "dd3596e7ac72d48260c72c6116cd1932b4df49f8f977d2806425e0eeac20a173",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red-results/artifacts/note-text-survives-reload-and-replacement-survives-reload/error-context.md",
+    "sha256": "e66e89248e20fcd4670988d163c0363128a836e5c5ba933b2f7230090a90ba46",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red-results/artifacts/note-text-survives-reload-and-replacement-survives-reload/test-failed-1.png",
+    "sha256": "eb93dd5d4ecc89a7990d28495fc04f03dda86c5d5f1600fb3d4b1463cf24cc8c",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red-results/artifacts/note-text-survives-reload-and-replacement-survives-reload/trace.zip",
+    "sha256": "0d276bc8648349034dcd3a7b5dd09941f1ac72f84366ff60ca5c13259ccad8d0",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red-results/playwright.json",
+    "sha256": "254ce1a827b8091fde55e7b4427f512b1dec51ae6fca8b97102e809d4c4f8d4e",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red-tests/note.spec.ts",
+    "sha256": "3574fc5716dcfbc3f0ebbb4a47b644c25fd28bd0cd7afdd7251913154873fe6d",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red-tests-app-index.html",
+    "sha256": "4d876680b47f44e387f6b9e4c4e1cf054383c2c062210a77a29a4ac703b59131",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red.exit",
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/receipts/starter-red.log",
+    "sha256": "80efb02f2f1728cd415e2d9ccea6bf68a1c3039fdf828df036fc272d108a2974",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/app/index.html",
+    "sha256": "5ab4b19a143c38046d3a84b804bcce0a544c237041085f7fc02e1e6be1a89ec3",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/bun.lock",
+    "sha256": "f78b15bde034841cbcf21d9057ceafbde6dac6282956a02cd96e3192b2cfe19f",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/package.json",
+    "sha256": "834ac7070bac7aace7f41a0787865fdcb483b4868144dc1a42ae9427acda3fd9",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/playwright.config.ts",
+    "sha256": "abd3cb0ada217b193422be62bf3571c0b32cb9b3cf32e14faa1d6dd31ffb56bf",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/receipts/regression-results/artifacts/.last-run.json",
+    "sha256": "6c9fde2567d37c41b0564a1ad232ce38f57512ed111a331934768d8cd00973ad",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/receipts/regression-results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/error-context.md",
+    "sha256": "faeae9ef840a6d534cfefe8c2edc58962d246b7a4a2d628d295043ccb176bb69",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/receipts/regression-results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/test-failed-1.png",
+    "sha256": "51200807416a1413b1df3f6455acba344feff74e96954e5dc0bc296b611362f9",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/receipts/regression-results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/trace.zip",
+    "sha256": "8ab7533d3d57777b2f889671ddf6e1cf0ac8284ef4d546904918cd20da3b6459",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/receipts/regression-results/playwright.json",
+    "sha256": "a5d4907556cbb908aa573f46ed4c6a093cd2ae840a9396243ad569b3678fcd88",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/receipts/regression-run.exit",
+    "sha256": "4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/receipts/regression-run.log",
+    "sha256": "b83d55960b0a433a607a60e184f7256bff3a6bcfff8c115d8704b3d124aee903",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/results/artifacts/.last-run.json",
+    "sha256": "6c9fde2567d37c41b0564a1ad232ce38f57512ed111a331934768d8cd00973ad",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/error-context.md",
+    "sha256": "faeae9ef840a6d534cfefe8c2edc58962d246b7a4a2d628d295043ccb176bb69",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/test-failed-1.png",
+    "sha256": "51200807416a1413b1df3f6455acba344feff74e96954e5dc0bc296b611362f9",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/results/artifacts/note-Clear-survives-reload-6ac23--Clear-reload-remains-empty/trace.zip",
+    "sha256": "8ab7533d3d57777b2f889671ddf6e1cf0ac8284ef4d546904918cd20da3b6459",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/results/playwright.json",
+    "sha256": "a5d4907556cbb908aa573f46ed4c6a093cd2ae840a9396243ad569b3678fcd88",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/regression/tests/note.spec.ts",
+    "sha256": "3574fc5716dcfbc3f0ebbb4a47b644c25fd28bd0cd7afdd7251913154873fe6d",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/REQUEST.md",
+    "sha256": "13e4a8266efdde35742c58426e69569165b3b95b916fb436fd9b9125199fc9a5",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/RESULT.md",
+    "sha256": "04f97711912e12ead55b9d45ef108987a7ff450f4513361e2a13d3b4cc95b3a9",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/results/artifacts/.last-run.json",
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/results/playwright.json",
+    "sha256": "d25bd92001dc5338a8b9a617e8b949aefa788789fd367a81933dff53977679c5",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/SPEC.md",
+    "sha256": "3d719c2e84e219dd505c688e953fe44314fec2444302adaff517ab8bb73536da",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/E1/task/tests/note.spec.ts",
+    "sha256": "3574fc5716dcfbc3f0ebbb4a47b644c25fd28bd0cd7afdd7251913154873fe6d",
+    "section": "browser-results",
+    "disposition": "Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green."
+  },
+  {
+    "file": "evidence/review/detail.md",
+    "sha256": "65625fb5a68513231295da608d3837cc76dce55e7ac826e6df4e8f9b61f54c82",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/E1-review.sh",
+    "sha256": "02edf43d620f86cca0fa899c497d70b1924b290cbe94a920b40e1836569a8273",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/reading.md",
+    "sha256": "29b24dc9232b7d6683fea54ae3fc180d32ebc2e53b6b6017df6fcb0e942286d0",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-after-inventory.json",
+    "sha256": "538e43ca4979f3445bbb0aed4e0dde9bac84a6667e6d1c54412a2ac368912441",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-audit.json",
+    "sha256": "84b9e77736ee20565f29bd35fde475d93d62310e6d5163a1a2aacf5f3f0e4119",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-before-inventory.json",
+    "sha256": "e762448f2b540f21dbd6148033ebed61a379cbdaa2bfb8eb6f9ce49d4da0ddc8",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-end.txt",
+    "sha256": "c4497fba2d7c885bc7b07199847c79db62632e108f486c29a5fcb3f2c24b824a",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-events.jsonl",
+    "sha256": "e966510949f51ec0c43ba15dc59e8d80e995f3529403cb30ee03573cab6df480",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-prompt.txt",
+    "sha256": "a6e60f9126c0ca21f4ab321f17e1297e820b95aba24c38fca619f8c61b5668dd",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-response.md",
+    "sha256": "a5d3d04ab1f467f92a53097b3f7d73f9deb1b334ed8bc1d15e312a4a03da2ffd",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-start.txt",
+    "sha256": "85bd765891a73509760f54c1d9c379fa65ecec452cccd5c5774352aaf5ea2c46",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review-stderr.log",
+    "sha256": "7fc4433fa70e4d82b380e1d77b60f5d46ba21b663b1647ef6a368fd1c8111eaf",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/review.jsonl",
+    "sha256": "a5fafce486d1df09e86725bab47f4337109986bb4f829bcd71bc51df48e25383",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/review/SETUP.md",
+    "sha256": "a885d8e131ec017f18fce6d62eb597ff9d6e892f1387b3292c0e899c976387cf",
+    "section": "independent-and-human-judgment",
+    "disposition": "Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding."
+  },
+  {
+    "file": "evidence/replay/acquisition.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/browser-install.log",
+    "sha256": "c0b92229c915fd65e4cf04689a7b21a98bda72429f4eabc9bbc6c8ae209794ed",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/browser.exit",
+    "sha256": "9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/browser.log",
+    "sha256": "2ee2aeca249297909c3c00268fb6944adff3c7661319b7db104c870daf0d9686",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/checksum.log",
+    "sha256": "621f93a2c9f1af388a6b212100f34faff941b2e4c9e9ac9a89641ec97d1c3f7c",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/credential-cleanup.json",
+    "sha256": "1e584ccc90795e8d6e03c0e5228fc93e0c3dab58e99bae3eba232da53ec77bb3",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/end.txt",
+    "sha256": "762956cebfde4eef54a4401b3c7bd06b3008488333acd288949d87c983e08c77",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/install.log",
+    "sha256": "8269ca8305f610bb39f56b2f8646c60983e9de539989d779de546325165bbfa7",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/old-archive-evidence.log",
+    "sha256": "ef2890c434353395b58ce49d6535c5b0733d1685ee06b7aede2d4dcfa6c1ce9d",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/old-whole-tree-match.json",
+    "sha256": "601ddbbbddcc1c76021640ae5cb434a900c84e10c682f6ff10bf2d7ea3c23bcd",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/process-close.json",
+    "sha256": "c77948d756188be878358c74a7104f4d39c8572dcc22cb91650efc7db7ec9e95",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/reader.tar.gz.sha256",
+    "sha256": "b1e3380936d8f6adc581d5cb632ee358b1a5b50eab392920e4a5e331c0e3a91b",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/results/artifacts/.last-run.json",
+    "sha256": "91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/results/playwright.json",
+    "sha256": "aef355877e1493773f37f2c5742b23af313900c3fff9af917b8ccc9d974f5af7",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/start.txt",
+    "sha256": "f5a773a31eed1d4c17bc85ac94239bbfcb224f94f1eafc5dcee44d3fb477af40",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/use-route.json",
+    "sha256": "89dbd9793363a73cf33f70258abf8c9d37b8c1e75427b1323857cb67464b6183",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/use-route.log",
+    "sha256": "0394d048b71c20513bd96ac2044ba902bbcfb12a0f7b0932030ab66604b8069e",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/replay/verify-use-route.mjs",
+    "sha256": "7c0480648134933e3e6cd4e7ae161fd837fb719facad7213b415710a8b87508b",
+    "section": "context-and-accounting",
+    "disposition": "Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup."
+  },
+  {
+    "file": "evidence/archive-repair/ignored-evidence-before.txt",
+    "sha256": "767741296058582d295377e107b4f91e07437989afb08a3c489d07fa0fce8e12",
+    "section": "context-and-accounting",
+    "disposition": "First committed S4 archive refused missing ignored logs; operator explicitly retains full evidence without changing task bytes."
+  },
+  {
+    "file": "evidence/archive-repair/s4-archive-red.log",
+    "sha256": "17df2aa54bcc836e580435fcd2af92bf573ea18e2822503d92afe39dc9061143",
+    "section": "context-and-accounting",
+    "disposition": "First committed S4 archive refused missing ignored logs; operator explicitly retains full evidence without changing task bytes."
+  },
+  {
+    "file": "human/feedback.json",
+    "sha256": "75bcf48878139d674393297071cbaf19a6956683d17df907af9946b5ab93fd12",
+    "section": "independent-and-human-judgment",
+    "disposition": "Actual functional confirmation, separate prose rejection and coordinator-operated access; no new E1 work or accepted embed design."
+  },
+  {
+    "file": "references/adaptive-ml-rl-visualized.html",
+    "sha256": "b268905ffd8594bab3503f14565adab01c04b2b1b226465f3b2f55c3a71472ac",
+    "section": "historical-campaign-and-limits",
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
+  },
+  {
+    "file": "references/adaptive-ml-speculative-decoding.html",
+    "sha256": "7a0ead1e66d1b04dfcf75f76193c01b68992eab360ed86eb6c0b5bb14ee36070",
+    "section": "historical-campaign-and-limits",
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
+  },
+  {
+    "file": "references/article-context.json",
+    "sha256": "c83d3fb5a71f2b3afbb0f2a6bb43384d16879c103768c7147f299438e822e912",
+    "section": "historical-campaign-and-limits",
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
+  },
+  {
+    "file": "references/karpathy-training-recipe.txt",
+    "sha256": "2cce5844dfb7d1cdac466ffde89248fb22ab30ecd3ec92c5cd7c385b42ab902b",
+    "section": "historical-campaign-and-limits",
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
+  },
+  {
+    "file": "references/taste-loops-latency-figure.txt",
+    "sha256": "306c5796b973dd47794e4c380996a0e363758ee17909ee89def516570c497e9b",
+    "section": "historical-campaign-and-limits",
+    "disposition": "Unchanged human-marked captures and user-selected surrounding article context: prose, visual beats and optional disclosure, not a generated taste score."
+  }
+]
