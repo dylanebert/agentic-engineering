@@ -23,14 +23,33 @@ export function figureArms(input: ArmInput): Arm[] {
 
 
 test("substrate: dist contains no Shallot or typegpu", async () => {
-  const readTree = async (path: string): Promise<string[]> => {
+  const readTree = async (path: string): Promise<{ name: string; content: string }[]> => {
     const entries = await readdir(path, { withFileTypes: true });
-    return (await Promise.all(entries.map((entry) => entry.isDirectory()
+    return (await Promise.all(entries.map(async (entry) => entry.isDirectory()
       ? readTree(join(path, entry.name))
-      : readFile(join(path, entry.name), "utf8").catch(() => "")))).flat();
+      : [{ name: entry.name, content: await readFile(join(path, entry.name), "utf8").catch(() => "") }]))).flat();
   };
-  const built = (await readTree(dist)).join("\n").toLowerCase();
-  assertion(built, "predicate:figure-1.1").not.toMatch(/(?:from|import\()\s*["\'](?:@dylanebert\/shallot|typegpu|unplugin-typegpu)/);
+  const files = await readTree(dist);
+  const executable: { content: string }[] = [];
+  for (const file of files) {
+    if (/\.(?:js|mjs|cjs)$/i.test(file.name)) executable.push(file);
+    if (/\.html?$/i.test(file.name)) {
+      // Lexical selection of emitted HTML scripts, not source examples or data blocks.
+      for (const script of file.content.matchAll(/<script\b((?:[^>"']|"[^"]*"|'[^']*')*)>([\s\S]*?)<\/script\s*>/gi)) {
+        const attributes = new Map([...script[1].matchAll(/([^\s=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s]+)))?/g)]
+          .map((attribute) => [attribute[1].toLowerCase(), attribute[2] ?? attribute[3] ?? attribute[4] ?? ""]));
+        const type = (attributes.get("type") ?? "").trim().toLowerCase();
+        if (!attributes.has("src") && (type === "" || type === "module" || /^(?:text|application)\/(?:javascript|ecmascript)$/.test(type))) {
+          executable.push({ content: script[2] });
+        }
+      }
+    }
+  }
+  // Maps retain source examples, not executable imports; figure-1.2 still reads all output.
+  const imports = executable.map((file) => file.content).join("\n").toLowerCase();
+  assertion(imports.trim().length, "predicate:figure-1.1 executable population").toBeGreaterThan(0);
+  const built = files.map((file) => file.content).join("\n").toLowerCase();
+  assertion(imports, "predicate:figure-1.1").not.toMatch(/(?:from|import\()\s*["\'](?:@dylanebert\/shallot|typegpu|unplugin-typegpu)/);
   assertion(built, "predicate:figure-1.2").not.toMatch(/<iframe|https?:\/\/(?:localhost|127\.0\.0\.1):\d+|\bvite\s+(?:dev|serve|preview)\b/);
 });
 
