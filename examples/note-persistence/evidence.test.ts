@@ -70,6 +70,51 @@ test('a changed outcome or absent test cannot masquerade as the recorded run', (
   expect(() => checkBrowserReport(red, 'Clear survives reload and another Clear/reload remains empty', '\"to be cleared\"')).toThrow('failing test population');
 });
 
+test('cumulative E1 clock and every role usage come from actual receipts', () => {
+  const campaign = readJson(join(root, 'campaign.json'));
+  let seconds = 0, tokens = 0, requests = 0, tools = 0;
+  for (const phase of campaign.conversations) {
+    const dir = phase.role === 'review' ? join(root, 'evidence/review') : join(e1, phase.role);
+    const measured = Number(readFileSync(join(dir, `${phase.role}-stderr.log`), 'utf8').match(/^real ([0-9.]+)$/m)?.[1]);
+    expect(measured).toBe(phase.seconds);
+    expect(readFileSync(join(dir, `${phase.role}.exit`), 'utf8').trim()).toBe('0');
+    const start = Date.parse(readFileSync(join(dir, `${phase.role}-start.txt`), 'utf8').trim());
+    const end = Date.parse(readFileSync(join(dir, `${phase.role}-end.txt`), 'utf8').trim());
+    expect(end).toBeGreaterThan(start);
+    const result = checkRecording(jsonl(join(dir, `${phase.role}.jsonl`)), jsonl(join(dir, `${phase.role}-events.jsonl`)), phase.model);
+    expect(result.usage.totalTokens).toBe(phase.tokens);
+    expect(result.requests).toBe(phase.requests); expect(result.tools).toBe(phase.tools);
+    seconds += measured; tokens += phase.tokens; requests += phase.requests; tools += phase.tools;
+  }
+  let failedCharge = 0;
+  for (const name of ['implementation-launch-failure', 'implementation-launch-failure-2']) {
+    const dir = join(e1, 'setup-repair', name);
+    expect(readFileSync(join(dir, 'implementation.exit'), 'utf8').trim()).toBe('1');
+    expect(readFileSync(join(dir, 'implementation-events.jsonl'), 'utf8')).toBe('');
+    const measured = Number(readFileSync(join(dir, 'implementation-stderr.log'), 'utf8').match(/^real ([0-9.]+)$/m)?.[1]);
+    failedCharge += Math.max(0.01, measured);
+  }
+  expect(failedCharge).toBe(campaign.failedStartupChargeSeconds);
+  expect(Number((seconds + failedCharge).toFixed(2))).toBe(campaign.spentSeconds);
+  expect(campaign.spentSeconds).toBeLessThan(campaign.limitSeconds);
+  expect({ tokens, requests, tools }).toEqual({ tokens: 219189, requests: 22, tools: 47 });
+  expect(campaign.modelCorrectiveFollowUps).toBe(0); expect(campaign.humanRefinements).toBe(0);
+  expect(campaign.historicalCampaign.attemptsConsumed).toBe(3);
+});
+
+test('public saved-kit replay and use route bind to unchanged final bytes', () => {
+  const manifest = readJson(join(root, 'replay-manifest.json'));
+  const dir = join(root, 'evidence/replay');
+  checkSnapshot(dir, manifest.receipts);
+  expect(sha(readFileSync(join(root, 'reader.tar.gz')))).toBe(manifest.archiveSha256);
+  checkBrowserReport(readJson(join(dir, 'results/playwright.json')));
+  expect(readFileSync(join(dir, 'browser.exit'), 'utf8').trim()).toBe('0');
+  const use = readJson(join(dir, 'use-route.json'));
+  expect(use.observation).toEqual({ status: 200, sameFinalBytes: true, sha256: sha(readFileSync(join(root, 'final/app/index.html'))), outsideStatus: 404 });
+  expect(readFileSync(join(dir, 'use-route.log'), 'utf8')).toContain('http-server stopped.');
+  expect(readJson(join(dir, 'credential-cleanup.json')).removed).toBe(true);
+});
+
 test('fresh Sol review is read-only, complete and bound to its unchanged corpus', () => {
   const dir = join(root, 'evidence/review');
   checkSnapshot(dir, readJson(join(root, 'review-manifest.json')).receipts);

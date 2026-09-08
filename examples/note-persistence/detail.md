@@ -49,13 +49,15 @@ The actual audit includes shell reads, copies, redirections, generated results a
 | Failed implementation startups | No session/header | 0 recorded | No usage record | 0.02 charged conservatively |
 | Sol-low review | 4 | 14 | 23,073 | 26.51 |
 
-Through review, E1 has spent **100.57 of 600 seconds**. No model corrective follow-up or human refinement has occurred; one operator setup correction is disclosed above.
+Through review, E1 has spent **100.57 of 600 seconds** ([machine-readable account](campaign.json)). No model corrective follow-up or human refinement has occurred; one operator setup correction is disclosed above.
 
 Usage sums each authoritative assistant message once, including final messages: spec input/output/cache-read/cache-write = 832/389/1,167/1,474; implementation = 45/3,322/164,434/24,453. Failed test exits are preserved in files even though the agent's shell wrapper deliberately returned 0 after recording them. There were no failed implementation tool calls. Review input/output/cache-read/cache-write = 818/1,104/9,486/11,665. Across E1's three conversations: 22 requests, 47 tools and 219,189 reported tokens.
 
 The S4 stock-Pi canary took 4.39 setup seconds: three requests, two reads (one intentional missing-file error), 2,265 reported tokens (2,151 input, 114 output, no cache tokens). Setup/editorial time and qualification are separate from E1's clock. Gateway billing is unknown; zero cost metadata is not free usage. Public list prices and their limits are references in [SETUP](SETUP.md), not an observed bill or a proof of direct-provider execution parity.
 
-The first S4 commit omitted 13 log files because Git ignored them. The committed-archive evidence test refused that incomplete inventory; the logs still existed locally. Astra added a task-local log exception and explicitly retained ignored evidence paths, including the later task's copied results. [Archive failure and omitted-path list](evidence/archive-repair/) preserve the packaging error. Archive checks must pass on the corrected commit before human reliance; this repair does not change the task's source or results.
+The first S4 commit omitted 13 log files because Git ignored them. The committed-archive evidence test refused that incomplete inventory; the logs still existed locally. Astra added a task-local log exception and explicitly retained ignored evidence paths, including the later task's copied results. [Archive failure and omitted-path list](evidence/archive-repair/) preserve the packaging error. The corrected `2705f334` archive passed all 12 evidence tests and the comparison; this repair did not change task source or results.
+
+The public reader archive at `2705f3340a45424aa3cf447a1d59177b224e06cc` was then downloaded into a new directory, checksum-verified and installed without a model or article dependencies. Its saved tests passed 4/4 with no skips. A separate bounded local-server probe served the exact final page and refused access to package.json, then closed. [Replay and use-route receipts](evidence/replay/) bind the artifact bytes, command, results and teardown. This proves saved-check replay, not another model's reproduction.
 
 ## Independent And Human Judgment
 

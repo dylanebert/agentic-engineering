@@ -1,0 +1,31 @@
+{
+  "start": "2026-09-08T20:55:11.228Z",
+  "end": "2026-09-08T20:55:11.392Z",
+  "cwd": "/tmp/agentic-engineering-dogfood-loop-20260908-2012/final-reader-replay/final",
+  "command": [
+    "gtimeout",
+    "--signal=TERM",
+    "--kill-after=5",
+    "300",
+    "node",
+    "node_modules/http-server/bin/http-server",
+    "app",
+    "-a",
+    "127.0.0.1",
+    "-p",
+    "18765",
+    "-c-1"
+  ],
+  "ownerPid": 33577,
+  "observation": {
+    "status": 200,
+    "sameFinalBytes": true,
+    "sha256": "8a788aa3c24da1c3b86778b5fa815a56252a8dbb1443049cf74405dafc4822c1",
+    "outsideStatus": 404
+  },
+  "exit": {
+    "code": 0,
+    "signal": null
+  },
+  "teardown": "owner sent SIGTERM to its timeout process; no browser opened"
+}

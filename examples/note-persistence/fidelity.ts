@@ -13,6 +13,7 @@ export const sourceGroups = [
   ['evidence/E1/setup-repair', 'conversations-and-assistance', 'Two pre-session failures, no-model controls and disclosed unchanged-prompt stdin rescue.'],
   ['evidence/E1/task', 'browser-results', 'Served snapshots, unchanged assertions, starter red, repeated green, later labeled Clear regression and final green.'],
   ['evidence/review', 'independent-and-human-judgment', 'Single Sol-low read-only review, exact draft inputs, complete messages and unchanged input audit; no consequential finding.'],
+  ['evidence/replay', 'context-and-accounting', 'Clean public reader acquisition, no-model four-test replay, bounded use-route probe, original archive check and owned cleanup.'],
   ['evidence/archive-repair', 'context-and-accounting', 'First committed S4 archive refused missing ignored logs; operator explicitly retains full evidence without changing task bytes.'],
   ['references', 'historical-campaign-and-limits', 'Unchanged human-marked capture excerpts: prose, reduced sequence and optional disclosure, not a generated taste score.'],
 ] as const;
@@ -30,6 +31,7 @@ export const requiredDisclosures = [
   'one operator setup correction is disclosed above.',
   'Gateway billing is unknown;',
   'The first S4 commit omitted 13 log files because Git ignored them.',
+  'Its saved tests passed 4/4 with no skips.',
   'One fresh read-only Sol-low review found no consequential gap.',
   'Actual human use and educational feedback are pending.',
   'The original campaign exhausted all three attempts and its one setup adjustment.',
