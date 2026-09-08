@@ -1,0 +1,1 @@
+This is a recording check, not an app task. Use bash to run `printf 'recording-ok\n'`. Then make a separate bash call that runs `printf 'deliberate-recording-error\n' >&2; exit 7`. Report both actual outcomes and stop. Do not read other files or make repairs.

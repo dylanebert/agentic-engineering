@@ -1,0 +1,40 @@
+[
+  {
+    "at": "2026-09-08T16:52:34.947Z",
+    "event": "start",
+    "root": "/tmp/note-dogfood-PdqO1q/controls/broken-setup",
+    "command": [
+      "node",
+      "/tmp/note-dogfood-PdqO1q/controls/absent-server.js",
+      "/tmp/note-dogfood-PdqO1q/controls/broken-setup",
+      "-a",
+      "127.0.0.1",
+      "-p",
+      "8765",
+      "-c-1"
+    ],
+    "origin": "http://127.0.0.1:8765",
+    "stage": 2,
+    "hashes": {},
+    "node": "v26.3.0",
+    "serverPid": 3509
+  },
+  {
+    "at": "2026-09-08T16:52:34.999Z",
+    "event": "error",
+    "message": "Error: instrument: static server failed to bind",
+    "outcome": "unavailable"
+  },
+  {
+    "at": "2026-09-08T16:52:34.999Z",
+    "event": "server-close",
+    "code": 1,
+    "signal": null
+  },
+  {
+    "at": "2026-09-08T16:52:35.000Z",
+    "event": "end",
+    "outcome": "unavailable",
+    "unchanged": true
+  }
+]

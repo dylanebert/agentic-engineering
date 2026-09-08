@@ -1,0 +1,58 @@
+[
+  {
+    "file": "qualification/session.jsonl",
+    "rawSha256": "5684ea8dbf60a394a749e63b6e0faeccfcda3e8f4b6267a85b1560e92493ee06",
+    "sanitizedSha256": "6d83f2c0a4f686e428a0d97823a84e6b0711f216fe7eacac6c39f3d91fb48385",
+    "removedResponseIds": 2,
+    "reason": "Provider request identifiers are account metadata; task messages, tool IDs, outputs and usage remain unchanged."
+  },
+  {
+    "file": "qualification/events.jsonl",
+    "rawSha256": "033bfe84c8b1a35c25c74a7d19c67df6acb4b88da932be8f96707b5629ed9557",
+    "sanitizedSha256": "6c69a858f855b075f9a7ee16dc764a6948aaddb7bdf46eb2afa90f89cc477fbc",
+    "removedResponseIds": 8,
+    "reason": "Provider request identifiers are account metadata; task messages, tool IDs, outputs and usage remain unchanged."
+  },
+  {
+    "file": "pilot/spec/session.jsonl",
+    "rawSha256": "ee6690e584b1070d95993e7031462f30984b19fda96a9491ff1b949da1074780",
+    "sanitizedSha256": "4c5c3589ac247cafae6e964e12b365dcd54b34b01b4158ac18631b0bfb0676f9",
+    "removedResponseIds": 6,
+    "reason": "Provider request identifiers are account metadata; task content, tool IDs and usage are unchanged."
+  },
+  {
+    "file": "pilot/spec/events.jsonl",
+    "rawSha256": "222ebf9ad02cd1b92f3c299941b6dbdc93a3db2fd44611cf2203930c49d96c15",
+    "sanitizedSha256": "9ccda247f0c933869649d55e1f9241a31313c13b0c6266a638709f4afa5202db",
+    "removedResponseIds": 23,
+    "reason": "Provider request identifiers are account metadata; task content, tool IDs and usage are unchanged."
+  },
+  {
+    "file": "pilot/stage-one/session.jsonl",
+    "rawSha256": "e18bc7a9b0814d70f548496299a97a5e170d394fcd334e398fd65fa42eb6855b",
+    "sanitizedSha256": "192c7255e0908fb7d1e37e5448fb03b15e74a726bd6d24d0a512fd63834e593e",
+    "removedResponseIds": 7,
+    "reason": "Provider request identifiers are account metadata; task content, tool IDs and usage are unchanged."
+  },
+  {
+    "file": "pilot/stage-one/events.jsonl",
+    "rawSha256": "5bdfae7ab355aaf57065097d46e8b3bce302c80c9850ff39f1d8e00d5e6c86f8",
+    "sanitizedSha256": "3575583e8599b8b1255a1c360abf41a13ba77efa6592b3fec3fb871cacdc12bb",
+    "removedResponseIds": 28,
+    "reason": "Provider request identifiers are account metadata; task content, tool IDs and usage are unchanged."
+  },
+  {
+    "file": "pilot/stage-two/session.jsonl",
+    "rawSha256": "3ebdc902c2bc9202aaed5f9c65d8d245b059dfd0fa6ff2a6dbad4c8f33bc6f79",
+    "sanitizedSha256": "5b5f541263c2bd1d49532a8cb6d7dba1e33e4e5a2ce22a1818f92d7e38296b3a",
+    "removedResponseIds": 7,
+    "reason": "Provider request identifiers are account metadata; task content, tool IDs and usage are unchanged."
+  },
+  {
+    "file": "pilot/stage-two/events.jsonl",
+    "rawSha256": "f01363b4d3aba6e2d39bfd39dfdb02637963d4e4cccb39ad45d1dde7bf36d095",
+    "sanitizedSha256": "7b1ba1ef143e88d6a3869c6730ac123755268e00d3f6f8179bceede66148d47b",
+    "removedResponseIds": 27,
+    "reason": "Provider request identifiers are account metadata; task content, tool IDs and usage are unchanged."
+  }
+]
