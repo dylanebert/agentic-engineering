@@ -1,0 +1,67 @@
+bun test v1.4.0 (34cbb9a40)
+
+examples/note-persistence/evidence.test.ts:
+16 |   visit(root);
+17 |   return files;
+18 | }
+19 | export function checkSnapshot(root: string, expected: Record<string, string>) {
+20 |   assert(Object.keys(expected).length > 0, 'snapshot population');
+21 |   assert.deepEqual(inventory(root), expected, 'snapshot bytes and inventory');
+              ^
+AssertionError: snapshot bytes and inventory
++ actual - expected
+... Skipped lines
+
+  {
+    'browser-end.txt': '6c74dbfbe51b68a0e55667f3328f4e3248bb56d577930c89c985f7b4f040f775',
+-   'browser-install.log': '01d4a63fcf823f240cfbc3a5fe3499f4264166e657e17b8dd727179dd5c5d72a',
+    'browser-start.txt': '9dc6416241a29fb27c562922ee6614bb78ff20473fb3ea443d9eda11b7615aee',
+    'bun.lock': 'c72392ac61ccaa5e5824d8c1db13902b2797f3fc257b4930be798004f7abb3ad',
+    'events.jsonl': 'c8c283b7baa44635777eaff9992d3ee72d95b4c6a3ccbf84f9d021515f5230ff',
+    'failure-results/artifacts/.last-run.json': 'd5dfbf82c9d9045bc9df9730331e96de07bd97cd8c12c4e4601f334470867a27',
+    'failure-results/artifacts/setup-supplied-editing-and-Clear-qualification-only/error-context.md': 'fba0e9250a249bd7b4e53269ee73c73ecb8aabfc728dd709b0076eca9b470aac',
+...
+    'failure.exit': '4355a46b19d348dc2f57c046f8ef63d4538ebb936000f3c9ee954a27460dd865',
+-   'failure.log': 'b1e40119a2dbb05135ba15e86518559ea94f00023549b65707f37e42e484d332',
+-   'frozen-install.log': 'fd0ed41b0c44fe784d1f6033d9d7ba525304b0efab4033a0efbd0321244e82f3',
+    'install-end.txt': '21a9ce7ee8449e9463cf8e7bebd0344c0f704a51f35ace7fd28cc25c2c832662',
+    'install-start.txt': '6dfb445784a17dd606178c3315924d5f44cc3804ba96b929a553af0cee2ab449',
+    'install.exit': '9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa',
+-   'install.log': 'c6e652d5ba21156cbed3b29379db17252339ea27d3f8c569f97e14d0f6e00a04',
+-   'member-build-installed.log': '5d57acb5043b211a4394fc106f5f161cf36c1c3338316975337650e8a21f6c44',
+-   'member-build.log': '3e7b87700371103a7e001d5f4dc0da1489ab3ed6be9db660293972ecbfd59a89',
+-   'member-check-installed.log': 'f8add6e918afbb36329c71b90e40a2f4129935298756eb6960ad32b4832665d8',
+-   'member-check.log': '8e3f908cd14797445e732c83c04a815295c68ecb18e66f10da21c1fb3dd4bbc5',
+-   'member-install.log': '8d03b68878f5f7b8fa3a387af15eff20b35d2b7cc94f8e16fcbf831ffb1474cb',
+    'occupied-port.json': '999f9252ea1f2f690401022822aa220f32b482d3a4b6b073f1dc7e3702fe48bf',
+-   'occupied-port.log': '69ea2428e2cf5d7dfdd2251d126429290e985e58457c9113c9a5043e44b62765',
+    'occupied-port.mjs': 'd092f789485e54682da26593909da08e427366376c050af7d962693b6a486fc5',
+    'package.json': 'a7bbd954559a322d4cb7ab6a2c433fc2f0557980bb9d3b6b29075cddfb7fbfaa',
+-   'pi-install.log': '377eff1d995b58f84ac05b5c1544c3dd62c0ec2cec43ea5104d411e5f3e72bc5',
+    'process-final.txt': 'a779f9c27193dea9ab67f9db0a88e462d718fff374a9cb7c2d94b1672024ea7c',
+    'recording-audit.json': 'b433e3a94407b687a3ef9465a7f422796806368da9d6e93787b6c891c4442cf4',
+    'recording-launch-original.sh': '40115f7ceabd09db1b99afbc140424f988c5f47fb428c0f8a9e9ed828e320300',
+    'recording-prompt.txt': '189813110ae86e19ab443f2b0239dd7a77890cd39f97e75ebea62afca8349d70',
+-   'recording-stderr.log': 'ee2bfb6bb0649ecfbacca52f89cb1281bd384f2322bacb6d379f7bcae2538da0',
+    'recording.exit': '9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa',
+    'session.jsonl': '78ac60ba98e2fa5e1c426f9f48d7f2db15eb94e49b031834af2f51c708c87e89',
+    'setup.spec.ts.txt': '4a826853670a733539f3234a71e98d3a1b30a5239e289609c7718d505efe856e',
+    'success-results/artifacts/.last-run.json': '91d1c43004802cd49950d78eb11c8fa7d05da8ffffe219a8b13b2f561bc00903',
+    'success-results/playwright.json': '3cd8db26c026ae4be7dc757791ca2329f172c2cb9f3a0596d7cef40254b4e042',
+    'success.exit': '9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa',
+-   'success.log': 'a0d58e1aceeffe1e49c8708ef3b700ca7903dd2ab79807d7cae5fabe735b2d3d'
+  }
+
+      at innerFail (node:assert:48:32)
+      at deepStrictEqual (node:assert:152:14)
+      at checkSnapshot (/private/tmp/agentic-engineering-dogfood-loop-20260908-2012/s4-committed-archive/examples/note-persistence/evidence.ts:21:10)
+      at <anonymous> (/private/tmp/agentic-engineering-dogfood-loop-20260908-2012/s4-committed-archive/examples/note-persistence/evidence.test.ts:14:3)
+(fail) frozen supplied starter and complete S4 receipt population [2.76ms]
+(pass) stock recording retains an actual missing-file error and successful read [0.49ms]
+(pass) missing actual tool result and terminal event refuse [0.48ms]
+(pass) a changed served snapshot refuses, then untouched starter still passes [2.98ms]
+
+ 3 pass
+ 1 fail
+ 8 expect() calls
+Ran 4 tests across 1 file. [20.00ms]

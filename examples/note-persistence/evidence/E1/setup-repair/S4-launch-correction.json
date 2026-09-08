@@ -1,0 +1,12 @@
+{
+  "at": "2026-09-08T20:33:44.321Z",
+  "attempt": "E1",
+  "change": "Same implementation prompt through documented stock stdin rather than long argv; both task launches produced no session/header, same failure reproduced with --version; short argv and stdin --version pass. No model fallback, source repair, context addition or campaign reset.",
+  "scriptSha256": "241a733852d4bc5ad4876a2102b73bc6215b3b5fd5c80ce8234671b28f60825a",
+  "promptSha256": "0fa944dd6a9729f22cbd06e08be82a8eaea4148a820b92ceea5caf68ce75b028",
+  "priorFreeze": "d0791d5bd1d61e54339c1491aeb459568f671e909e69f8daec4c0ae79c431e34",
+  "subjectSeconds": 7.2,
+  "operatorLaunchCorrection": 1,
+  "modelCorrectivePrompts": 0,
+  "humanRefinements": 0
+}

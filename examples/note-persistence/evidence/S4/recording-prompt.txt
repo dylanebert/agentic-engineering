@@ -1,0 +1,1 @@
+This is setup recording qualification, not an engineering task. Use read to read missing.txt (which is intentionally absent), then use read to read sentinel.txt. Report the missing-file error and sentinel text. Do not inspect anything else, write files, plan, or implement anything.

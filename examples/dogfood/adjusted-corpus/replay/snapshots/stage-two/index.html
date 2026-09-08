@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Note</title>
+</head>
+<body>
+  <textarea id="note" rows="10" cols="60" placeholder="Write your note here..."></textarea>
+  <br>
+  <button id="clear" type="button">Clear</button>
+
+  <script>
+    const note = document.getElementById('note');
+    const clear = document.getElementById('clear');
+    const STORAGE_KEY = 'note-text';
+
+    // Restore saved text (including an empty note) on load.
+    note.value = localStorage.getItem(STORAGE_KEY) || '';
+
+    // Save on every edit.
+    note.addEventListener('input', () => {
+      localStorage.setItem(STORAGE_KEY, note.value);
+    });
+
+    clear.addEventListener('click', () => {
+      note.value = '';
+      // Persist the empty note so a reload keeps it empty.
+      localStorage.setItem(STORAGE_KEY, '');
+    });
+  </script>
+</body>
+</html>

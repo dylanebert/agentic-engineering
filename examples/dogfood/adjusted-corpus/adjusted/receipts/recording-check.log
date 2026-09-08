@@ -1,0 +1,13 @@
+spec {"requests":4,"tools":4,"toolErrors":0,"usage":{"input":9658,"output":1075,"cacheRead":0,"cacheWrite":0,"totalTokens":10733}} real 54.05
+user 0.59
+sys 0.16
+
+stage-one {"requests":8,"tools":7,"toolErrors":2,"usage":{"input":27604,"output":2164,"cacheRead":0,"cacheWrite":0,"totalTokens":29768}} real 88.47
+user 0.75
+sys 0.23
+
+stage-two {"requests":8,"tools":8,"toolErrors":1,"usage":{"input":39501,"output":4626,"cacheRead":0,"cacheWrite":0,"totalTokens":44127}} real 62.86
+user 0.83
+sys 0.23
+
+outside scratch exactly own extracted script; no preexisting bytes read by extraction

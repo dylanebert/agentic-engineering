@@ -1,0 +1,19 @@
+import { test, expect } from '@playwright/test';
+
+test('supplied editing and Clear; qualification only', async ({ page, browser }) => {
+  console.log('browser version', browser.version());
+  const response = await page.goto('/');
+  expect(response?.status()).toBe(200);
+  const note = page.getByRole('textbox');
+  await expect(note).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Clear', exact: true })).toHaveCount(1);
+  await expect(note).toHaveValue('');
+  await note.fill('Qualification line one\nQualification line two');
+  await expect(note).toHaveValue('Qualification line one\nQualification line two');
+  await page.getByRole('button', { name: 'Clear', exact: true }).click();
+  await expect(note).toHaveValue('');
+  expect((await page.request.get('/package.json')).status()).toBe(404);
+  if (process.env.QUALIFICATION_FAILURE === '1') {
+    expect('observed', 'deliberate setup qualification failure; not an E1 defect').toBe('forced failure');
+  }
+});

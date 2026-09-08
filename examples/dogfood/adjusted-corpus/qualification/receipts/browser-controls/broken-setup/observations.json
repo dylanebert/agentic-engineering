@@ -1,0 +1,40 @@
+[
+  {
+    "at": "2026-09-08T17:22:55.860Z",
+    "event": "start",
+    "root": "/tmp/saved-note-support-fwQW4L/controls/broken-setup",
+    "command": [
+      "node",
+      "/tmp/saved-note-support-fwQW4L/controls/absent-server.js",
+      "/tmp/saved-note-support-fwQW4L/controls/broken-setup",
+      "-a",
+      "127.0.0.1",
+      "-p",
+      "8765",
+      "-c-1"
+    ],
+    "origin": "http://127.0.0.1:8765",
+    "stage": 2,
+    "hashes": {},
+    "node": "v26.3.0",
+    "serverPid": 32567
+  },
+  {
+    "at": "2026-09-08T17:22:55.911Z",
+    "event": "error",
+    "message": "Error: instrument: static server failed to bind",
+    "outcome": "unavailable"
+  },
+  {
+    "at": "2026-09-08T17:22:55.911Z",
+    "event": "server-close",
+    "code": 1,
+    "signal": null
+  },
+  {
+    "at": "2026-09-08T17:22:55.911Z",
+    "event": "end",
+    "outcome": "unavailable",
+    "unchanged": true
+  }
+]

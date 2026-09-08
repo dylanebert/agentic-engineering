@@ -1,0 +1,25 @@
+bun test v1.4.0 (34cbb9a40)
+
+examples/dogfood/evidence.test.ts:
+(pass) nonempty stock corpus, frozen snapshots and completed process exits [4.30ms]
+(pass) recording qualifies a successful tool and deliberate error, not a task failure [0.22ms]
+(pass) missing result and missing terminal stream are rejected [0.71ms]
+(pass) a changed snapshot fails the actual filesystem reader [11.11ms]
+(pass) pilot starts from the frozen kit and browser results bind to unchanged stage sources [2.08ms]
+(pass) final observer lifecycle rechecks retain every original behavior and control outcome [0.57ms]
+(pass) all retained corpus bytes match the frozen artifact manifest [6.77ms]
+(pass) separated attempts start fresh and retain every recorded failure and browser boundary [36.91ms]
+(pass) finite reading maps all frozen sources and shows exact quotations and recipe [24.80ms]
+checker fixture unchanged: exit=0; 876 mapped sources accepted
+checker fixture removed-repair: exit=1; mapping source coverage/order/outcome refused
+checker fixture changed-outcome: exit=1; mapping source coverage/order/outcome refused
+(pass) checker-only mutations remove a real repair and change a browser outcome through the CLI [150.69ms]
+(pass) review omissions remain visible, with real deletion negatives [1.47ms]
+editorial fixture: snapshot pass; overwrite refused; cumulative=457; exhausted/missing timing refused; exit 7 preserved; zero model requests
+(pass) post-run editorial fixture executes snapshot, cumulative budget and exit recording commands, never a model [383.39ms]
+(pass) browser controls distinguish three defects from a setup failure [0.42ms]
+
+ 13 pass
+ 0 fail
+ 232 expect() calls
+Ran 13 tests across 1 file. [636.00ms]

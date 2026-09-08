@@ -1,0 +1,9 @@
+bun install v1.4.0 (34cbb9a40)
+Resolving dependencies
+Resolved, downloaded and extracted [44]
+Saved lockfile
+
++ @playwright/test@1.62.1
++ http-server@14.1.1
+
+52 packages installed [445.00ms]

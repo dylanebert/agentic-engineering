@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Note</title>
+</head>
+<body>
+  <textarea id="note" rows="10" cols="60" placeholder="Write your note here..."></textarea>
+  <br>
+  <button id="clear" type="button">Clear</button>
+
+  <script>
+    const note = document.getElementById('note');
+    const clear = document.getElementById('clear');
+
+    clear.addEventListener('click', () => {
+      note.value = '';
+    });
+  </script>
+</body>
+</html>

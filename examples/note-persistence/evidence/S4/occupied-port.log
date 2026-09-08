@@ -1,0 +1,9 @@
+2026-09-08T20:16:55.445Z pw:webserver HTTP GET: http://127.0.0.1:18765/
+2026-09-08T20:16:55.451Z pw:webserver HTTP Status: 200
+2026-09-08T20:16:55.451Z pw:webserver WebServer is already available
+2026-09-08T20:16:55.452Z pw:webserver Terminating the WebServer
+2026-09-08T20:16:55.452Z pw:webserver Terminated the WebServer
+Error: http://127.0.0.1:18765 is already used, make sure that nothing is running on the port/url or set reuseExistingServer:true in config.webServer.
+2026-09-08T20:16:55.453Z pw:webserver Terminating the WebServer
+2026-09-08T20:16:55.453Z pw:webserver Terminated the WebServer
+

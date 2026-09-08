@@ -1,0 +1,143 @@
+bun test v1.4.0 (34cbb9a40)
+
+../../../../../../private/tmp/dogfood-archive-red-B8XP6K/examples/dogfood/evidence.test.ts:
+(pass) nonempty stock corpus, frozen snapshots and completed process exits [4.33ms]
+(pass) recording qualifies a successful tool and deliberate error, not a task failure [0.23ms]
+(pass) missing result and missing terminal stream are rejected [0.76ms]
+(pass) a changed snapshot fails the actual filesystem reader [10.58ms]
+(pass) pilot starts from the frozen kit and browser results bind to unchanged stage sources [2.25ms]
+(pass) final observer lifecycle rechecks retain every original behavior and control outcome [2.38ms]
+16 |   visit(root);
+17 |   return files;
+18 | }
+19 | export function checkSnapshot(root: string, expected: Record<string, string>) {
+20 |   assert(Object.keys(expected).length > 0, 'snapshot population');
+21 |   assert.deepEqual(inventory(root), expected, 'snapshot bytes and inventory');
+              ^
+AssertionError: snapshot bytes and inventory
++ actual - expected
+... Skipped lines
+
+  {
+    'index.json': 'c4abba2019b18b516a9e40a2f1de55caecef88a31e78aee99f7550a2510dafd2',
+    'initial/README.md': 'd39a3f75e3728da2ab02c0e68eaf9065da87cebce080a9c07e4bf08c6cfc5222',
+    'initial/settings.json': 'fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b',
+    'initial/stage-one.txt': 'd21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770',
+...
+    'pilot/stage-one/browser/observations.json': 'befa7fb541d8b7fed92dcc16394eaa744d36b1b2f1e248a0a81bfb90c912a5bb',
+-   'pilot/stage-one/browser/server.log': 'db09be97d6f358dca7403c4c6c8b501a92580d191f01d156a07824b5a6c712f2',
+    'pilot/stage-one/end': '925671e6db16755f01ee3c0da0f70c452592d82beb3cd7a6ce7645753b3132c8',
+    'pilot/stage-one/events.jsonl': '3575583e8599b8b1255a1c360abf41a13ba77efa6592b3fec3fb871cacdc12bb',
+    'pilot/stage-one/exit': '9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa',
+    'pilot/stage-one/session.jsonl': '192c7255e0908fb7d1e37e5448fb03b15e74a726bd6d24d0a512fd63834e593e',
+    'pilot/stage-one/start': '52b6eb0897d7fcae776055272ace9a24148e8c77e8dce30d19fb36268e1f65d5',
+...
+    'pilot/stage-two/browser/saved-reload.png': 'd79e42c184e9092a4ab2de37d5b3e709802f43d17cf7a32ebd1514f07b3b0499',
+-   'pilot/stage-two/browser/server.log': 'a76191acee541ba696a372687edd6340df12b8efa53c720c7498e66ea753d8f4',
+    'pilot/stage-two/end': '507fa29a09f92b7233074a1c56d93e8510dc4089853bad76f61b694c4b85aca0',
+    'pilot/stage-two/events.jsonl': '7b1ba1ef143e88d6a3869c6730ac123755268e00d3f6f8179bceede66148d47b',
+    'pilot/stage-two/exit': '9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa',
+    'pilot/stage-two/session.jsonl': '5b5f541263c2bd1d49532a8cb6d7dba1e33e4e5a2ce22a1818f92d7e38296b3a',
+    'pilot/stage-two/start': '39b9cbf46012be61fb17499b084c665b2ebd3e5fa3115d5c30628bef847d5923',
+...
+    'pilot/transitions.jsonl': '9bfcde62a4eff9b8d5a2380acbf761c276a02280f43d37c7ce404014f4128d0b',
+-   'qualification/browser-qualification.log': 'a46a33be4077e059fbc54ab33bb8368c5305bca7528648ba7867a11aa64fbdab',
+    'qualification/browser/broken-setup/observations.json': '1c814ef323bc7ebc748883f8aef383b774fdd8914fdc9c9ee13588704134033f',
+-   'qualification/browser/broken-setup/server.log': '6846eb6e3d96580484efd971b9936507bda4585228e0df93ac814823f6fbc67e',
+    'qualification/browser/correct/clear-before-reload.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'qualification/browser/correct/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'qualification/browser/correct/edited-reload.png': '6ade8bbb080649c0eb0b3fea7a20ef5a4eea04deff015482464b4967dd6bcbcd',
+    'qualification/browser/correct/empty-reload.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+    'qualification/browser/correct/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+...
+    'qualification/browser/correct/saved-reload.png': '884ea7416ed56322f79c55f9277b019484dff0ff9a73300156144605f8f026d1',
+-   'qualification/browser/correct/server.log': 'b5eee93b3c6f96f1b9f071bfb2eae779326a5c49e149293734635bf111bb1a37',
+    'qualification/browser/missing-restore/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'qualification/browser/missing-restore/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+    'qualification/browser/missing-restore/multiline-edit.png': '51fa5f1e747ec49d806d1fb8513abd8b0b36ea037ad544701177fad1489394fe',
+    'qualification/browser/missing-restore/observations.json': '7272fe4ee7f78f7985bb93052d5906711b1105f542299c102b34061a7248d314',
+    'qualification/browser/missing-restore/saved-reload.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+-   'qualification/browser/missing-restore/server.log': 'b9e803bafac2e4ea200d59ee0c90325ef3ed6cb3706f9d6e0ca0d355e432a41b',
+    'qualification/browser/missing-save/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'qualification/browser/missing-save/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+    'qualification/browser/missing-save/multiline-edit.png': '51fa5f1e747ec49d806d1fb8513abd8b0b36ea037ad544701177fad1489394fe',
+    'qualification/browser/missing-save/observations.json': '8ac6f75999fd0e45d8a35d84739306324cb49110140bb43fe31a94c82fd012ec',
+    'qualification/browser/missing-save/saved-reload.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+-   'qualification/browser/missing-save/server.log': 'd2ddbbd5fd32641278a84e0dba8b483d07c9944b4321ecb90007dd9769fd0a8d',
+    'qualification/browser/nonpersisted-clear/clear-before-reload.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'qualification/browser/nonpersisted-clear/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'qualification/browser/nonpersisted-clear/edited-reload.png': '6ade8bbb080649c0eb0b3fea7a20ef5a4eea04deff015482464b4967dd6bcbcd',
+    'qualification/browser/nonpersisted-clear/empty-reload.png': '6ade8bbb080649c0eb0b3fea7a20ef5a4eea04deff015482464b4967dd6bcbcd',
+    'qualification/browser/nonpersisted-clear/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+...
+    'qualification/browser/nonpersisted-clear/saved-reload.png': '884ea7416ed56322f79c55f9277b019484dff0ff9a73300156144605f8f026d1',
+-   'qualification/browser/nonpersisted-clear/server.log': '390007cc77aff0468ae5bbb9f0cd6f25b223d1a0ad8c1c0132caa806a37ae166',
+    'qualification/canary.end': 'd6399bb459377294744d5303f6ef8259800ba887c32faec2210e827ed7f2a897',
+    'qualification/canary.exit': '9a271f2a916b0b6ee6cecb2426f0b3206ef074578be55d9bc94f6f3fe3ab86aa',
+    'qualification/canary.start': '8ecbbc0121ebc2ee200760d12e4bd625e1f28f55b2c7de8587518347bc5c5daf',
+    'qualification/canary.stderr.txt': 'a89e38e3165786eac20941be262aeea8a152352e3302da25979652b724b7d80b',
+    'qualification/controls/correct/index.html': '4e282a8084d184784810a4c983deae30fe46b35e9910efb92c16649955f27f10',
+...
+    'qualification/input/prompt.txt': 'e7084575860020711abbd35479b19f67c5998a20fb8df2b864428be2996253ec',
+-   'qualification/reader-install.log': '75e8da793955402f78d349e6a9d78a2c39017cc4bac67b9efa2a6a18fa3f8ba9',
+    'qualification/session.jsonl': '6d83f2c0a4f686e428a0d97823a84e6b0711f216fe7eacac6c39f3d91fb48385',
+    'rechecks/qualification/broken-setup/observations.json': 'b3bb02011f240d2f7cbddd0c101519f7a108863eab6488f1de4172ca44f64030',
+-   'rechecks/qualification/broken-setup/server.log': '6846eb6e3d96580484efd971b9936507bda4585228e0df93ac814823f6fbc67e',
+    'rechecks/qualification/correct/clear-before-reload.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'rechecks/qualification/correct/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'rechecks/qualification/correct/edited-reload.png': '6ade8bbb080649c0eb0b3fea7a20ef5a4eea04deff015482464b4967dd6bcbcd',
+    'rechecks/qualification/correct/empty-reload.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+    'rechecks/qualification/correct/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+...
+    'rechecks/qualification/correct/saved-reload.png': '884ea7416ed56322f79c55f9277b019484dff0ff9a73300156144605f8f026d1',
+-   'rechecks/qualification/correct/server.log': '01bb80f855fb6fea1dab94fdb47b025cc3487aa482bcbf8b0008d0948da035b5',
+    'rechecks/qualification/missing-restore/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'rechecks/qualification/missing-restore/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+    'rechecks/qualification/missing-restore/multiline-edit.png': '51fa5f1e747ec49d806d1fb8513abd8b0b36ea037ad544701177fad1489394fe',
+    'rechecks/qualification/missing-restore/observations.json': '4cfb70ea2ccd9e40c1f74d03b97140dfcfff32edad0b65849b939d46d58b1a2e',
+    'rechecks/qualification/missing-restore/saved-reload.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+-   'rechecks/qualification/missing-restore/server.log': '5a3cb99b96733d95f7842229bfbe6b1ba7cdfd4b94ae07fdd2ca16245a157aa7',
+    'rechecks/qualification/missing-save/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'rechecks/qualification/missing-save/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+    'rechecks/qualification/missing-save/multiline-edit.png': '51fa5f1e747ec49d806d1fb8513abd8b0b36ea037ad544701177fad1489394fe',
+    'rechecks/qualification/missing-save/observations.json': 'a56f49f8143b546525a5bfd9080dd64c5c92f0547f85bfc2754b72b9f1c38bb9',
+    'rechecks/qualification/missing-save/saved-reload.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+-   'rechecks/qualification/missing-save/server.log': 'e68a1e94fa9b240863692e147446a2acfdce56870c08770d4191340d5cdb2666',
+    'rechecks/qualification/nonpersisted-clear/clear-before-reload.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'rechecks/qualification/nonpersisted-clear/clear.png': 'fe0945c4d190f13f569e56b6a60a2af5cc03a7a7dfd0525f8661fb2642f72139',
+    'rechecks/qualification/nonpersisted-clear/edited-reload.png': '6ade8bbb080649c0eb0b3fea7a20ef5a4eea04deff015482464b4967dd6bcbcd',
+    'rechecks/qualification/nonpersisted-clear/empty-reload.png': '6ade8bbb080649c0eb0b3fea7a20ef5a4eea04deff015482464b4967dd6bcbcd',
+    'rechecks/qualification/nonpersisted-clear/empty-start.png': '80a837fd25144bc2628620e42135ca14f343b235a0c9579af685c1ca34bfda2a',
+...
+    'rechecks/qualification/nonpersisted-clear/saved-reload.png': '884ea7416ed56322f79c55f9277b019484dff0ff9a73300156144605f8f026d1',
+-   'rechecks/qualification/nonpersisted-clear/server.log': '407a7bfb90239e61c2cbe2ae19f3a4be35054a45a7bdb7a1bbbd59ed27285415',
+    'rechecks/stage-one/clear.png': '643b90349896a825de2b8edd808f723732c969a9373b22d2a02756b3a3a87046',
+    'rechecks/stage-one/empty-start.png': '146d59103568bcbdc371937fa75f28016cbb35d4f2d394912d65e8a99d6cc5c3',
+    'rechecks/stage-one/multiline-edit.png': '00716c4c6cd83f6f1fe2aeb823bc2b712d6dc7222e41d1a06f82a1d3e73b28db',
+    'rechecks/stage-one/observations.json': '67a3640f66d6a5c65d323046f41374c3659a1bcfd9f64acdd49662f85b402637',
+-   'rechecks/stage-one/server.log': '3a8fe2186af80ebc50c835a348ffc837f968844f3de663d3e9c9d69236f567d4',
+    'rechecks/stage-two/clear-before-reload.png': '643b90349896a825de2b8edd808f723732c969a9373b22d2a02756b3a3a87046',
+    'rechecks/stage-two/clear.png': '643b90349896a825de2b8edd808f723732c969a9373b22d2a02756b3a3a87046',
+    'rechecks/stage-two/edited-reload.png': 'd802fe0c5c85f9fb530559b8b802a21aadfaa7c1d53c34d8f38caa897e71ae0e',
+    'rechecks/stage-two/empty-reload.png': '146d59103568bcbdc371937fa75f28016cbb35d4f2d394912d65e8a99d6cc5c3',
+    'rechecks/stage-two/empty-start.png': '146d59103568bcbdc371937fa75f28016cbb35d4f2d394912d65e8a99d6cc5c3',
+...
+    'rechecks/stage-two/saved-reload.png': 'd79e42c184e9092a4ab2de37d5b3e709802f43d17cf7a32ebd1514f07b3b0499',
+-   'rechecks/stage-two/server.log': 'f01ecc7c4b5116d9f68c49b51eec86fcc9b40b5ff10960b239f5bc3652e93f1d',
+    'redactions.json': '009ec2a73f2c7378065521cb4815d80f56e016f80cc955812c6ff20ed32bdf15',
+    'runtime.json': '44e4b6a638b0a0f79e76157b2861a5b650340ab4bc97e24966c8d9dd2a44c6ab',
+    'setup/bun.lock': '9abdaf5c56bfa701065efe2e3dd8adc654e4e2b29d7a5442bd0ca1f230e38bb4',
+    'setup/package.json': '1fd8472868bcea5d30c23d068da0b6ddb3678d35c91a95cfabc9d50ebdf2cf85'
+  }
+
+      at innerFail (node:assert:48:32)
+      at deepStrictEqual (node:assert:152:14)
+      at checkSnapshot (/private/tmp/dogfood-archive-red-B8XP6K/examples/dogfood/evidence.ts:21:10)
+      at <anonymous> (/private/tmp/dogfood-archive-red-B8XP6K/examples/dogfood/evidence.test.ts:87:3)
+(fail) all retained corpus bytes match the frozen artifact manifest [9.46ms]
+(pass) browser controls distinguish three defects from a setup failure [0.29ms]
+
+ 7 pass
+ 1 fail
+ 87 expect() calls
+Ran 8 tests across 1 file. [49.00ms]

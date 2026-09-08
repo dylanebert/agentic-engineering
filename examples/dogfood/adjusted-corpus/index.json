@@ -1,0 +1,228 @@
+{
+  "attempts": [
+    {
+      "id": "adjusted",
+      "attempt": 2,
+      "condition": "separated-app-runtime",
+      "conversations": [
+        {
+          "id": "spec",
+          "requests": 4,
+          "tools": 4,
+          "toolErrors": 0,
+          "usage": {
+            "input": 9658,
+            "output": 1075,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "totalTokens": 10733
+          },
+          "reportedReasoning": 265,
+          "subjectWallSeconds": 54.05,
+          "exit": 0
+        },
+        {
+          "id": "stage-one",
+          "requests": 8,
+          "tools": 7,
+          "toolErrors": 2,
+          "usage": {
+            "input": 27604,
+            "output": 2164,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "totalTokens": 29768
+          },
+          "reportedReasoning": 381,
+          "subjectWallSeconds": 88.47,
+          "exit": 0
+        },
+        {
+          "id": "stage-two",
+          "requests": 8,
+          "tools": 8,
+          "toolErrors": 1,
+          "usage": {
+            "input": 39501,
+            "output": 4626,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "totalTokens": 44127
+          },
+          "reportedReasoning": 1713,
+          "subjectWallSeconds": 62.86,
+          "exit": 0
+        }
+      ],
+      "correctiveFollowUps": 0,
+      "subjectWallSeconds": 205.38,
+      "billing": "unknown",
+      "publicProviderParity": "unverified",
+      "contextAudit": "No recorded prior-context/solution access. Work-only-in-folder violated by own extracted /tmp/note-script.js; bytes exactly own script. No strict folder compliance claim."
+    },
+    {
+      "id": "replay",
+      "attempt": 3,
+      "condition": "separated-app-runtime",
+      "conversations": [
+        {
+          "id": "spec",
+          "requests": 4,
+          "tools": 4,
+          "toolErrors": 0,
+          "usage": {
+            "input": 9329,
+            "output": 1023,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "totalTokens": 10352
+          },
+          "reportedReasoning": 204,
+          "subjectWallSeconds": 17.14,
+          "exit": 0
+        },
+        {
+          "id": "stage-one",
+          "requests": 7,
+          "tools": 6,
+          "toolErrors": 0,
+          "usage": {
+            "input": 23150,
+            "output": 1635,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "totalTokens": 24785
+          },
+          "reportedReasoning": 532,
+          "subjectWallSeconds": 27.22,
+          "exit": 0
+        },
+        {
+          "id": "stage-two",
+          "requests": 7,
+          "tools": 8,
+          "toolErrors": 1,
+          "usage": {
+            "input": 26338,
+            "output": 3194,
+            "cacheRead": 0,
+            "cacheWrite": 0,
+            "totalTokens": 29532
+          },
+          "reportedReasoning": 700,
+          "subjectWallSeconds": 53.43,
+          "exit": 0
+        }
+      ],
+      "correctiveFollowUps": 0,
+      "subjectWallSeconds": 97.78999999999999,
+      "billing": "unknown",
+      "publicProviderParity": "unverified",
+      "contextAudit": "All recorded file reads/counts/process substitutions use own app and supplied prompts. No recorded prior-context/solution access; not containment."
+    }
+  ],
+  "qualification": {
+    "requests": 2,
+    "tools": 2,
+    "toolErrors": 1,
+    "usage": {
+      "input": 3607,
+      "output": 235,
+      "cacheRead": 0,
+      "cacheWrite": 0,
+      "totalTokens": 3842
+    },
+    "subjectWallSeconds": 6.26
+  },
+  "kit": {
+    "app/stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+    "app/stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+    "app/task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863",
+    "README.md": "11f441c1e5a5a4e6fd65ff67efb5011410da5e479af65c45ab91d3a5191549e2",
+    "settings.json": "fbbd9ef1679904dedddae25b530d43824d062a0d635529fa4e5edd9e74e8919b"
+  },
+  "snapshots": [
+    {
+      "id": "adjusted/before-spec",
+      "path": "adjusted/snapshots/before-spec",
+      "hashes": {
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "adjusted/after-spec",
+      "path": "adjusted/snapshots/after-spec",
+      "hashes": {
+        "SPEC.md": "b9f380f2b0928ea3c883132641ac7e1468bccf93bd4210362fcd98d78571f226",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "adjusted/stage-one",
+      "path": "adjusted/snapshots/stage-one",
+      "hashes": {
+        "index.html": "4e38f0468e342b602ae04433abe031c501434900dee7b286ac049c338098a07e",
+        "SPEC.md": "b9f380f2b0928ea3c883132641ac7e1468bccf93bd4210362fcd98d78571f226",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "adjusted/stage-two",
+      "path": "adjusted/snapshots/stage-two",
+      "hashes": {
+        "index.html": "b3f40dc6fe5cc7bef721c44b0e33fbc704423d191e517791ee3f13a4a3d50771",
+        "SPEC.md": "b9f380f2b0928ea3c883132641ac7e1468bccf93bd4210362fcd98d78571f226",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "replay/before-spec",
+      "path": "replay/snapshots/before-spec",
+      "hashes": {
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "replay/after-spec",
+      "path": "replay/snapshots/after-spec",
+      "hashes": {
+        "SPEC.md": "65e7e4037729bf71457c5d8682699eb1e06b21b341c89c1608acbde70227e231",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "replay/stage-one",
+      "path": "replay/snapshots/stage-one",
+      "hashes": {
+        "index.html": "fcc11b32e2fc3cadae93af7ac036ff42b319e4a11024b989da4925b6310f5ca9",
+        "SPEC.md": "65e7e4037729bf71457c5d8682699eb1e06b21b341c89c1608acbde70227e231",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    },
+    {
+      "id": "replay/stage-two",
+      "path": "replay/snapshots/stage-two",
+      "hashes": {
+        "index.html": "01b30eda9603df8266105d4e89a508f88f55c1683f12082e5fe8db4b91018f0a",
+        "SPEC.md": "65e7e4037729bf71457c5d8682699eb1e06b21b341c89c1608acbde70227e231",
+        "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+        "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+        "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+      }
+    }
+  ]
+}

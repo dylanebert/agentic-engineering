@@ -1,0 +1,62 @@
+bun test v1.4.0 (34cbb9a40)
+
+examples/dogfood/evidence.test.ts:
+34 |   const messages = session.filter(e => e.type === 'message').map(e => e.message);
+35 |   assert(messages.some(m => m.role === 'user'), 'prompt population');
+36 |   const assistants = messages.filter(m => m.role === 'assistant');
+37 |   assert(assistants.length > 0, 'request population');
+38 |   assert.equal(assistants.at(-1).stopReason, 'stop', 'terminal assistant');
+39 |   assert.equal(events.at(-1)?.type, 'agent_end', 'terminal event');
+              ^
+AssertionError: terminal event
++ actual - expected
+
++ 'agent_settled'
+- 'agent_end'
+         ^
+
+      at innerFail (node:assert:48:32)
+      at strictEqual (node:assert:179:14)
+      at checkRecording (/Users/dylan.ebert/kex-wt/kex-agentic-engineering-dogfood-pilot/projects/agentic-engineering/examples/dogfood/evidence.ts:39:10)
+      at <anonymous> (/Users/dylan.ebert/kex-wt/kex-agentic-engineering-dogfood-pilot/projects/agentic-engineering/examples/dogfood/evidence.test.ts:14:20)
+(fail) nonempty stock corpus, frozen snapshots and completed process exits [0.90ms]
+34 |   const messages = session.filter(e => e.type === 'message').map(e => e.message);
+35 |   assert(messages.some(m => m.role === 'user'), 'prompt population');
+36 |   const assistants = messages.filter(m => m.role === 'assistant');
+37 |   assert(assistants.length > 0, 'request population');
+38 |   assert.equal(assistants.at(-1).stopReason, 'stop', 'terminal assistant');
+39 |   assert.equal(events.at(-1)?.type, 'agent_end', 'terminal event');
+              ^
+AssertionError: terminal event
++ actual - expected
+
++ 'agent_settled'
+- 'agent_end'
+         ^
+
+      at innerFail (node:assert:48:32)
+      at strictEqual (node:assert:179:14)
+      at checkRecording (/Users/dylan.ebert/kex-wt/kex-agentic-engineering-dogfood-pilot/projects/agentic-engineering/examples/dogfood/evidence.ts:39:10)
+      at <anonymous> (/Users/dylan.ebert/kex-wt/kex-agentic-engineering-dogfood-pilot/projects/agentic-engineering/examples/dogfood/evidence.test.ts:22:18)
+(fail) recording qualifies a successful tool and deliberate error, not a task failure [0.19ms]
+29 | 
+30 | test('missing result and missing terminal stream are rejected', () => {
+31 |   const session = jsonl(join(root, 'qualification/session.jsonl'));
+32 |   const events = jsonl(join(root, 'qualification/events.jsonl'));
+33 |   const omitted = session.find(e => e.message?.role === 'toolResult');
+34 |   expect(() => checkRecording(session.filter(e => e !== omitted), events)).toThrow('tool result population');
+                                                                                ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "tool result population"
+Received message: "terminal event\n+ actual - expected\n\n+ 'agent_settled'\n- 'agent_end'\n         ^\n"
+
+      at <anonymous> (/Users/dylan.ebert/kex-wt/kex-agentic-engineering-dogfood-pilot/projects/agentic-engineering/examples/dogfood/evidence.test.ts:34:76)
+(fail) missing result and missing terminal stream are rejected [0.22ms]
+(pass) a changed snapshot fails the actual filesystem reader [2.98ms]
+(pass) browser controls distinguish three defects from a setup failure [9.42ms]
+
+ 2 pass
+ 3 fail
+ 19 expect() calls
+Ran 5 tests across 1 file. [24.00ms]

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Note</title>
+</head>
+<body>
+  <h1>Note</h1>
+  <label for="note">Your note</label>
+  <textarea id="note" rows="8" cols="40"></textarea>
+  <button id="clear" type="button">Clear</button>
+  <script>
+    const note = document.querySelector('#note');
+    const storageKey = 'note';
+    note.value = localStorage.getItem(storageKey) ?? '';
+    note.addEventListener('input', () => {
+      localStorage.setItem(storageKey, note.value);
+    });
+    document.querySelector('#clear').addEventListener('click', () => {
+      note.value = '';
+      localStorage.setItem(storageKey, '');
+    });
+  </script>
+</body>
+</html>

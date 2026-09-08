@@ -1,0 +1,65 @@
+{
+  "header": {
+    "type": "session",
+    "version": 3,
+    "id": "01a082b1-3d9f-75c7-92b8-27738931b104",
+    "timestamp": "2026-09-08T20:24:08.863Z",
+    "cwd": "/private/tmp/agentic-engineering-dogfood-loop-20260908-2012/qualification/recording-task"
+  },
+  "entries": 9,
+  "operations": [
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_e8iBbNeGCb97eKiMUk420qKt|fc_04d986e4096b1de3016aa06eea0a7c87d291642b3dd56bb30b",
+      "toolName": "read",
+      "args": {
+        "path": "missing.txt",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_end",
+      "toolCallId": "call_e8iBbNeGCb97eKiMUk420qKt|fc_04d986e4096b1de3016aa06eea0a7c87d291642b3dd56bb30b",
+      "toolName": "read",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "ENOENT: no such file or directory, access '/private/tmp/agentic-engineering-dogfood-loop-20260908-2012/qualification/recording-task/missing.txt'"
+          }
+        ],
+        "details": {}
+      },
+      "isError": true
+    },
+    {
+      "type": "tool_execution_start",
+      "toolCallId": "call_yBzvGT6dsXwX8hknkfiXQPfW|fc_04d986e4096b1de3016aa06eeb34e487d2b4196b1981fd7311",
+      "toolName": "read",
+      "args": {
+        "path": "sentinel.txt",
+        "offset": 1,
+        "limit": 2000
+      }
+    },
+    {
+      "type": "tool_execution_end",
+      "toolCallId": "call_yBzvGT6dsXwX8hknkfiXQPfW|fc_04d986e4096b1de3016aa06eeb34e487d2b4196b1981fd7311",
+      "toolName": "read",
+      "result": {
+        "content": [
+          {
+            "type": "text",
+            "text": "stock-recording-qualified\n"
+          }
+        ]
+      },
+      "isError": false
+    }
+  ],
+  "terminal": {
+    "type": "agent_settled"
+  },
+  "timing": "real 4.39\nuser 0.52\nsys 0.12\n"
+}

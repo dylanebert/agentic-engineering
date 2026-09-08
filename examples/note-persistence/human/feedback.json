@@ -1,0 +1,25 @@
+{
+  "date": "2026-09-08",
+  "source": "Dylan's conversation, relayed in the same-owner revision brief",
+  "functionalQuote": "it works.",
+  "functionalOutcome": "confirmed by actual use",
+  "readingCommit": "0b266edc701e3e37c71c3bb1a7ad2d91643a630b",
+  "readingQuote": "oh i found it. it's a little bit in the weeds. look at the writing style of the rest of our blog post. consdier our principles - conciseness, progressive disclosure, multimodal reinforcement, everything being earned. revise.",
+  "educationalOutcome": "both standalone readings rejected; review mechanism retired",
+  "revisedReadingCommit": "0b90c9f8a7bf3bf3e6f37c4cb5bf2aa45dd16caf",
+  "revisedReadingQuote": "I'm not reading all that. it looks like your own internal notes. why should I care? my judgement should be on the structure of what's presented in the blog post.",
+  "functionalVerbatim": "it works",
+  "structuralAcceptance": false,
+  "codeRefinementRequested": false,
+  "additionalE1Seconds": 0,
+  "access": {
+    "operator": "coordinator, not experimental subject",
+    "userSeat": "Omarchy",
+    "route": "Mac static server through SSH reverse tunnel to Omarchy loopback",
+    "tunnel": "ssh -R 127.0.0.1:18765:127.0.0.1:18765 omarchy",
+    "boundedSeconds": 300,
+    "browserOpenedBy": "remote xdg-open",
+    "exactBrowserEngine": "not established"
+  },
+  "followOn": "The separately scoped article-structure delivery owns the next in-post human look. No structural or visual acceptance, polished state or further experimental run is authorized by this record."
+}

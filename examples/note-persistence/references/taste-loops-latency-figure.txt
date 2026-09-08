@@ -1,0 +1,62 @@
+capture: projects/taste-loops src/lib/LatencyFigure.svelte @ 78ea88c (lines 1-60 of 187)
+
+<script lang="ts">
+  // Adapted from Inception's Mercury parallel-vs-sequential viz, restated for round count: the fast
+  // lane completes a judged proposal every beat (chip appears, the accent pop is the verdict) while
+  // the frontier lane's single proposal barely fills before the loop restarts. Timing is
+  // illustrative, not literal; the fast lane must look fast, and seconds are never prescribed. The
+  // motion carries the claim; the caption is the only explanation. Loops while on-screen (operator
+  // direction supersedes play-once-then-still for this figure); reduced motion gets the fully-drawn
+  // resting state: fast lane judged, frontier lane partial.
+
+  const chips = [1, 2, 3, 4, 5, 6, 7, 8];
+  const beat = 300; // ms per fast proposal, illustrative
+  const judgeAt = 0.68; // fraction of the beat when the verdict lands
+  const loop = 3600; // full row lands by ~2.6 s, then a brief hold before restart
+  const frontierSpan = 25000; // scaled so the frontier bar is only ~14% filled at loop restart
+
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let elapsed = $state(0);
+  let root: HTMLElement;
+
+  $effect(() => {
+    if (reduced) return;
+    let raf = 0;
+    let last = 0;
+    const tick = (t: number) => {
+      if (last) elapsed = (elapsed + t - last) % loop;
+      last = t;
+      raf = requestAnimationFrame(tick);
+    };
+    const io = new IntersectionObserver(
+      ([e]) => {
+        cancelAnimationFrame(raf);
+        if (e.isIntersecting) {
+          last = 0;
+          raf = requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.2 },
+    );
+    io.observe(root);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+    };
+  });
+
+  function chip(i: number): "pending" | "proposing" | "judged" {
+    if (reduced) return "judged";
+    const t = elapsed - i * beat;
+    if (t < 0) return "pending";
+    return t < beat * judgeAt ? "proposing" : "judged";
+  }
+
+  const fill = $derived(
+    reduced ? (chips.length * beat) / frontierSpan : elapsed / frontierSpan,
+  );
+</script>
+
+<div class="fig" bind:this={root}>
+  <div class="lane">

@@ -1,0 +1,22 @@
+Starting up http-server, serving app
+
+http-server version: 14.1.1
+
+http-server settings: 
+CORS: disabled
+Cache: -1 seconds
+Connection Timeout: 120 seconds
+Directory Listings: visible
+AutoIndex: visible
+Serve GZIP Files: false
+Serve Brotli Files: false
+Default File Extension: none
+
+Available on:
+  http://127.0.0.1:18765
+Hit CTRL-C to stop the server
+
+[2026-09-08T20:55:11.379Z]  "GET /" "node"
+[2026-09-08T20:55:11.386Z]  "GET /package.json" "node"
+[2026-09-08T20:55:11.387Z]  "GET /package.json" Error (404): "Not found"
+http-server stopped.

@@ -1,0 +1,5 @@
+campaign {"at":"2026-09-08T17:28:42.636Z","event":"launch-request","runner":55581,"cohort":"plain","options":{}}
+campaign {"at":"2026-09-08T17:28:42.956Z","event":"launch","runner":55581,"cohort":"plain","pid":55603,"options":{}}
+campaign {"at":"2026-09-08T17:28:43.925Z","event":"close-request","runner":55581,"pid":55603}
+campaign {"at":"2026-09-08T17:28:43.939Z","event":"close","runner":55581,"pid":55603,"alive":false}
+behavior: pass
