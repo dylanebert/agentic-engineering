@@ -793,8 +793,9 @@ for (const view of views) {
     assertion(band.offCenter, "predicate:capture-2.4").toBeLessThanOrEqual(0.5);
 
     await page.evaluate(() => document.fonts.ready);
-    // Always write the portable capture first, then compare only on the stamped seat. A WSL
-    // capture runs on Windows and has no Darwin golden by design.
+    // Always write the portable capture first, then compare only on the stamped seat. The
+    // golden is stamped on the Mac (chromium-darwin); a run on this workspace's other seat,
+    // Omarchy, writes the capture and skips the comparison by design.
     await page.screenshot({ path: join(root, view.name), fullPage: true });
     const seat = `${testInfo.project.name}-${process.platform}`;
     if (seat === `${goldenBrowser}-${goldenPlatform}`) {
