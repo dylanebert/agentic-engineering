@@ -109,7 +109,7 @@
 
   <footer class="foot">
     <p class="aside">
-      Check out the <a href="https://www.youtube.com/c/IndividualKex">video version</a>.
+      Check out the <a href="https://www.youtube.com/watch?v=CLLp3ey-9VI">video version</a>.
     </p>
   </footer>
 </article>
