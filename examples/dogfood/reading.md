@@ -139,7 +139,7 @@ The saved note is small enough to inspect, with a useful persistence boundary: c
 
 I would place this beside the article's loop and verification sections: task, model spec, first implementation/check, persistence change, failed simulation/repair, then actual browser result. Keep setup, the rejected original condition and attempt comparison discoverable beside that sequence. Static source-linked blocks and screenshots are sufficient for this first reading. No player, live API or production page change is implied.
 
-The [reference comparison](comparison.md) covers prose and reading order, not a visual style or synthetic taste score. A fresh reviewer must check whether this compression hides consequential work. Dylan owns whether the example is useful for a beginner. That verdict has not happened.
+The [reference comparison](comparison.md) covers prose and reading order, not a visual style or synthetic taste score. Fresh fidelity review found missing setup detail and an omitted original-test limit. This reading includes the owner's known repairs; no second review or subject run was needed. Dylan owns whether the example is useful for a beginner. That educational verdict has not happened.
 
 ## Runnable Appendix
 
