@@ -20,6 +20,29 @@ export function checkSnapshot(root: string, expected: Record<string, string>) {
   assert(Object.keys(expected).length > 0, 'snapshot population');
   assert.deepEqual(inventory(root), expected, 'snapshot bytes and inventory');
 }
+export function checkBrowserReport(report: any, failingTitle?: string, observedValue?: string) {
+  assert.equal(report.stats.skipped, 0, 'no skipped assertions');
+  assert.equal(report.stats.flaky, 0, 'no retry success');
+  assert.equal(report.stats.expected, failingTitle ? 3 : 4, 'passing test population');
+  assert.equal(report.stats.unexpected, failingTitle ? 1 : 0, 'failing test population');
+  const specs = report.suites.flatMap((suite: any) => suite.specs);
+  assert.equal(specs.length, 4, 'test population');
+  const failed: any[] = [];
+  for (const spec of specs) {
+    assert.equal(spec.tests.length, 1, 'project population');
+    assert.equal(spec.tests[0].results.length, 1, 'single execution per test');
+    const result = spec.tests[0].results[0];
+    if (result.status === 'failed') failed.push({ title: spec.title, error: result.error });
+    else assert.equal(result.status, 'passed', 'executed test');
+  }
+  assert.equal(failed.length, failingTitle ? 1 : 0, 'failure population');
+  if (failingTitle) {
+    assert.equal(failed[0].title, failingTitle, 'red requirement');
+    const message = failed[0].error.message.replace(/\u001b\[[0-9;]*m/g, '');
+    assert(message.includes('toHaveValue'), 'red DOM predicate');
+    assert(message.includes(`Received: ${observedValue}`) || message.includes(`Received:  ${observedValue}`), 'red observed value');
+  }
+}
 export function jsonl(path: string): any[] {
   const text = readFileSync(path, 'utf8');
   assert(text.endsWith('\n'), 'unterminated JSONL');

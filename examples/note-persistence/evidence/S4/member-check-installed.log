@@ -1,0 +1,5 @@
+$ svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json
+Loading svelte-check in workspace: /Users/dylan.ebert/kex-wt/kex-agentic-engineering-dogfood-extend-note/projects/agentic-engineering
+Getting Svelte diagnostics...
+
+svelte-check found 0 errors and 0 warnings

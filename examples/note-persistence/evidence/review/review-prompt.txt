@@ -1,0 +1,5 @@
+You are the one fresh read-only reviewer of this bounded worked example. Which requirement, test assumption or completion claim is unsupported, and what observable would expose it?
+
+Read reading.md and detail.md, then the request/spec, supplied and final app, actual tests and recorded browser results. Challenge shared implementer/test assumptions, especially empty being treated as missing, and whether the short account hides supplied expert work, startup rescues, failures or limits. One no-finding result is legitimate. Do not require a bug, broader storage semantics or other browser engines excluded by the request. Human use is genuinely pending; do not invent it.
+
+The corpus contains only this new condition. You may inspect the retained new source receipts as needed. You have only read tools: do not write, repair, invoke models, browse outside URLs or inspect parent directories, environment, sessions outside this corpus, credentials or other projects. Return concrete consequential findings, if any, with their file/evidence and an observable check; distinguish limitations already disclosed from defects. Finish once, without a review-until-green loop.

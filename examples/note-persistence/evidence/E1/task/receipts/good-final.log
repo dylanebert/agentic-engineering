@@ -1,0 +1,61 @@
+2026-09-08T20:35:22.746Z pw:webserver HTTP GET: http://127.0.0.1:18765/
+2026-09-08T20:35:22.750Z pw:webserver Error while checking if http://127.0.0.1:18765/ is available: connect ECONNREFUSED 127.0.0.1:18765
+2026-09-08T20:35:22.751Z pw:webserver Starting WebServer process node node_modules/http-server/bin/http-server app -a 127.0.0.1 -p 18765 -c-1...
+2026-09-08T20:35:22.752Z pw:webserver Process started
+2026-09-08T20:35:22.752Z pw:webserver Waiting for availability...
+2026-09-08T20:35:22.752Z pw:webserver HTTP GET: http://127.0.0.1:18765/
+2026-09-08T20:35:22.753Z pw:webserver Error while checking if http://127.0.0.1:18765/ is available: connect ECONNREFUSED 127.0.0.1:18765
+2026-09-08T20:35:22.753Z pw:webserver Waiting 100ms
+[WebServer] Starting up http-server, serving app
+[WebServer] 
+[WebServer] http-server version: 14.1.1
+[WebServer] 
+[WebServer] http-server settings: 
+[WebServer] CORS: disabled
+[WebServer] Cache: -1 seconds
+[WebServer] Connection Timeout: 120 seconds
+[WebServer] Directory Listings: visible
+[WebServer] AutoIndex: visible
+[WebServer] Serve GZIP Files: false
+[WebServer] Serve Brotli Files: false
+[WebServer] Default File Extension: none
+[WebServer] 
+[WebServer] Available on:
+[WebServer]   http://127.0.0.1:18765
+[WebServer] Hit CTRL-C to stop the server
+[WebServer] 
+2026-09-08T20:35:22.853Z pw:webserver HTTP GET: http://127.0.0.1:18765/
+[WebServer] [2026-09-08T20:35:22.855Z]  "GET /" "undefined"
+2026-09-08T20:35:22.858Z pw:webserver HTTP Status: 200
+2026-09-08T20:35:22.858Z pw:webserver WebServer available
+
+Running 4 tests using 1 worker
+
+2026-09-08T20:35:23.056Z pw:browser <launching> /tmp/agentic-engineering-dogfood-loop-20260908-2012/acquired-starter/browsers/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/tmp/agentic-engineering-dogfood-loop-20260908-2012/support/tmp/playwright_chromiumdev_profile-zftJy0 --remote-debugging-pipe --no-startup-window
+2026-09-08T20:35:23.059Z pw:browser <launched> pid=72171
+[WebServer] [2026-09-08T20:35:23.157Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.171Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+  ✓  1 tests/note.spec.ts:10:1 › fresh context has one empty textbox and one Clear button (90ms)
+[WebServer] [2026-09-08T20:35:23.245Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.257Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+  ✓  2 tests/note.spec.ts:17:1 › multiline editing and Clear work (107ms)
+[WebServer] [2026-09-08T20:35:23.355Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.366Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.383Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.399Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+  ✓  3 tests/note.spec.ts:26:1 › text survives reload and replacement survives reload (100ms)
+[WebServer] [2026-09-08T20:35:23.460Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.471Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.504Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+[WebServer] [2026-09-08T20:35:23.537Z]  "GET /" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36"
+  ✓  4 tests/note.spec.ts:37:1 › Clear survives reload and another Clear/reload remains empty (139ms)
+2026-09-08T20:35:23.568Z pw:browser [pid=72171] <gracefully close start>
+2026-09-08T20:35:23.576Z pw:browser [pid=72171] <process did exit: exitCode=0, signal=null>
+2026-09-08T20:35:23.576Z pw:browser [pid=72171] starting temporary directories cleanup
+2026-09-08T20:35:23.578Z pw:browser [pid=72171] finished temporary directories cleanup
+2026-09-08T20:35:23.578Z pw:browser [pid=72171] <gracefully close end>
+2026-09-08T20:35:23.587Z pw:webserver Terminating the WebServer
+[WebServer] http-server stopped.
+2026-09-08T20:35:23.589Z pw:webserver Terminated the WebServer
+
+  4 passed (845ms)

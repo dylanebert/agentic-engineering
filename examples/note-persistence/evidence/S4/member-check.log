@@ -1,0 +1,3 @@
+$ svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json
+/opt/homebrew/bin/bash: line 1: svelte-check: command not found
+error: script "check" exited with code 127
