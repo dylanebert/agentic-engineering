@@ -1,0 +1,13 @@
+{
+  "at": "2026-09-08T17:31:11.088Z",
+  "source": "/tmp/saved-note-app-eqs1Xg",
+  "root": "/tmp/saved-note-support-Hnfer3/snapshots/stage-two",
+  "hashes": {
+    "index.html": "01b30eda9603df8266105d4e89a508f88f55c1683f12082e5fe8db4b91018f0a",
+    "SPEC.md": "65e7e4037729bf71457c5d8682699eb1e06b21b341c89c1608acbde70227e231",
+    "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+    "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+    "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+  },
+  "excluded": []
+}

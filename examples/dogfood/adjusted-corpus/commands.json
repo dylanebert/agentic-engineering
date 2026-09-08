@@ -1,0 +1,50 @@
+[
+  {
+    "attempt": "adjusted",
+    "stage": "spec",
+    "root": "/tmp/saved-note-app-7sXV1g",
+    "remaining": 600,
+    "transcription": "Exact launched command shape; shell start/end/exit files retained beside stock session. No custom runtime.",
+    "command": "/usr/bin/time -p -o /tmp/saved-note-support-wmwflV/records/spec/time.txt /opt/homebrew/bin/gtimeout --signal=TERM --kill-after=5 600 env -i HOME=/tmp/saved-note-support-wmwflV/home PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin PI_CODING_AGENT_DIR=/tmp/saved-note-support-wmwflV/config PI_OFFLINE=1 PI_TELEMETRY=0 /opt/homebrew/bin/node /tmp/saved-note-support-wmwflV/tools/node_modules/@earendil-works/pi-coding-agent/dist/cli.js --no-approve --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --tools read,bash,edit,write --model ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731 --thinking max --session-dir /tmp/saved-note-support-wmwflV/records/spec --mode json -p @task.txt > /tmp/saved-note-support-wmwflV/records/spec/events.jsonl 2> /tmp/saved-note-support-wmwflV/records/spec/stderr.txt"
+  },
+  {
+    "attempt": "adjusted",
+    "stage": "stage-one",
+    "root": "/tmp/saved-note-app-7sXV1g",
+    "remaining": 545,
+    "transcription": "Exact launched command shape; shell start/end/exit files retained beside stock session. No custom runtime.",
+    "command": "/usr/bin/time -p -o /tmp/saved-note-support-wmwflV/records/stage-one/time.txt /opt/homebrew/bin/gtimeout --signal=TERM --kill-after=5 545 env -i HOME=/tmp/saved-note-support-wmwflV/home PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin PI_CODING_AGENT_DIR=/tmp/saved-note-support-wmwflV/config PI_OFFLINE=1 PI_TELEMETRY=0 /opt/homebrew/bin/node /tmp/saved-note-support-wmwflV/tools/node_modules/@earendil-works/pi-coding-agent/dist/cli.js --no-approve --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --tools read,bash,edit,write --model ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731 --thinking max --session-dir /tmp/saved-note-support-wmwflV/records/stage-one --mode json -p @stage-one.txt > /tmp/saved-note-support-wmwflV/records/stage-one/events.jsonl 2> /tmp/saved-note-support-wmwflV/records/stage-one/stderr.txt"
+  },
+  {
+    "attempt": "adjusted",
+    "stage": "stage-two",
+    "root": "/tmp/saved-note-app-7sXV1g",
+    "remaining": 457,
+    "transcription": "Exact launched command shape; shell start/end/exit files retained beside stock session. No custom runtime.",
+    "command": "/usr/bin/time -p -o /tmp/saved-note-support-wmwflV/records/stage-two/time.txt /opt/homebrew/bin/gtimeout --signal=TERM --kill-after=5 457 env -i HOME=/tmp/saved-note-support-wmwflV/home PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin PI_CODING_AGENT_DIR=/tmp/saved-note-support-wmwflV/config PI_OFFLINE=1 PI_TELEMETRY=0 /opt/homebrew/bin/node /tmp/saved-note-support-wmwflV/tools/node_modules/@earendil-works/pi-coding-agent/dist/cli.js --no-approve --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --tools read,bash,edit,write --model ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731 --thinking max --session-dir /tmp/saved-note-support-wmwflV/records/stage-two --mode json -p @stage-two.txt > /tmp/saved-note-support-wmwflV/records/stage-two/events.jsonl 2> /tmp/saved-note-support-wmwflV/records/stage-two/stderr.txt"
+  },
+  {
+    "attempt": "replay",
+    "stage": "spec",
+    "root": "/tmp/saved-note-app-eqs1Xg",
+    "remaining": 600,
+    "transcription": "Exact launched command shape; shell start/end/exit files retained beside stock session. No custom runtime.",
+    "command": "/usr/bin/time -p -o /tmp/saved-note-support-Hnfer3/records/spec/time.txt /opt/homebrew/bin/gtimeout --signal=TERM --kill-after=5 600 env -i HOME=/tmp/saved-note-support-Hnfer3/home PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin PI_CODING_AGENT_DIR=/tmp/saved-note-support-Hnfer3/config PI_OFFLINE=1 PI_TELEMETRY=0 /opt/homebrew/bin/node /tmp/saved-note-support-Hnfer3/tools/node_modules/@earendil-works/pi-coding-agent/dist/cli.js --no-approve --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --tools read,bash,edit,write --model ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731 --thinking max --session-dir /tmp/saved-note-support-Hnfer3/records/spec --mode json -p @task.txt > /tmp/saved-note-support-Hnfer3/records/spec/events.jsonl 2> /tmp/saved-note-support-Hnfer3/records/spec/stderr.txt"
+  },
+  {
+    "attempt": "replay",
+    "stage": "stage-one",
+    "root": "/tmp/saved-note-app-eqs1Xg",
+    "remaining": 582,
+    "transcription": "Exact launched command shape; shell start/end/exit files retained beside stock session. No custom runtime.",
+    "command": "/usr/bin/time -p -o /tmp/saved-note-support-Hnfer3/records/stage-one/time.txt /opt/homebrew/bin/gtimeout --signal=TERM --kill-after=5 582 env -i HOME=/tmp/saved-note-support-Hnfer3/home PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin PI_CODING_AGENT_DIR=/tmp/saved-note-support-Hnfer3/config PI_OFFLINE=1 PI_TELEMETRY=0 /opt/homebrew/bin/node /tmp/saved-note-support-Hnfer3/tools/node_modules/@earendil-works/pi-coding-agent/dist/cli.js --no-approve --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --tools read,bash,edit,write --model ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731 --thinking max --session-dir /tmp/saved-note-support-Hnfer3/records/stage-one --mode json -p @stage-one.txt > /tmp/saved-note-support-Hnfer3/records/stage-one/events.jsonl 2> /tmp/saved-note-support-Hnfer3/records/stage-one/stderr.txt"
+  },
+  {
+    "attempt": "replay",
+    "stage": "stage-two",
+    "root": "/tmp/saved-note-app-eqs1Xg",
+    "remaining": 555,
+    "transcription": "Exact launched command shape; shell start/end/exit files retained beside stock session. No custom runtime.",
+    "command": "/usr/bin/time -p -o /tmp/saved-note-support-Hnfer3/records/stage-two/time.txt /opt/homebrew/bin/gtimeout --signal=TERM --kill-after=5 555 env -i HOME=/tmp/saved-note-support-Hnfer3/home PATH=/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin PI_CODING_AGENT_DIR=/tmp/saved-note-support-Hnfer3/config PI_OFFLINE=1 PI_TELEMETRY=0 /opt/homebrew/bin/node /tmp/saved-note-support-Hnfer3/tools/node_modules/@earendil-works/pi-coding-agent/dist/cli.js --no-approve --no-extensions --no-skills --no-prompt-templates --no-themes --no-context-files --tools read,bash,edit,write --model ai-gw-baseten/baseten/deepseek-ai/DeepSeek-V4-Flash-0731 --thinking max --session-dir /tmp/saved-note-support-Hnfer3/records/stage-two --mode json -p @stage-two.txt > /tmp/saved-note-support-Hnfer3/records/stage-two/events.jsonl 2> /tmp/saved-note-support-Hnfer3/records/stage-two/stderr.txt"
+  }
+]

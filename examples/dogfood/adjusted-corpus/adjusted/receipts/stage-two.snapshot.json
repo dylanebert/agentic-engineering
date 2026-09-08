@@ -1,0 +1,13 @@
+{
+  "at": "2026-09-08T17:28:17.714Z",
+  "source": "/tmp/saved-note-app-7sXV1g",
+  "root": "/tmp/saved-note-support-wmwflV/snapshots/stage-two",
+  "hashes": {
+    "index.html": "b3f40dc6fe5cc7bef721c44b0e33fbc704423d191e517791ee3f13a4a3d50771",
+    "SPEC.md": "b9f380f2b0928ea3c883132641ac7e1468bccf93bd4210362fcd98d78571f226",
+    "stage-one.txt": "d21afab51b0b7cae3454c0b9d7c3c63c0499ca124af01dff5a36c8e01cd36770",
+    "stage-two.txt": "37774bd877eef1ed304cba74d3c98e6903356a170f2d0076aaa025264d78d690",
+    "task.txt": "e3f7474f0736cd70c22008fd6f1decb4c170dec875d3791a43940d263ee19863"
+  },
+  "excluded": []
+}

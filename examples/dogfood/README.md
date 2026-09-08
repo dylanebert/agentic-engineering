@@ -1,46 +1,49 @@
-# Saved-Note Experiment: Pilot Record
+# Saved-Note Experiment
 
-One pilot has run. Its two implementation stages passed the recorded browser actions. No adjustment, clean replay, independent size decision or finished reader walkthrough has happened. This is an unfinished experiment record, not a demonstrated public-provider recipe.
+Three finite attempts produced pages that passed the recorded browser stages. The original pilot is clean-context protocol-invalid because it read prior transcript bytes. The adjusted pilot had an outside-folder scratch write. The final gateway replay had no prohibited context access in recorded calls, but its simulation failed once and its final testing claim was overstated. No public-provider parity, containment guarantee or human educational verdict is established.
 
-## Read the Record
+## Read Both Views
 
-- [Reader inputs](reader/README.md): supplied setup, request, stage prompts and manual checks. Start a repeat from these files, never the completed snapshots.
-- [Frozen initial inventory and snapshots](corpus/index.json): SHA-256 bindings at conversation boundaries.
-- [Spec conversation](corpus/pilot/spec/session.jsonl), [first stage](corpus/pilot/stage-one/session.jsonl), [second stage](corpus/pilot/stage-two/session.jsonl): stock Pi session entries with IDs, prompts, tool arguments/results and final-message usage. Each directory also contains the stock event stream and process exit/timing receipts.
-- [First-stage browser observations](corpus/pilot/stage-one/browser/observations.json) and [second-stage observations](corpus/pilot/stage-two/browser/observations.json): actual actions, values, timestamps, source hashes and teardown. Screenshots sit alongside these records.
-- [Unaltered final files](corpus/pilot/snapshots/stage-two/): the subject's output, not supplied reader scaffolding.
-- [Counts and time](corpus/pilot/summary.json), [coordinator transitions](corpus/pilot/transitions.jsonl), [redaction ledger](corpus/redactions.json).
+- **[Complete reader sequence](reading.md)**: all attempts, setup and detours, then the selected replay, costs/limits and the full frozen runnable appendix. It can be shown inline or exported as Markdown; it is not a production UI.
+- **[Separated reader kit](adjusted-reader/README.md)**: unchanged task/stage prompts, explicit app/support separation, installed versions, environment, recording, budgets, ordinary serving and teardown. Copy only its three `app` prompts into subject context.
+- **[Finite source map](mapping.json)**: 875 hash-bound file/entry dispositions. Persistent conversations and browser observations have entry-level rows; stock delta streams are retained whole as their detailed counterpart.
+- **[Setup and intervention account](adjusted-corpus/actions.json)**: who supplied work, what failed, what changed and what stayed unobserved. This is retrospective editorial accounting linked to actual records, not a replacement runtime recorder.
+- **[Reference/prose comparison](comparison.md)** and **[public pricing reference](pricing.md)**: named sources and explicit limits, not a taste score or gateway bill.
 
-The model wrote SPEC.md (`spec/session.jsonl`, entry `1a573768`), created index.html (`stage-one/session.jsonl`, `6c0029ec`), then added persistence (`stage-two/session.jsonl`, `b9721ecf`). The coordinator supplied prompts and checks but did not change those files. There were no corrective follow-ups or failed subject tool calls. Deliberately broken observer controls are separate from the pilot and must not be narrated as agent bugs.
+## Preserve Every Attempt
 
-## A Protocol Deviation
+| Attempt | Inputs and Records | Browser Result | Condition |
+|---|---|---|---|
+| Original | [Frozen five-file kit and index](corpus/index.json), [summary](corpus/pilot/summary.json) | [Both stages passed](corpus/pilot/stage-two/browser/observations.json) | Transcript-byte access; full-folder serving differed from snapshot observations |
+| Adjusted | [Binding](adjusted-corpus/adjusted/binding.json), [summary](adjusted-corpus/adjusted/summary.json) | [Both stages passed](adjusted-corpus/adjusted/receipts/stage-two-browser/observations.json) | Separate roots, but subject extracted its own script outside instructed app folder |
+| Gateway Replay | [Binding](adjusted-corpus/replay/binding.json), [summary](adjusted-corpus/replay/summary.json) | [Both stages passed](adjusted-corpus/replay/receipts/stage-two-browser/observations.json) | Fresh original inputs; no recorded prohibited context access; not OS containment |
 
-In the second-stage session, entry `376ee6cf` runs `wc -l records/*.jsonl`. That command accessed previous transcript bytes and returned line counts and filenames, although the prompt said not to read prior conversations. No prior transcript text or solution content appears in its tool output. The model's final claim that it did not read transcripts is therefore too broad. This observation needs the independent decision before a clean replay; do not describe this pilot as proving strict transcript isolation.
+Each attempt directory retains spec/first-stage/second-stage stock sessions and event streams, full boundary snapshots, browser actions/screenshots, timing and exits. No coordinator edited subject specs or page code. All three used Flash 0731/max, three fresh conversations and zero corrective follow-ups. Failed subject simulations, inaccurate summaries and deliberate observer controls remain distinguishable.
 
-The subject also listed config, record and installed-tool filenames. It did not read credential contents or outside project code in the retained calls. An external folder, empty HOME and tool allowlist are not an OS sandbox. The corpus records observable tool behavior, not hidden provider internals or a containment guarantee.
+The original `corpus/`, `corpus.sha256.json` and five-file `reader/` remain unchanged. That old reader folder is historical evidence, not the selected reproduction recipe. Never copy completed snapshots, transcripts, controls, this reading or private reports into a new subject folder. The three-attempt campaign is exhausted; do not retry until success.
 
-## What the Checks Establish
+## Run the Evidence Readers
 
-The pilot used Pi 0.85.1 with gateway DeepSeek V4 Flash 0731 at max, Bun 1.4.0, Node 26.7.0 and Chromium 151.0.7922.34. There were three fresh conversations, 20 model requests, 26 tool calls and 84.03 seconds of subject-process wall time. Final assistant messages report 92,167 input and 6,329 output tokens, 98,496 total, with zero reported cache tokens. Gateway price metadata was unpriced: cost is unknown, not free. Direct DeepSeek access and transport parity remain unverified.
-
-The coordinator's browser checks passed three first-stage and seven second-stage assertions at the same loopback origin. The subject's own checks were one static Node check, then a syntax check and a DOM/storage stub. Those are not real-browser evidence. Browser checks do not establish cross-device storage, durability after clearing browser data, accessibility quality, educational usefulness or a population success rate.
-
-## Run the Observer Checks
-
-From the article repository after its normal frozen-lockfile dependency install:
+From the article repository:
 
 ```sh
 bun test ./examples/dogfood/evidence.test.ts
+bun examples/dogfood/mapping.ts
+bun examples/dogfood/mapping.ts --print
 bun run check
 bun run build
 ```
 
-The tests read the retained corpus and qualify missing-result, missing-terminal and changed-snapshot refusals. They do not rerun the model. The browser observer imports the existing article's plain-browser lifecycle. Its CLI requires an input snapshot, the ordinary http-server 14.1.1 script installed through the reader recipe, and a new output directory:
+The tests require nonempty populations, match stock tool calls/results and final usage, bind snapshots/browser observations, and reject missing results, missing terminal events and changed snapshots. Checker-only CLI mutations remove a real repair mapping and change an outcome, producing the intended refusal. They do not rerun subjects or narrate fixtures as model failures.
+
+The browser observer reuses the article's bounded plain-Chromium lifecycle, not its GPU runner. After ordinary http-server installation, use a new output directory:
 
 ```sh
 bun examples/dogfood/browser.ts observe /absolute/snapshot /absolute/tools/node_modules/http-server/bin/http-server /absolute/new-observations 2
 ```
 
-The observer owns and closes its static server, fresh browser context and browser. `qualify` in place of `observe` creates observer-only correct, missing-save, missing-restore and non-persisted-clear fixtures at the supplied root, then exercises the same browser reader. Never copy those controls into a subject folder. The correct control passes; save/restore defects lose text on reload; the clear defect restores stale text. A deliberately missing server produces an instrument failure, not a note failure.
+Use `1` for editing/Clear only. `qualify` instead of `observe` creates observer-only correct, missing-save, missing-restore and nonpersisted-Clear controls at a new root, then exercises the same browser reader. Broken serving is unavailable, not an app failure. No interactive dev server or browser tab is left open by these procedures.
 
-No production article or manuscript was changed. The next step is an independent read of the whole pilot before any adjustment or repeat. Educational usefulness remains a later human decision.
+All public removals are provider response IDs, with raw/sanitized hashes and reasons in each redaction ledger. Raw account configuration is not distributed. Temporary credential copies were removed; [new teardown receipts](adjusted-corpus/teardown.json) record owned process inspection. Actual gateway billing and direct-public transport parity remain unknown.
+
+No production article, figure manifest or manuscript changed. This candidate stops at fresh fidelity review before the human reading is relied upon. Educational usefulness remains Dylan's decision.

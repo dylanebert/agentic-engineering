@@ -1,0 +1,60 @@
+{
+  "id": "replay",
+  "attempt": 3,
+  "condition": "separated-app-runtime",
+  "conversations": [
+    {
+      "id": "spec",
+      "requests": 4,
+      "tools": 4,
+      "toolErrors": 0,
+      "usage": {
+        "input": 9329,
+        "output": 1023,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 10352
+      },
+      "reportedReasoning": 204,
+      "subjectWallSeconds": 17.14,
+      "exit": 0
+    },
+    {
+      "id": "stage-one",
+      "requests": 7,
+      "tools": 6,
+      "toolErrors": 0,
+      "usage": {
+        "input": 23150,
+        "output": 1635,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 24785
+      },
+      "reportedReasoning": 532,
+      "subjectWallSeconds": 27.22,
+      "exit": 0
+    },
+    {
+      "id": "stage-two",
+      "requests": 7,
+      "tools": 8,
+      "toolErrors": 1,
+      "usage": {
+        "input": 26338,
+        "output": 3194,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "totalTokens": 29532
+      },
+      "reportedReasoning": 700,
+      "subjectWallSeconds": 53.43,
+      "exit": 0
+    }
+  ],
+  "correctiveFollowUps": 0,
+  "subjectWallSeconds": 97.78999999999999,
+  "billing": "unknown",
+  "publicProviderParity": "unverified",
+  "contextAudit": "All recorded file reads/counts/process substitutions use own app and supplied prompts. No recorded prior-context/solution access; not containment."
+}
