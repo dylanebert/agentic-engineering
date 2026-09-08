@@ -287,8 +287,11 @@ test("hero: exactly one three-state hero sits above the opening", async ({ page 
 
 test("hero: reduced motion rests on the captured agentic frame", async ({ page }) => {
   const result = await assertReducedMotion(page, '[data-hero-id="spectrum-hero"]', async (target, step) => { if (step === 0) await target.goto(url, { waitUntil: "networkidle" }); }, 1);
-  const read = await page.locator('[data-hero-id="spectrum-hero"]').evaluate((element) => ({ phase: getComputedStyle(element).getPropertyValue("--phase").trim(), rows: element.querySelector("pre")?.textContent?.split("\n").length, state: element.getAttribute("data-hero-state") }));
-  console.log(`hero reduced rest: ${JSON.stringify(read)}`); assertion(result.pass, "predicate:figure-9.1").toBe(true); assertion(read, "predicate:figure-9.2").toEqual({ phase: "1", rows: 31, state: "agentic" });
+  const read = await page.locator('[data-hero-id="spectrum-hero"]').evaluate((element) => {
+    const image = element.querySelector<HTMLImageElement>("[data-hero-poster]");
+    return { phase: getComputedStyle(element).getPropertyValue("--phase").trim(), loaded: image?.complete, width: image?.naturalWidth, height: image?.naturalHeight, state: element.getAttribute("data-hero-state") };
+  });
+  console.log(`hero reduced rest: ${JSON.stringify(read)}`); assertion(result.pass, "predicate:figure-9.1").toBe(true); assertion(read, "predicate:figure-9.2").toEqual({ phase: "1", loaded: true, width: 560, height: 560, state: "agentic" });
 });
 
 // The repaired spectrum fills its three station circles with their role color, so the earlier
@@ -325,7 +328,7 @@ test("hero: plain Chromium keeps silent rest", async ({ page }) => {
   await page.goto(url, { waitUntil: "networkidle" });
   const hero = page.locator('[data-hero-id="spectrum-hero"]');
   const initialText = await page.locator("body").innerText();
-  await assertion(hero.locator("pre"), "predicate:figure-11.7").toBeVisible();
+  await assertion(hero.locator("[data-hero-poster]"), "predicate:figure-11.7").toBeVisible();
   await assertion(hero, "predicate:figure-11.8").not.toHaveAttribute("data-hero-gpu", "drawn");
   await page.waitForTimeout(700);
   assertion(await page.locator("body").innerText(), "predicate:figure-11.9").toBe(initialText);
