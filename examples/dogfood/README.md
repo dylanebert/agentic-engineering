@@ -6,7 +6,8 @@ Three finite attempts produced pages that passed the recorded browser stages. Th
 
 - **[Complete reader sequence](reading.md)**: all attempts, setup and detours, then the selected replay, costs/limits and the full frozen runnable appendix. It can be shown inline or exported as Markdown; it is not a production UI.
 - **[Separated reader kit](adjusted-reader/README.md)**: unchanged task/stage prompts, explicit app/support separation, installed versions, environment, recording, budgets, ordinary serving and teardown. Copy only its three `app` prompts into subject context.
-- **[Finite source map](mapping.json)**: 875 hash-bound file/entry dispositions. Persistent conversations and browser observations have entry-level rows; stock delta streams are retained whole as their detailed counterpart.
+- **[Post-run supplement](reader-supplement.md)**: pinned acquisition, prerequisite references/availability, exact snapshot/hash/timing/exit steps and cumulative budgets. Added after review, included in full in the reading, never represented as replay-tested inputs.
+- **[Finite source map](mapping.json)**: 876 hash-bound file/entry dispositions, including the new editorial supplement. Persistent conversations and browser observations have entry-level rows; stock delta streams are retained whole as their detailed counterpart.
 - **[Setup and intervention account](adjusted-corpus/actions.json)**: who supplied work, what failed, what changed and what stayed unobserved. This is retrospective editorial accounting linked to actual records, not a replacement runtime recorder.
 - **[Reference/prose comparison](comparison.md)** and **[public pricing reference](pricing.md)**: named sources and explicit limits, not a taste score or gateway bill.
 
@@ -46,4 +47,4 @@ Use `1` for editing/Clear only. `qualify` instead of `observe` creates observer-
 
 All public removals are provider response IDs, with raw/sanitized hashes and reasons in each redaction ledger. Raw account configuration is not distributed. Temporary credential copies were removed; [new teardown receipts](adjusted-corpus/teardown.json) record owned process inspection. Actual gateway billing and direct-public transport parity remain unknown.
 
-No production article, figure manifest or manuscript changed. This candidate stops at fresh fidelity review before the human reading is relied upon. Educational usefulness remains Dylan's decision.
+No production article, figure manifest or manuscript changed. Fresh fidelity review identified missing setup detail, an omitted original-simulation qualification and one long private paragraph. The owner repaired those findings with targeted regression checks, without another subject or review cycle. Educational usefulness remains Dylan's decision; the branches remain unmerged while human feedback is outstanding.

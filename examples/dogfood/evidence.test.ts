@@ -1,5 +1,6 @@
 import { test, expect } from 'bun:test';
-import { readFileSync, mkdtempSync, cpSync, writeFileSync, rmSync } from 'node:fs';
+import { readFileSync, mkdtempSync, cpSync, writeFileSync, rmSync, mkdirSync } from 'node:fs';
+import { checkEditorial, originalLimit, supplementBlock } from './editorial';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { checkRecording, checkSnapshot, inventory, jsonl } from './evidence';
@@ -145,7 +146,7 @@ test('separated attempts start fresh and retain every recorded failure and brows
 test('finite reading maps all frozen sources and shows exact quotations and recipe', () => {
   const mapping = JSON.parse(readFileSync(join(import.meta.dir, 'mapping.json'), 'utf8'));
   const reading = readFileSync(join(import.meta.dir, 'reading.md'), 'utf8');
-  expect(checkMapping(import.meta.dir, mapping, reading)).toEqual({ sources: 875, mappings: 875, quotations: 2 });
+  expect(checkMapping(import.meta.dir, mapping, reading)).toEqual({ sources: 876, mappings: 876, quotations: 2 });
   expect(reading).toContain(readFileSync(join(import.meta.dir, 'adjusted-reader/README.md'), 'utf8'));
   for (const name of ['task.txt', 'stage-one.txt', 'stage-two.txt']) expect(reading).toContain(readFileSync(join(import.meta.dir, 'adjusted-reader/app', name), 'utf8'));
 });
@@ -166,8 +167,66 @@ test('checker-only mutations remove a real repair and change a browser outcome t
       const output = child.stdout.toString() + child.stderr.toString();
       expect(child.exitCode).toBe(expectedExit);
       if (expectedExit) expect(output).toContain('mapping source coverage/order/outcome');
-      console.log(`checker fixture ${name}: exit=${child.exitCode}; ${expectedExit ? 'mapping source coverage/order/outcome refused' : '875 mapped sources accepted'}`);
+      console.log(`checker fixture ${name}: exit=${child.exitCode}; ${expectedExit ? 'mapping source coverage/order/outcome refused' : '876 mapped sources accepted'}`);
     }
+  } finally { rmSync(temporary, { recursive: true }); }
+});
+
+test('review omissions remain visible, with real deletion negatives', () => {
+  const reading = readFileSync(join(import.meta.dir, 'reading.md'), 'utf8');
+  const mapping = JSON.parse(readFileSync(join(import.meta.dir, 'mapping.json'), 'utf8'));
+  checkEditorial(import.meta.dir, reading, mapping);
+  const supplement = readFileSync(join(import.meta.dir, 'reader-supplement.md'), 'utf8');
+  expect(() => checkEditorial(import.meta.dir, reading.replace(supplement, ''), mapping)).toThrow('complete post-run supplement is inline');
+  expect(() => checkEditorial(import.meta.dir, reading.replace(originalLimit, ''), mapping)).toThrow('original simulation limit is visible');
+  const changed = structuredClone(mapping);
+  changed.find((r: any) => r.id.endsWith('#62b4ce9c')).disposition = 'Consult source for full details.';
+  expect(() => checkEditorial(import.meta.dir, reading, changed)).toThrow('original simulation explicit disposition');
+  const source = jsonl(join(root, 'pilot/stage-two/session.jsonl'));
+  const command = source.find(e => e.id === '62b4ce9c').message.content.find((c: any) => c.type === 'toolCall').arguments.command;
+  expect(command).toContain('const badNote = { value:"", addEventListener(){}, focus(){} };');
+  expect(command).not.toMatch(/assert[.(]|throw new Error\("(?:expected|mismatch)/);
+  expect(source.find(e => e.id === '2251be77').message.content[0].text).toContain('storage-unavailable page loaded without crash');
+  expect(source.find(e => e.id === '9b32f330').message.content.some((c: any) => c.text?.includes('editing still works ✅'))).toBe(true);
+});
+
+test('post-run editorial fixture executes snapshot, cumulative budget and exit recording commands, never a model', () => {
+  const temporary = mkdtempSync(join(tmpdir(), 'dogfood-editorial-fixture-'));
+  const app = join(temporary, 'app'), support = join(temporary, 'support');
+  mkdirSync(app); mkdirSync(support); mkdirSync(join(support, 'records')); mkdirSync(join(support, 'snapshots'));
+  writeFileSync(join(app, 'task.txt'), 'editorial fixture, not a subject task\n');
+  const text = readFileSync(join(import.meta.dir, 'reader-supplement.md'), 'utf8');
+  const env = { ...process.env, APP: app, SUPPORT: support, CLEAN_PATH: '/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin' };
+  const run = (command: string, extra = {}) => Bun.spawnSync(['/bin/bash', '-c', command], { env: { ...env, ...extra }, stdout: 'pipe', stderr: 'pipe' });
+  try {
+    expect(run(supplementBlock(text, 'prerequisites')).exitCode).toBe(0);
+    expect(readFileSync(join(support, 'prerequisites.exit'), 'utf8').trim()).toBe('0');
+    expect(readFileSync(join(support, 'prerequisites.txt'), 'utf8')).toContain('Python');
+    const snapshot = supplementBlock(text, 'snapshot');
+    expect(run(snapshot).exitCode).toBe(0);
+    expect(JSON.parse(readFileSync(join(support, 'snapshots/before-spec.json'), 'utf8')).hashes).toEqual(inventory(app));
+    const repeated = run(snapshot);
+    expect(repeated.exitCode).not.toBe(0);
+    expect(repeated.stderr.toString()).toContain('snapshot destination must be absent');
+    for (const [stage, time] of [['spec', '54.05'], ['stage-one', '88.47']]) {
+      mkdirSync(join(support, 'records', stage!)); writeFileSync(join(support, 'records', stage!, 'time.txt'), `real ${time}\n`);
+    }
+    const budget = supplementBlock(text, 'budget') + '\nprintf "%s" "$REMAINING"';
+    const cumulative = run(budget); expect(cumulative.exitCode).toBe(0); expect(cumulative.stdout.toString()).toBe('457');
+    writeFileSync(join(support, 'records/stage-one/time.txt'), 'real 600\n');
+    expect(run(budget).exitCode).not.toBe(0);
+    writeFileSync(join(support, 'records/stage-one/time.txt'), 'missing time\n');
+    expect(run(budget).exitCode).not.toBe(0);
+    const fixture = join(support, 'fixture.js');
+    writeFileSync(fixture, 'console.log("editorial command fixture, not Pi"); process.exit(7);\n');
+    const launch = run(supplementBlock(text, 'launch'), { STAGE: 'fixture', PROMPT: 'task.txt', REMAINING: '5', NODE: 'node', PI: fixture, LIMIT: 'gtimeout', CLEAN_PATH: process.env.PATH!, MODEL: 'NO_MODEL' });
+    expect(launch.exitCode).toBe(0); // shell recorded the failure; it did not replace it with success
+    const dir = join(support, 'records/fixture');
+    expect(readFileSync(join(dir, 'exit.txt'), 'utf8').trim()).toBe('7');
+    for (const file of ['start.txt', 'end.txt']) expect(readFileSync(join(dir, file), 'utf8')).toMatch(/^\d{4}-\d\d-\d\dT/);
+    expect(readFileSync(join(dir, 'time.txt'), 'utf8')).toMatch(/^real\s+[0-9.]+/m);
+    expect(readFileSync(join(dir, 'events.jsonl'), 'utf8')).toContain('editorial command fixture, not Pi');
+    console.log('editorial fixture: snapshot pass; overwrite refused; cumulative=457; exhausted/missing timing refused; exit 7 preserved; zero model requests');
   } finally { rmSync(temporary, { recursive: true }); }
 });
 

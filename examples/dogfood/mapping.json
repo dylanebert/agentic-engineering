@@ -1284,7 +1284,7 @@
     "locator": "62b4ce9c",
     "outcome": null,
     "reading": "original",
-    "disposition": "Entry retained in chronological source order; consult linked record for full arguments, results and context. Prose is a labeled paraphrase, not a replacement transcript."
+    "disposition": "The original simulation printed values rather than asserting equality. Its storage-denied arm demonstrated loading without a crash, not editing or clearing under denied storage, despite the final response’s claim. See result 2251be77; retain the independent browser pass, not an application-defect narrative."
   },
   {
     "id": "corpus/pilot/stage-two/session.jsonl#2251be77",
@@ -1302,7 +1302,7 @@
     "locator": "9b32f330",
     "outcome": null,
     "reading": "original",
-    "disposition": "Entry retained in chronological source order; consult linked record for full arguments, results and context. Prose is a labeled paraphrase, not a replacement transcript."
+    "disposition": "The original simulation printed values rather than asserting equality. Its storage-denied arm demonstrated loading without a crash, not editing or clearing under denied storage, despite the final response’s claim. See result 2251be77; retain the independent browser pass, not an application-defect narrative."
   },
   {
     "id": "corpus/pilot/stage-two/start",
@@ -7873,5 +7873,14 @@
     "outcome": null,
     "reading": "setup",
     "disposition": "Full source file retained and discoverable here; prose summarizes its role, not every repeated byte."
+  },
+  {
+    "id": "reader-supplement.md",
+    "file": "reader-supplement.md",
+    "hash": "e53f30841bdcff4465299da5caa29265d3f7dfc082cc5be27c3b8819e6ec0230",
+    "locator": "whole-file",
+    "outcome": null,
+    "reading": "supplement",
+    "disposition": "Post-run reader supplementation following fidelity review, not replay-tested inputs or a new attempt. Includes pinned acquisition, prerequisite caveats and executable recording steps."
   }
 ]

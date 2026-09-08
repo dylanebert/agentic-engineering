@@ -1,6 +1,6 @@
 # Reading and Reference Comparison
 
-This compares the complete [reading](reading.md), not a production UI. The source map accounts for 875 source-file/entry rows across 387 frozen files, including all three attempts, two recording canaries, browser controls, observer repairs and setup/intervention accounts. Stock streams retain 3,795 entries in full. Structural coverage cannot prove a paraphrase is faithful; that is the earned fresh review question.
+This compares the complete [reading](reading.md), not a production UI. The source map accounts for 876 source-file/entry rows across 387 frozen files plus one post-run editorial supplement, including all three attempts, two recording canaries, browser controls, observer repairs and setup/intervention accounts. Stock streams retain 3,795 entries in full. Structural coverage cannot prove a paraphrase is faithful. The earned review found known omissions; the owner restored them without a second review cycle.
 
 ## Marked Channels
 
@@ -10,7 +10,7 @@ This compares the complete [reading](reading.md), not a production UI. The sourc
 | RL Visualized, pinned inline capture | Reduced-scope step-by-step reading | The replay follows task → spec → editing/check → persistence/error/repair → browser result. Static evidence and linked screenshots carry detail instead of a new player. | No live hero or equivalent interaction was built or judged. This does not certify figure quality. |
 | Taste-Loops, pinned catalog/capture | Concise prose, short and neutral sentences | Short outcome sentences sit beside concrete caveats. One overlong pricing paragraph was found and split by the runnable comparison. No 79-word paragraph tripwire remains. | The retained capture is figure source, not the full post. It supports the marked provenance and timing caveat, not an independent full-post prose comparison or a new visual identity. |
 
-The full reading is longer than an article insert because its runnable appendix includes exact setup and prompts. An eventual article may collapse that appendix, but cannot remove acquisition, access limits, failed checks or the attempt comparison. The reviewer checks rule application; Dylan judges usefulness. No synthetic taste score is produced.
+The full reading is longer than an article insert because it includes the frozen appendix and a clearly labeled post-run supplement. Review found that the frozen appendix lacked executable acquisition, snapshot and recording details; the supplement supplies them, without claiming the replay used those new commands. An eventual article may collapse that appendix, but cannot remove acquisition, access limits, failed checks or the attempt comparison. The reviewer checks rule application; Dylan judges usefulness. No synthetic taste score is produced.
 
 ## Proposed Placement and Compression
 
@@ -19,6 +19,8 @@ The current `src/App.svelte` has `loop` and `verification` sections. `src/lib/fi
 | Source Evidence | Concise Web Text or Action | Detail Retained | Beginner Friction |
 |---|---|---|---|
 | Frozen task and three-prompt inventory | Ask for one saved note, in two stages | Exact unchanged prompts and future-stage visibility | The person supplies scope; the model does not choose all checks |
+| Original stage-two `62b4ce9c`, `2251be77`, `9b32f330` | Prints and a load-only denied-storage arm are not tested editing | The specific overstatement appears beside the original result and in two map dispositions | Preserve limits of unselected attempts too |
+| Post-run supplement, separately hash-bound | Acquire only pinned reader files; record every boundary and cumulative allowance | Official prerequisite refs, uncaptured historical Python version, exact ordinary commands | This is editorial supplementation, not a newly successful task condition |
 | Original stage-two entry `376ee6cf` | A line count still read prior transcript bytes | Full original setup, transcript, output and independent pass | Passing behavior is not proof of a clean experiment |
 | Separated bindings and setup account | Keep the app separate from runtime files | Install versions, config, empty HOME/env, paths, caps and teardown | Local tools and paid access are prerequisites |
 | Adjusted stage-one and stage-two sessions | Tests themselves needed repairs | Both first-stage stub failures, two failures in one second-stage call, own external scratch file | No strict folder compliance or hidden repair claim |
@@ -42,4 +44,4 @@ bun examples/dogfood/compare.ts /absolute/kex/reference/taste/captures
 
 This checks the mapping, prints the complete source-linked reading and three marked captures with hashes, then prints paragraph and lexical-relative-word findings. It does not fetch URLs, run a subject or open a browser. Missing captures fail rather than silently omitting a reference. Raw comparison output is retained in the private delivery receipts; the reading and sources are public kit material.
 
-The first comparison exited 1 for an 82-word pricing paragraph. Splitting it preserved every qualification; the rerun exits 0. The lexical scan reports 29 candidates across 3,039 prose words, 9.54 per thousand, below the 12-per-thousand tripwire even before classifying non-relative uses. Code, tables and block quotations are excluded; recipe prose is included. This is a lexical check, not a semantic or educational verdict.
+The original comparison found one long pricing paragraph. During known repairs, the supplement introduction also reached 82 words and was split without dropping qualifications; the final comparison exits 0. The lexical scan now reports 34 candidates across 4,023 prose words, 8.45 per thousand, below the 12-per-thousand tripwire even before classifying non-relative uses. Code, tables and block quotations are excluded; recipe prose is included. This is a lexical check, not a semantic or educational verdict.

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { sha, jsonl, checkSnapshot } from './evidence';
+import { checkEditorial } from './editorial';
 
 export type Source = { id: string; file: string; hash: string; locator: string; outcome: string | null };
 export type Mapping = Source & { reading: string; disposition: string };
@@ -27,6 +28,12 @@ export function sources(root: string): Source[] {
       }
     }
   }
+  const editorial = JSON.parse(readFileSync(join(root, 'editorial.sha256.json'), 'utf8'));
+  assert.deepEqual(Object.keys(editorial), ['reader-supplement.md'], 'editorial source population');
+  for (const [file, hash] of Object.entries(editorial)) {
+    assert.equal(sha(readFileSync(join(root, file))), hash, 'editorial source bytes');
+    result.push({ id: file, file, hash: hash as string, locator: 'whole-file', outcome: null });
+  }
   assert.equal(new Set(result.map(r => r.id)).size, result.length, 'unique source IDs');
   return result;
 }
@@ -48,6 +55,7 @@ export function checkMapping(root: string, mapping: Mapping[], reading: string) 
     assert(entry.message.content.some((c: any) => c.type === 'text' && c.text.includes(quote.text)), 'quotation bytes');
     assert(reading.includes(quote.text), 'quotation shown');
   }
+  checkEditorial(root, reading, mapping);
   return { sources: expected.length, mappings: mapping.length, quotations: quotations.length };
 }
 
