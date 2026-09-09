@@ -68,7 +68,7 @@ for (const population of ["missing", "directory", "map-only", "empty-js", "empty
     await expect(run()).rejects.toThrow();
   });
 }
-for (const prohibited of ["<iframe", "http://localhost:1234", "https://127.0.0.1:4321", "vite dev", "vite serve", "vite preview"]) {
+for (const prohibited of ["http://localhost:1234", "https://127.0.0.1:4321", "vite dev", "vite serve", "vite preview"]) {
   test(`figure-1.2 still scans non-executable output: ${prohibited}`, async () => {
     await file("main.js", "export const ready = true;");
     await file("main.js.map", JSON.stringify({ sourcesContent: [prohibited] }));

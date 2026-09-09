@@ -1,4 +1,5 @@
 import { readFile, readdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { expect as assertion, type Page, type Browser, type APIRequestContext, type TestInfo } from "@playwright/test";
 import { perceptualDelta, type DecodedPng } from "./png";
@@ -50,7 +51,20 @@ test("substrate: dist contains no Shallot or typegpu", async () => {
   assertion(imports.trim().length, "predicate:figure-1.1 executable population").toBeGreaterThan(0);
   const built = files.map((file) => file.content).join("\n").toLowerCase();
   assertion(imports, "predicate:figure-1.1").not.toMatch(/(?:from|import\()\s*["\'](?:@dylanebert\/shallot|typegpu|unplugin-typegpu)/);
-  assertion(built, "predicate:figure-1.2").not.toMatch(/<iframe|https?:\/\/(?:localhost|127\.0\.0\.1):\d+|\bvite\s+(?:dev|serve|preview)\b/);
+  assertion(built, "predicate:figure-1.2").not.toMatch(/https?:\/\/(?:localhost|127\.0\.0\.1):\d+|\bvite\s+(?:dev|serve|preview)\b/);
+});
+
+test("note: sole frame serves the retained implementation", async ({ page, request }) => {
+  await page.goto(url, { waitUntil: "networkidle" });
+  const frames = page.locator("iframe");
+  assertion(await frames.count(), "predicate:note.frame-count").toBe(1);
+  assertion(await frames.getAttribute("src"), "predicate:note.frame-source").toBe("/agentic-engineering/note.html");
+  assertion((await frames.getAttribute("title"))?.trim(), "predicate:note.frame-title").toBeTruthy();
+  assertion(await frames.getAttribute("srcdoc"), "predicate:note.no-srcdoc").toBeNull();
+  const response = await request.get(new URL("note.html", url).href);
+  assertion(response.status(), "predicate:note.asset-status").toBe(200);
+  // Retained note-persistence/final/app/index.html; regression reads the source too.
+  assertion(createHash("sha256").update(await response.body()).digest("hex"), "predicate:note.saved-bytes").toBe("8a788aa3c24da1c3b86778b5fa815a56252a8dbb1443049cf74405dafc4822c1");
 });
 
 // --- Server contract: missing assets 404 (no SPA fallback masking) ---
