@@ -1,6 +1,7 @@
 <script lang="ts">
   import Overture from "./lib/Overture.svelte";
   import StageLoop from "./lib/StageLoop.svelte";
+  import NoteExample from "./lib/NoteExample.svelte";
 </script>
 
 <article class="page">
@@ -64,8 +65,9 @@
   <section class="section" id="loop">
     <h2>the loop</h2>
     <p>
-      Let's put these principles together. Suppose we want an agent to make a todo list app. In the
-      first conversation, implement nothing. Instead, tell the agent to write a
+      Let's put these principles together. Start with a supplied note page: you can edit text and
+      Clear it, but reloading loses the note. The task is to add saving. In the first conversation,
+      implement nothing. Instead, tell the agent to write a
       <span class="term" data-role="context">spec</span>: a file describing the work that needs to
       be done, broken into stages.
     </p>
@@ -78,8 +80,9 @@
     <StageLoop />
     <p>
       The spec holds context across conversations, while each conversation is small and focused.
-      The crux of this loop is verification.
+      Here's the implemented note. Type a few lines, reload this page, then try Clear and reload again.
     </p>
+    <NoteExample />
   </section>
 
   <section class="section" id="verification">
@@ -90,15 +93,20 @@
     </p>
     <ol class="kinds">
       <li>
-        <strong>Human verification.</strong> Reading the code. This is the highest ceiling, but
-        also slow and expensive.
+        <strong>Human verification.</strong> Read the code and use the result. I tried this note
+        and confirmed it works. Functional success doesn't settle whether it's useful, or whether this example
+        helps explain the loop. Passing tests can't make that judgment.
       </li>
       <li>
-        <strong>Machine verification.</strong> Code verifying code, e.g. test suites. This is fast
-        and efficient, but relies on correct assumptions.
+        <strong>Machine verification.</strong> Code verifying code. The agent's tests caught text
+        disappearing on reload, then passed after the fix in repeated clean starts. Tests carry
+        requirements into later conversations. But their assumptions matter: a later deliberate
+        regression checked that they also catch Clear bringing old text back.
       </li>
       <li>
-        <strong>Agent verification.</strong> Tell another agent: "this code is wrong. explain why."
+        <strong>Agent verification.</strong> Ask a fresh agent to look for mistakes in the code,
+        tests and results. The independent reviewer found no consequential gap in this run.
+        It's another check, not a guarantee or a substitute for using the note.
       </li>
     </ol>
     <p>
