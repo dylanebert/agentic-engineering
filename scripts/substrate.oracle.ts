@@ -4,7 +4,7 @@ import { join } from "node:path";
 
 const root = join(import.meta.dir, "..");
 const dependency = "@dylanebert/shallot";
-const candidate = "70770cfc34d82fdd19cb705d8753bb6f093748d6";
+const candidate = "0664218f465224397b80aeb604b51178ac71cfb2";
 const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
 const lock = readFileSync(join(root, "bun.lock"), "utf8");
 const installedRoot = realpathSync(join(root, "node_modules", dependency));
