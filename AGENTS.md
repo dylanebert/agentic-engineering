@@ -3,7 +3,7 @@
 Admission is Bun **1.4.2** exactly, from `.bun-version` and `packageManager`. The active
 root is an application: it supports the uncommitted local source override and immutable
 candidate staging. The selected Shallot candidate is
-`github:dylanebert/shallot#70770cfc34d82fdd19cb705d8753bb6f093748d6`; there is no saved
+`github:dylanebert/shallot#0664218f465224397b80aeb604b51178ac71cfb2`; there is no saved
 link, local directory, short ref, mutable tag, or artifact stage. Stable published exit is
 not admitted until a compatible Shallot release exists.
 
