@@ -367,6 +367,7 @@ export async function campaign(selection: string, mutations: Mutation[], updateS
         add(input!, group, arms[0], mutation.cohort ?? "plain", mutation.label, mutation.predicate);
       }
       const { stageRuntime } = await import("./runtime");
+      cases.push({ id: "runtime/article/gpu/1", input: baseline, group: "figure", title: "sustained runtime", cohort: "gpu" });
       stageRuntime(baseline, cases, "healthy", true);
       stageRuntime(baseline, cases, "error", true);
       const corsInput = { ...cases.find(c => c.id === "runtime/healthy/plain/1")!.input, id: "cors-header-removed", omitRuntimeCors: true };
@@ -383,6 +384,14 @@ export async function campaign(selection: string, mutations: Mutation[], updateS
   writeFileSync(join(work, "selection.json"), JSON.stringify({ selection, pure }));
   const args = ["bunx", "playwright", "test", "--config", "playwright.config.ts"];
   if (selection === "runtime") args.push(...process.argv.slice(2));
+  if (selection === "runtime-witnesses") {
+    const forwarded = process.argv.slice(2).filter(argument => argument !== "--runtime-witnesses");
+    // Playwright matches the project-qualified title; strip only outer anchors so the
+    // documented exact-title selector still reaches the selected test in every project.
+    const grep = forwarded.indexOf("--grep");
+    if (grep >= 0 && forwarded[grep + 1]?.startsWith("^") && forwarded[grep + 1]?.endsWith("$")) forwarded[grep + 1] = forwarded[grep + 1].slice(1, -1);
+    args.push(...forwarded);
+  }
   if (selection === "capture" && updateSnapshots) args.push("--update-snapshots");
   record("playwright-start", { args, work });
   const child = Bun.spawnSync(args, { cwd: work, stdout: "inherit", stderr: "inherit", env: { ...process.env, DEBUG: "pw:browser", DEBUG_COLORS: "0", CAMPAIGN_SELECTION: selection } });

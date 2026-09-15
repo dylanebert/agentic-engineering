@@ -6,6 +6,8 @@ import { decodePng, type DecodedPng } from "./png";
 import { classifyRegion, type Region } from "./region";
 
 const base = "/agentic-engineering/";
+type Delta = { mean: number; extent: number; pixels: number };
+
 const external = [
   "https://www.datadoghq-browser-agent.com/us1/v6/datadog-rum.js",
   "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Inter:wght@400;700&family=JetBrains+Mono:wght@400&family=Outfit:wght@500;600&display=swap",
@@ -26,7 +28,7 @@ if(adapter){
 const device=await adapter.requestDevice(),context=c.getContext('webgpu'),format=navigator.gpu.getPreferredCanvasFormat();context.configure({device,format,alphaMode:'opaque'});
 const module=device.createShaderModule({code:\`struct U{phase:f32,kind:f32,pad:vec2f};@group(0) @binding(0) var<uniform> u:U;
 @vertex fn v(@builtin(vertex_index) i:u32)->@builtin(position) vec4f{var p=array<vec2f,3>(vec2f(-1,-1),vec2f(3,-1),vec2f(-1,3));return vec4f(p[i],0,1);}
-@fragment fn f(@builtin(position) p:vec4f)->@location(0) vec4f{let q=p.xy-vec2f(250,110);let a=u.phase*6.2831853;let r=vec2f(q.x*cos(a)-q.y*sin(a),q.x*sin(a)+q.y*cos(a));var bg=vec3f(251.0/255.0,252.0/255.0,253.0/255.0);if(u.kind==0){bg=vec3f(0.025);}
+@fragment fn f(@builtin(position) p:vec4f)->@location(0) vec4f{let q=p.xy-vec2f(140,140);let a=u.phase*6.2831853;let r=vec2f(q.x*cos(a)-q.y*sin(a),q.x*sin(a)+q.y*cos(a));var bg=vec3f(251.0/255.0,252.0/255.0,253.0/255.0);if(u.kind==0){bg=vec3f(0.025);}
 if(abs(r.x)<45 && abs(r.y)<45){var col=vec3f(0.35,0.15,0.65);if(u.kind==1){col=vec3f(0.65,0.12,0.8);}if(u.kind==2){col=vec3f(0.15,0.35,0.25);}return vec4f(col,1);}return vec4f(bg,1);}\`});
 const pipeline=device.createRenderPipeline({layout:'auto',vertex:{module,entryPoint:'v'},fragment:{module,entryPoint:'f',targets:[{format}]},primitive:{topology:'triangle-list'}});
 const buffer=device.createBuffer({size:16,usage:GPUBufferUsage.UNIFORM|GPUBufferUsage.COPY_DST});
@@ -140,15 +142,16 @@ async function snapshot(page: Page) {
   });
 }
 type Read = Awaited<ReturnType<typeof snapshot>>;
-type Frame = { before: Read; after: Read; region: Region; image: DecodedPng; file: string };
+type Frame = { before: Read; after: Read; region: Region; image?: DecodedPng; file?: string; capture: string; delta?: Delta | null };
 function localDelta(a: Frame, b: Frame) {
-  if (!a.region.pass || !b.region.pass || a.image.width !== b.image.width || a.image.height !== b.image.height) return null;
+  const ai = a.image, bi = b.image;
+  if (!ai || !bi || !a.region.pass || !b.region.pass || ai.width !== bi.width || ai.height !== bi.height) return null;
   const x0 = Math.min(a.region.bounds!.x, b.region.bounds!.x), y0 = Math.min(a.region.bounds!.y, b.region.bounds!.y);
   const x1 = Math.max(a.region.bounds!.x + a.region.bounds!.width, b.region.bounds!.x + b.region.bounds!.width), y1 = Math.max(a.region.bounds!.y + a.region.bounds!.height, b.region.bounds!.y + b.region.bounds!.height);
   let sum = 0, above = 0, n = 0;
   for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
-    const i = (y * a.image.width + x) * 4;
-    const d = Math.max(...[0, 1, 2].map(c => Math.abs(a.image.data[i+c] - b.image.data[i+c])));
+    const i = (y * ai.width + x) * 4;
+    const d = Math.max(...[0, 1, 2].map(c => Math.abs(ai.data[i+c] - bi.data[i+c])));
     sum += d; if (d > 3) above++; n++;
   }
   return { mean: sum / n, extent: above / n, pixels: n };
@@ -272,7 +275,13 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
   raw('subject', { id: item.id, observer: 'bounded-runtime-1', input: item.input.hashes, options, started: new Date(started).toISOString() });
   const control = Boolean(item.input.runtimeControl);
   const distPaths = Object.keys(bytes(join(item.input.root, "dist")));
-  const articlePaths = control ? ["index.html"] : distPaths.filter(p => p !== "__case.json" && !p.endsWith(".map") && (item.cohort === "gpu" || !p.startsWith("fonts/") && !p.startsWith("assets/hero-engine-")));
+  // Candidate Shallot's packed transitive extras add dormant wasm/worker artifacts to dist. The
+  // route claim covers the article's requested presentation surface, not every unrequested file.
+  const articlePaths = control ? ["index.html"] : distPaths.filter(p => {
+    if (p === "__case.json" || p.endsWith(".map") || p.includes(".worker-")) return false;
+    const ext = p.split(".").at(-1);
+    return p === "index.html" || ["js", "css", "png", "ttf"].includes(ext ?? "");
+  }).filter(p => item.cohort === "gpu" || !p.startsWith("fonts/") && !p.startsWith("assets/hero-engine-"));
   const requestedPaths = unsupported ? articlePaths.filter(p => !p.startsWith("fonts/")) : articlePaths;
   const declared = [...requestedPaths.map(p => origin.origin + base + (p === "index.html" ? "" : p)), origin.origin + "/favicon.ico", ...external].sort();
   try {
@@ -330,10 +339,110 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
     async function frame(label: string) {
       const before = await snapshot(page);
       const file = join(info.outputDir, label + ".png");
-      const buffer = await page.screenshot({ path: file, clip: before.box, animations: "allow" });
-      const after = await snapshot(page), image = decodePng(buffer), region = classifyRegion(image);
-      const f = { before, after, image, region, file }; frames.push(f);
-      raw("frame", { before, after, region, file }); return f;
+      let image: DecodedPng | undefined;
+      let capture = control ? "synthetic-control-diagnostic-screenshot" : "final-canvas 1280x720@1 rgba8-tight";
+      let region: Region;
+      let delta: Delta | null | undefined;
+      if (control) {
+        // Synthetic controls intentionally use their independent screenshot surface. They never
+        // probe for Shallot's capture and never contribute to the production frame claim.
+        image = decodePng(await page.screenshot({ clip: before.box, animations: "allow" }));
+        region = classifyRegion(image);
+      } else {
+        // Production article evidence stays in the page. The public capture's complete RGBA
+        // buffer is classified and compared there, returning only bounded metadata to Node.
+        const captured = await page.evaluate(async () => {
+          type Stored = { width: number; height: number; data: Uint8ClampedArray; region: Region; marker: string };
+          type Store = { latest: Record<string, Stored>; first: Record<string, Stored>; pairs: Record<string, Delta> };
+          const w = globalThis as typeof globalThis & { __runtimeFrameStore?: Store };
+          const store = w.__runtimeFrameStore ??= { latest: {}, first: {}, pairs: {} };
+          const heroNode = document.querySelector('[data-hero-id="spectrum-hero"]')!;
+          const marker = () => JSON.stringify({
+            state: heroNode.getAttribute("data-hero-state"),
+            treatment: heroNode.getAttribute("data-hero-treatment"),
+            cells: heroNode.getAttribute("data-hero-cells"),
+            drawn: heroNode.getAttribute("data-hero-gpu"),
+          });
+          const beforeMarker = marker();
+          const capture = (globalThis as typeof globalThis & { __heroCapture?: () => Promise<{ rgba: Uint8ClampedArray; width: number; height: number }> }).__heroCapture;
+          if (typeof capture !== "function") throw new Error("public Shallot capture is required for article evidence");
+          const result = await capture();
+          const afterMarker = marker();
+          if (beforeMarker !== afterMarker) throw new Error("runtime marker changed across public capture");
+          const { width, height, rgba } = result;
+          if (width !== 1280 || height !== 720 || rgba.length !== width * height * 4) throw new Error("public capture identity is not final-canvas 1280x720@1 rgba8-tight");
+          const onPerimeter = (x: number, y: number) => x < 4 || y < 4 || x >= width - 4 || y >= height - 4;
+          const channels: number[][] = [[], [], []];
+          for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) if (onPerimeter(x, y)) {
+            const i = (y * width + x) * 4;
+            for (let c = 0; c < 3; c++) channels[c].push(rgba[i + c]);
+          }
+          const background = channels.map(values => {
+            values.sort((a, b) => a - b);
+            const middle = Math.floor(values.length / 2);
+            return (values[middle] + values[Math.floor((values.length - 1) / 2)]) / 2;
+          }) as [number, number, number];
+          let pixels = 0, outliers = 0, left = width, right = -1, top = height, bottom = -1;
+          const rows = new Set<number>(), columns = new Set<number>();
+          for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+            const i = (y * width + x) * 4;
+            const contrast = Math.max(...background.map((channel, c) => Math.abs(rgba[i + c] - channel)));
+            if (contrast <= 12) continue;
+            pixels++; if (onPerimeter(x, y)) outliers++;
+            rows.add(y); columns.add(x); left = Math.min(left, x); right = Math.max(right, x); top = Math.min(top, y); bottom = Math.max(bottom, y);
+          }
+          const bounds = pixels ? { x: left, y: top, width: right - left + 1, height: bottom - top + 1 } : null;
+          const perimeter = { pixels: channels[0].length, outliers, fraction: outliers / channels[0].length };
+          const failures: string[] = [];
+          if (pixels < 100) failures.push("pixels < 100");
+          if (!bounds || bounds.width < 20) failures.push("width < 20");
+          if (!bounds || bounds.height < 20) failures.push("height < 20");
+          if (rows.size < 20) failures.push("occupied rows < 20");
+          if (columns.size < 20) failures.push("occupied columns < 20");
+          if (!bounds || left < 5 || top < 5 || width - 1 - right < 5 || height - 1 - bottom < 5) failures.push("margin < 5");
+          if (bounds && bounds.width > width * 0.8) failures.push("width > 80%");
+          if (bounds && bounds.height > height * 0.9) failures.push("height > 90%");
+          if (perimeter.fraction >= 0.01) failures.push("perimeter outliers >= 1%");
+          const currentRegion = { pass: failures.length === 0, failures, background, pixels, bounds, rows: rows.size, columns: columns.size, perimeter };
+          const markerState = JSON.parse(beforeMarker).state ?? "unknown";
+          const current = { width, height, data: new Uint8ClampedArray(rgba), region: currentRegion, marker: beforeMarker };
+          const compare = (a: Stored, b: Stored): Delta | null => {
+            if (!a.region.pass || !b.region.pass || a.width !== b.width || a.height !== b.height || !a.region.bounds || !b.region.bounds) return null;
+            const x0 = Math.min(a.region.bounds.x, b.region.bounds.x), y0 = Math.min(a.region.bounds.y, b.region.bounds.y);
+            const x1 = Math.max(a.region.bounds.x + a.region.bounds.width, b.region.bounds.x + b.region.bounds.width), y1 = Math.max(a.region.bounds.y + a.region.bounds.height, b.region.bounds.y + b.region.bounds.height);
+            let sum = 0, above = 0, n = 0;
+            for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
+              const i = (y * width + x) * 4;
+              const difference = Math.max(Math.abs(a.data[i] - b.data[i]), Math.abs(a.data[i + 1] - b.data[i + 1]), Math.abs(a.data[i + 2] - b.data[i + 2]));
+              sum += difference; if (difference > 3) above++; n++;
+            }
+            return { mean: sum / n, extent: above / n, pixels: n };
+          };
+          const previous = store.latest[markerState];
+          const first = store.first[markerState];
+          const localDelta = previous ? compare(previous, current) : null;
+          if (!first) store.first[markerState] = current;
+          for (const [otherState, other] of Object.entries(store.first)) if (otherState !== markerState) {
+            const key = [otherState, markerState].sort().join("|");
+            const value = compare(other, current);
+            if (value) store.pairs[key] = value;
+          }
+          store.latest[markerState] = current;
+          return { region: currentRegion, delta: localDelta, marker: beforeMarker, capture: "final-canvas 1280x720@1 rgba8-tight" };
+        });
+        region = captured.region;
+        delta = captured.delta;
+        capture = captured.capture;
+        if (!region.pass) await page.screenshot({ path: file, clip: before.box, animations: "allow" });
+      }
+      const after = await snapshot(page);
+      const f: Frame = { before, after, image, region, file: region.pass && !control ? undefined : file, capture, delta };
+      frames.push(f);
+      raw("frame", { before, after, region, file: f.file, capture, delta }); return f;
+    }
+    if (!control && !unsupported) {
+      await page.locator(hero + '[data-hero-gpu="drawn"]').waitFor({ timeout: 5000 });
+      await page.waitForFunction(() => typeof (globalThis as { __heroCapture?: unknown }).__heroCapture === "function", undefined, { timeout: 5000 });
     }
     if (unsupported) {
       await unsupportedRead(page, check, raw, warnings);
@@ -363,13 +472,14 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
         check(`runtime.${state}.population`, selected.length >= 2, selected.length);
         check(`runtime.${state}.region`, selected.length > 0 && selected.every(f => f.region.pass), selected.map(f => ({ file: f.file, failures: f.region.failures })));
         check(`runtime.${state}.identity`, selected.length > 0 && selected.every(f => [f.before, f.after].every(read => read.drawn === "drawn" && read.treatment === state && (state === "agentic" ? /^\d+x\d+$/.test(read.cells ?? "") : read.cells === null))), selected.map(f => ({ before: f.before, after: f.after })));
-        const differences = selected.slice(1).map((f, i) => ({ a: selected[i].file, b: f.file, value: localDelta(selected[i], f) }));
+        const differences = selected.slice(1).map((f, i) => ({ a: selected[i].file, b: f.file, value: f.delta ?? localDelta(selected[i], f) }));
         check(`runtime.${state}.change`, differences.some(d => d.value !== null && d.value.mean > 3), differences);
         if (state !== "agentic") check(`runtime.${state}.perimeter`, selected.length > 0 && selected.every(f => f.before.page?.length === 3 && f.region.background.every((v,c) => Math.abs(v-f.before.page![c]) <= 3)), selected.map(f => ({ background: f.region.background, page: f.before.page })));
       }
+      const publicPairs = await page.evaluate(() => (globalThis as typeof globalThis & { __runtimeFrameStore?: { pairs: Record<string, Delta> } }).__runtimeFrameStore?.pairs ?? {});
       for (const [a,b] of [["human","agentic"],["human","vibe"],["agentic","vibe"]]) {
         const fa = frames.find(f => f.before.state === a && f.region.pass), fb = frames.find(f => f.before.state === b && f.region.pass);
-        const delta = fa && fb ? localDelta(fa,fb) : null;
+        const delta = control && fa && fb ? localDelta(fa,fb) : publicPairs[[a,b].sort().join("|")] ?? null;
         check(`runtime.pair.${a}-${b}`, delta !== null && delta.mean > 3, delta);
       }
       await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));

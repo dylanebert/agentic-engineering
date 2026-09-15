@@ -52,7 +52,7 @@ export const mutations: Mutation[] = [
     "path": "src/lib/Overture.svelte",
     "needle": "data-hero-id=\"spectrum-hero\"",
     "replacement": "data-retired-hero-id=\"spectrum-hero\"",
-    "grep": "exactly one unlabeled three-state hero",
+    "grep": "exactly one three-state hero",
     "predicate": "figure-8.1"
   },
   {
@@ -60,7 +60,7 @@ export const mutations: Mutation[] = [
     "path": "src/lib/Overture.svelte",
     "needle": "aria-hidden=\"true\">",
     "replacement": "aria-hidden=\"true\"><span data-figure-label>forbidden</span>",
-    "grep": "exactly one unlabeled three-state hero",
+    "grep": "exactly one three-state hero",
     "predicate": "figure-8.1"
   },
   {
@@ -236,10 +236,10 @@ export const mutations: Mutation[] = [
     "predicate": "figure-9.2"
   },
   {
-    "label": "new hero invisible GPU canvas",
-    "path": "src/lib/Overture.svelte",
-    "needle": "canvas.drawn{opacity:calc(1 - .9 * var(--veil))",
-    "replacement": "canvas.drawn{opacity:calc(0 * var(--veil))",
+    "label": "new hero renderer pixels absent",
+    "path": "src/lib/hero-engine.ts",
+    "needle": "const hideAgenticPixels = false;",
+    "replacement": "const hideAgenticPixels = true;",
     "predicate": "runtime.agentic.region",
     "runtime": true,
     "cohort": "gpu"

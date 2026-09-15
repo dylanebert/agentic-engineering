@@ -1,0 +1,5 @@
+{
+  "check": [
+    { "file": "scripts/shallot.test.ts" }
+  ]
+}

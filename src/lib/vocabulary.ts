@@ -5,7 +5,7 @@
 // checked as a substring of its section's prose (scripts/figures.spec.ts), so the label and the
 // prose cannot drift apart without a gate seeing it.
 // Hex values are the composited page colors, checked against the page ground at 4.5:1 by
-// scripts/vocabulary.oracle.ts.
+// scripts/vocabulary.unit.ts.
 
 export const pageGround = "#fbfcfd";
 
