@@ -1,47 +1,40 @@
-import { build } from "@dylanebert/shallot/src/engine/app/index.ts";
-import { aim } from "@dylanebert/shallot/src/engine/utils/index.ts";
-import { Compute } from "@dylanebert/shallot/runtime";
-import { cells, cellsGridFor } from "@dylanebert/shallot/src/extras/cells/index.ts";
-import { Glaze, GlazePlugin, Tonemap } from "@dylanebert/shallot/src/standard/glaze/index.ts";
-import { Color, Part, PartPlugin } from "@dylanebert/shallot/src/standard/part/index.ts";
-import { attachCanvas } from "@dylanebert/shallot/src/standard/render/core.ts";
-import { AmbientLight, Camera, RenderPlugin } from "@dylanebert/shallot/src/standard/render/index.ts";
-import { SearPlugin } from "@dylanebert/shallot/src/standard/sear/index.ts";
-import { SlabPlugin } from "@dylanebert/shallot/src/standard/slab/index.ts";
-import { Transform, TransformsPlugin } from "@dylanebert/shallot/src/standard/transforms/index.ts";
-import { fsCtxSchema, registerSurface, surfaceLayout } from "@dylanebert/shallot/src/standard/render/contract.ts";
-import { unpackLdrColor, Xform } from "@dylanebert/shallot/src/engine/utils/core.ts";
-import type { Plugin } from "@dylanebert/shallot/src/engine/app/index.ts";
-import tgpu from "typegpu";
-import * as d from "typegpu/data";
+import {
+  AmbientLight,
+  aim,
+  build,
+  Camera,
+  cells,
+  cellsGridFor,
+  Color,
+  Compute,
+  Glaze,
+  GlazePlugin,
+  Part,
+  PartPlugin,
+  RenderPlugin,
+  Resolution,
+  SearPlugin,
+  SlabPlugin,
+  Tonemap,
+  Transform,
+  TransformsPlugin,
+} from "@dylanebert/shallot";
+import { captureFrame, type Capture } from "@dylanebert/shallot/harness/capture";
+import { attachCanvas } from "@dylanebert/shallot/render";
 
 export type HeroTreatment = "human" | "agentic" | "vibe";
 export type HeroColors = Record<HeroTreatment, string>;
 
+// Instrument mutations may park the renderer-authored subject; this remains false in production.
+const hideAgenticPixels = false;
+
 const scene = `<scene>
 <a ambient-light="color: 0x404040" />
 <a directional-light="direction: -0.4 -0.8 -0.45; intensity: 1" />
-<a id="camera" camera sear glaze transform />
+<a id="camera" camera resolution="width: 1280; height: 720" sear glaze transform />
 <a id="box" part transform color="rgba: 0.85 0.55 0.35" />
-<a id="glow" part="surface: glow" transform="scale: 1.1 1.1 1.1" color="rgba: 0.42 0.25 0.63 0.28" />
+<a id="glow" part transform="scale: 1.1 1.1 1.1" color="rgba: 0.42 0.25 0.63 0.28" />
 </scene>`;
-
-// An unlit, alpha-blended surface for the vibe glow shell: Part color straight through, alpha kept.
-const glowLayout = surfaceLayout({
-  eids: { type: "storage", element: d.u32 },
-  transforms: { type: "storage", element: Xform },
-  color: { type: "storage", element: d.u32 },
-});
-const glowFs = tgpu.fn([fsCtxSchema()], d.vec4f)((ctx) => {
-  "use gpu";
-  const color = unpackLdrColor(glowLayout.$.color[ctx.eid]);
-  return d.vec4f(color.xyz, color.w);
-});
-const GlowPlugin: Plugin = {
-  name: "HeroGlow",
-  dependencies: [SearPlugin],
-  initialize(state) { registerSurface(state, { name: "glow", layout: glowLayout, fs: glowFs, blend: "alpha" }); },
-};
 
 function rgb(hex: string) {
   const value = Number.parseInt(hex.slice(1), 16);
@@ -59,15 +52,18 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
     },
   })) };
   const app = await build({
-    plugins: [SlabPlugin, TransformsPlugin, RenderPlugin, PartPlugin, SearPlugin, GlowPlugin, gated, GlazePlugin],
+    plugins: [SlabPlugin, TransformsPlugin, RenderPlugin, PartPlugin, SearPlugin, gated, GlazePlugin],
     defaults: false, scene, pixelRatio: 2,
   });
   const camera = [...app.state.query([Camera])][0];
+  Resolution.width.set(camera, 1280);
+  Resolution.height.set(camera, 720);
   const parts = [...app.state.query([Part])];
   const box = parts[0];
   const glow = parts[1];
   const ambient = [...app.state.query([AmbientLight])][0];
-  // Fixed 2x backing and 9 CSS-pixel cells keep the poster and live grid identical across displays.
+  // The CSS hero remains a compact square, while the bound final canvas is pinned to Shallot's
+  // public 1280x720 capture contract. Cells stay fixed in CSS pixels across displays.
   Object.assign(canvas, { cellWidth: 18, cellHeight: 18 });
   try { attachCanvas(camera, canvas, app.state); }
   catch (error) { app.dispose(); throw error; }
@@ -88,6 +84,7 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
     const rotation = aim(x, y, z, 0, -0.12, 0);
     // The glow shell only exists in vibe; elsewhere it parks far outside the view so Cells never samples it.
     Transform.pos.set(glow, 0, next === "vibe" ? 0 : 100, 0, 0);
+    Transform.pos.set(box, hideAgenticPixels && next === "agentic" ? 100 : 0, 0, 0, 0);
     Transform.pos.set(camera, x, y, z, 0);
     Transform.rot.set(camera, rotation.x, rotation.y, rotation.z, rotation.w);
     const color = rgb(colors[next]);
@@ -103,5 +100,8 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
     const grid = next === "agentic" ? cellsGridFor(camera) : undefined;
     return grid ? `${grid.cols}x${grid.rows}` : undefined;
   };
-  return { render, presented: () => Compute.device.queue.onSubmittedWorkDone(), dispose: () => app.dispose() };
+  const capture = (): Promise<Capture> => captureFrame(canvas);
+  (globalThis as typeof globalThis & { __heroCapture?: typeof capture }).__heroCapture = capture;
+  (canvas as HTMLCanvasElement & { __heroCapture?: typeof capture }).__heroCapture = capture;
+  return { render, presented: () => Compute.device.queue.onSubmittedWorkDone(), capture, dispose: () => app.dispose() };
 }

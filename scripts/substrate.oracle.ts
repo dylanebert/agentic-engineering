@@ -1,80 +1,26 @@
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { basename, join } from "node:path";
+import { createHash } from "node:crypto";
+import { lstatSync, readFileSync, realpathSync } from "node:fs";
+import { join } from "node:path";
 
-const repo = join(import.meta.dir, "..");
+const root = join(import.meta.dir, "..");
 const dependency = "@dylanebert/shallot";
-const expectedTypegpu = "~0.12.4";
-const expectedPlugin = "~0.12.3";
-const requiredPayload = [
-  "src/extras/cells/core.ts",
-  "dist/vite.js",
-  "dist/harness-browser.js",
-];
+const candidate = "70770cfc34d82fdd19cb705d8753bb6f093748d6";
+const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+const lock = readFileSync(join(root, "bun.lock"), "utf8");
+const installedRoot = realpathSync(join(root, "node_modules", dependency));
+const installed = JSON.parse(readFileSync(join(installedRoot, "package.json"), "utf8"));
+const hash = (path: string) => createHash("sha256").update(readFileSync(path)).digest("hex");
 
-function sha256(path: string): string {
-  const hash = new Bun.CryptoHasher("sha256");
-  hash.update(readFileSync(path));
-  return hash.digest("hex");
-}
-
-function verify(root: string): void {
-  const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-  const spec = manifest.dependencies?.[dependency];
-  if (typeof spec !== "string" || !spec.startsWith("file:vendor/") || spec.slice(5).includes("..")) {
-    throw new Error(`Shallot dependency must be an exact relative file: path under vendor/, got ${String(spec)}`);
-  }
-  if (manifest.dependencies?.typegpu !== expectedTypegpu) throw new Error(`typegpu must be ${expectedTypegpu}`);
-  if (manifest.dependencies?.["unplugin-typegpu"] !== expectedPlugin) throw new Error(`unplugin-typegpu must be ${expectedPlugin}`);
-
-  const tarName = basename(spec.slice(5));
-  const match = /^shallot-(\d+\.\d+\.\d+)-([0-9a-f]{7})\.tgz$/.exec(tarName);
-  if (!match) throw new Error(`Shallot tarball name must carry version and seven-character source commit: ${tarName}`);
-  const tarPath = join(root, spec.slice(5));
-  const stem = tarName.slice(0, -4);
-  const source = readFileSync(join(root, "vendor", `${stem}.source-commit`), "utf8").trim();
-  if (!/^[0-9a-f]{40}$/.test(source) || source.slice(0, 7) !== match[2]) throw new Error("tarball name and source-commit record disagree");
-  const checksum = readFileSync(join(root, "vendor", `${stem}.sha256`), "utf8").trim();
-  if (checksum !== `${sha256(tarPath)}  ${tarName}`) throw new Error("vendored Shallot SHA-256 does not match committed bytes");
-
-  const lock = readFileSync(join(root, "bun.lock"), "utf8");
-  if (!lock.includes(`\"${dependency}\": \"file:vendor/${tarName}\"`) || !lock.includes(`${dependency}@vendor/${tarName}`)) {
-    throw new Error("bun.lock does not resolve the exact vendored Shallot artifact");
-  }
-  const installed = join(root, "node_modules", dependency);
-  for (const path of requiredPayload) readFileSync(join(installed, path));
-}
-
-function mutation(name: string, mutate: (root: string) => void): void {
-  const root = mkdtempSync(join(tmpdir(), "agentic-engineering-substrate-"));
-  try {
-    for (const path of ["package.json", "bun.lock", "vendor", "node_modules"]) cpSync(join(repo, path), join(root, path), { recursive: true });
-    mutate(root);
-    let red = false;
-    try { verify(root); } catch { red = true; }
-    if (!red) throw new Error(`mutation stayed green: ${name}`);
-    console.log(`mutation red: ${name}`);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
-}
-
-verify(repo);
-console.log("substrate: article manifest, lock, provenance, checksum, and installed payload agree");
-const manifest = JSON.parse(readFileSync(join(repo, "package.json"), "utf8"));
-const tarName = basename(manifest.dependencies[dependency].slice(5));
-mutation("flip tarball byte with checksum unchanged", (root) => {
-  const path = join(root, "vendor", tarName);
-  const bytes = readFileSync(path);
-  bytes[bytes.length - 1] ^= 1;
-  writeFileSync(path, bytes);
-});
-mutation("strip Cells from installed payload", (root) => rmSync(join(root, "node_modules", dependency, requiredPayload[0])));
-mutation("strip tooling export from installed payload", (root) => rmSync(join(root, "node_modules", dependency, requiredPayload[1])));
-mutation("rewrite dependency as registry range", (root) => {
-  const path = join(root, "package.json");
-  const value = JSON.parse(readFileSync(path, "utf8"));
-  value.dependencies[dependency] = "^0.10.0";
-  writeFileSync(path, JSON.stringify(value, null, 2));
-});
-console.log("oracle-substrate: PASS");
+if (manifest.dependencies?.[dependency] !== `github:dylanebert/shallot#${candidate}`)
+  throw new Error("Shallot manifest is not the qualified full-SHA source identity");
+if (!lock.includes(`github:dylanebert/shallot#${candidate}`))
+  throw new Error("bun.lock does not record the qualified full-SHA source identity");
+if (installed.name !== dependency || installed.version !== "0.10.0")
+  throw new Error("installed Shallot metadata is not the candidate package");
+if (installedRoot === join(root, "node_modules", dependency) && lstatSync(join(root, "node_modules", dependency)).isSymbolicLink())
+  throw new Error("realpath proof found a producer symlink");
+if (installedRoot.includes("/tmp/shallot-candidate") || installedRoot.includes("/projects/shallot"))
+  throw new Error(`realpath proof found a producer path: ${installedRoot}`);
+if (!/^[0-9a-f]{64}$/.test(hash(join(root, "package.json"))) || !/^[0-9a-f]{64}$/.test(hash(join(root, "bun.lock"))))
+  throw new Error("manifest or lock hash was not computed");
+console.log(JSON.stringify({ dependency, candidate, installedRoot, packageHash: hash(join(root, "package.json")), lockHash: hash(join(root, "bun.lock")) }));

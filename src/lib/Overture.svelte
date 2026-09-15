@@ -48,8 +48,7 @@
     const initialize = async () => {
       if (!("gpu" in navigator)) return;
       try {
-        const adapter = await navigator.gpu.requestAdapter();
-        if (!adapter || disposed) return;
+        // mountHero owns the single adapter/device admission used by the public engine.
         const { mountHero } = await import("./hero-engine");
         if (disposed) return;
         const style = getComputedStyle(root);
@@ -60,6 +59,7 @@
         }, getComputedStyle(document.body).backgroundColor);
         if (disposed) { mounted.dispose(); return; }
         engine = mounted;
+        (globalThis as typeof globalThis & { __heroCapture?: typeof mounted.capture }).__heroCapture = mounted.capture;
         render(0);
         await mounted.presented();
         if (disposed) return;
@@ -93,6 +93,9 @@
       cancelAnimationFrame(observeFrame);
       cancelAnimationFrame(raf);
       observer.disconnect();
+      if (engine && (globalThis as typeof globalThis & { __heroCapture?: typeof engine.capture }).__heroCapture === engine.capture) {
+        delete (globalThis as typeof globalThis & { __heroCapture?: typeof engine.capture }).__heroCapture;
+      }
       engine?.dispose();
     };
   });

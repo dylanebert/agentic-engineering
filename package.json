@@ -1,6 +1,10 @@
 {
   "name": "agentic-engineering",
   "version": "0.0.0",
+  "packageManager": "bun@1.4.2",
+  "engines": {
+    "bun": ">=1.4.2"
+  },
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
@@ -15,15 +19,18 @@
   },
   "private": true,
   "dependencies": {
-    "@dylanebert/shallot": "file:vendor/shallot-0.10.0-5fa98bb.tgz",
-    "typegpu": "~0.12.4",
+    "@dylanebert/shallot": "github:dylanebert/shallot#70770cfc34d82fdd19cb705d8753bb6f093748d6",
+    "typegpu": "~0.12.5",
     "unplugin-typegpu": "~0.12.3"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json && bun scripts/shallot-carrier.ts check",
+    "list": "bun scripts/shallot-carrier.ts list",
+    "workflow": "bun scripts/shallot-carrier.ts workflow",
+    "test": "bun scripts/shallot-carrier.ts test && bun test ./scripts/figures-manifest.test.ts ./scripts/import-gate.test.ts ./scripts/shot-route.test.ts",
     "shot": "bun run scripts/shot.ts",
     "shot:update": "bun run scripts/shot.ts --update-snapshots",
     "instrument": "bun run scripts/instrument.ts",
