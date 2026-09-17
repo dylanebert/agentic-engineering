@@ -22,7 +22,7 @@ check(
     budget: 20_000,
   },
   () => {
-    const result = Bun.spawnSync(["bun", "run", "hero:check"], { cwd: process.cwd(), stdout: "inherit", stderr: "inherit" });
+    const result = Bun.spawnSync(["bun", "run", "hero"], { cwd: process.cwd(), stdout: "inherit", stderr: "inherit" });
     if (result.exitCode !== 0) throw new Error(`hero capture failed with exit ${result.exitCode}`);
   },
 );

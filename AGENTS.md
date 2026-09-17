@@ -21,7 +21,7 @@ population. Use these commands; they never reach a host checkout or a private
 
 The carrier's fixed public-capture row and real-Chromium hero/shot integrations remain
 separate from the application's Svelte, TypeScript, build, Playwright, and product gates.
-Those independent gates include `bun run build`, `bun run hero:check`, `bun run runtime`,
+Those independent gates include `bun run build`, `bun run hero`, `bun run runtime`,
 `bun run instrument`, and `bun run shot`; general Playwright evidence is diagnostic and is
 not a Shallot frame claim.
 

@@ -30,20 +30,11 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json && bun scripts/shallot-carrier.ts check",
     "list": "bun scripts/shallot-carrier.ts list",
     "workflow": "bun scripts/shallot-carrier.ts workflow",
-    "test": "bun scripts/shallot-carrier.ts test && bun test ./scripts/figures-manifest.test.ts ./scripts/import-gate.test.ts ./scripts/shot-route.test.ts",
+    "test": "bun scripts/shallot-carrier.ts test && bun test ./scripts/figures-manifest.test.ts ./scripts/import-gate.test.ts ./scripts/shot-route.test.ts ./scripts/package-commands.test.ts",
     "shot": "bun run scripts/shot.ts",
-    "shot:update": "bun run scripts/shot.ts --update-snapshots",
     "instrument": "bun run scripts/instrument.ts",
-    "instrument:pure": "bun run scripts/instrument.ts --pure",
-    "campaign": "bun run scripts/instrument.ts",
     "runtime": "bun run scripts/runtime.ts",
-    "hero:check": "bun scripts/hero-startup.ts",
-    "hero:poster": "bun scripts/hero-startup.ts --update-poster",
-    "figures": "bun run scripts/figures.ts",
-    "oracle-text": "bun run scripts/oracle-text.ts",
-    "tripwires": "bun run scripts/tripwires.ts",
-    "oracle-vocabulary": "bun run scripts/vocabulary.oracle.ts",
-    "oracle-substrate": "bun run scripts/substrate.oracle.ts"
+    "hero": "bun scripts/hero-startup.ts"
   },
   "type": "module"
 }
