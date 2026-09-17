@@ -53,7 +53,7 @@ export function nonemptyGpu(options: LaunchOptions) {
 export async function launch(options: LaunchOptions, cohort: string) {
   if (cohort === "gpu") nonemptyGpu(options);
   record("launch-request", { cohort, options });
-  const browser = await chromium.launch({ headless: true, ...options });
+  const browser = await chromium.launch({ headless: cohort !== "gpu" || process.platform !== "linux", ...options });
   const session = await browser.newBrowserCDPSession();
   const processes = await session.send("SystemInfo.getProcessInfo");
   const pid = processes.processInfo.find((p) => p.type === "browser")?.id;
