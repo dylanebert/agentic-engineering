@@ -1,9 +1,8 @@
 # Agentic Engineering consumer contract
 
-Admission is Bun **1.4.2** exactly, from `.bun-version` and `packageManager`. The active
+The active
 root is an application: it supports the uncommitted local source override and immutable
-candidate staging. The selected Shallot candidate is
-`github:dylanebert/shallot#0664218f465224397b80aeb604b51178ac71cfb2`; there is no saved
+candidate staging. There is no saved
 link, local directory, short ref, mutable tag, or artifact stage. Stable published exit is
 not admitted until a compatible Shallot release exists.
 
@@ -34,7 +33,7 @@ geometry and record real Chromium adapter identity. Missing WebGPU, a software/f
 adapter, missing display, or missing build output refuses; no CPU reconstruction,
 private source import, copied transport, or unsupported state is evidence. Frozen
 experiment records under `examples/**/evidence` are historical general Playwright and
-agent evidence; they are not rewritten for this migration.
+agent evidence.
 
 ## Identity proof and state transitions
 
