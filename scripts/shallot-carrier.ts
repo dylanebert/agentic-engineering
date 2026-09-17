@@ -7,10 +7,11 @@ const legacyChecks = [
   "scripts/figures-manifest.test.ts",
   "scripts/import-gate.test.ts",
   "scripts/shot-route.test.ts",
+  "scripts/package-commands.test.ts",
   "scripts/vocabulary.oracle.ts",
   "scripts/substrate.oracle.ts",
 ];
-const parked = join("/tmp", `agentic-engineering-carrier-${process.pid}`);
+const parked = join(root, "node_modules", `.agentic-engineering-carrier-${process.pid}`);
 const command = process.argv[2];
 if (!command || !["list", "check", "test", "workflow"].includes(command)) {
   throw new Error("carrier usage: list|check|test|workflow [options]");
