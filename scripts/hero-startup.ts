@@ -10,6 +10,7 @@ import { requireDisplay } from "./display";
 const root = resolve(import.meta.dir, "..");
 const output = mkdtempSync(join(tmpdir(), "article-hero-startup-"));
 const update = process.argv.includes("--update-poster");
+const only = process.argv.slice(2).find(arg => !arg.startsWith("--"));
 const hero = '[data-hero-id="spectrum-hero"]';
 const poster = `${hero} [data-hero-poster]`;
 
@@ -57,7 +58,8 @@ async function main() {
       { name: "no-webgpu", width: 390, dpr: 2, mode: "missing" },
       { name: "no-adapter", width: 390, dpr: 1, mode: "absent" },
       { name: "failed-init", width: 1440, dpr: 2, mode: "failed" },
-    ];
+    ].filter(item => only === undefined || item.name === only);
+    if (cases.length === 0) throw new Error(`no case named ${only}`);
     for (const item of cases) {
       const context = await handle.browser.newContext({ viewport: { width: item.width, height: 900 }, deviceScaleFactor: item.dpr, reducedMotion: item.mode === "reduce" ? "reduce" : "no-preference", ...(item.mode === "playback" ? { recordVideo: { dir: output, size: { width: 1440, height: 900 } } } : {}) });
       try {
