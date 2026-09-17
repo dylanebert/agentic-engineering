@@ -95,7 +95,7 @@ async function main() {
           await video.saveAs(join(output, "startup.webm"));
           results.push({ ...item, state, box, video: "startup.webm" });
         } else if (item.mode === "absent" || item.mode === "failed" || item.mode === "missing") {
-          if (item.mode === "failed") await expect(page.locator(hero)).toHaveAttribute("data-hero-gpu", "unsupported");
+          if (item.mode === "absent" || item.mode === "failed") await expect(page.locator(hero)).toHaveAttribute("data-hero-gpu", "unsupported");
           const first = await read(page);
           const image = await page.locator(`${hero} .canvas-wrap`).screenshot();
           await page.waitForTimeout(300);
