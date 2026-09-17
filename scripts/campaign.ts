@@ -50,10 +50,59 @@ export function nonemptyGpu(options: LaunchOptions) {
   expect(Object.keys(options).length, "predicate:runner.gpu-config").toBeGreaterThan(0);
   expect(JSON.stringify(options), "predicate:runner.gpu-distinct").not.toBe("{}");
 }
+/** the window class only the campaign's headed Chromium carries, and what the compositor rule matches. */
+const HEADED_WINDOW_CLASS = "agentic-engineering-campaign";
+/** the rule's name: a later declaration of it replaces the rule rather than adding one, though an effect it leaves out keeps its last value. */
+const HEADED_RULE_NAME = "agentic-engineering-campaign";
+/** no smaller than the largest viewport a case asks for, 1440x900, so tiling never resizes the window mid-run. */
+const HEADED_WINDOW_SIZE = "1440 900";
+/** Floating, so tiling cannot resize or hide it; unfocused, so the keyboard stays where the person is working. */
+function headedRuleScript(): string {
+  return [
+    "AGENTIC_ENGINEERING_CAMPAIGN_RULE = hl.window_rule({",
+    `    name = ${JSON.stringify(HEADED_RULE_NAME)},`,
+    `    match = { class = ${JSON.stringify(`^(${HEADED_WINDOW_CLASS})$`)} },`,
+    "    float = true,",
+    "    no_initial_focus = true,",
+    `    size = ${JSON.stringify(HEADED_WINDOW_SIZE)},`,
+    "})",
+    "return 1",
+  ].join("\n");
+}
+function hyprctl(args: string[]): string {
+  const run = spawnSync("hyprctl", args, { encoding: "utf8" });
+  if (run.status !== 0 || run.stdout.startsWith("error:")) throw new Error(`hyprctl ${args[0]} exited ${run.status} with ${(run.stdout + run.stderr).trim().split("\n")[0] || "no output"}`);
+  return run.stdout;
+}
+/** A rule is a request: refuse, naming what the compositor reports, unless every window of the class floats. */
+function placementRefusal(clients: { class?: string; floating?: boolean; address?: string }[]): string | undefined {
+  const windows = clients.filter(client => client.class === HEADED_WINDOW_CLASS);
+  if (windows.length === 0) return `the compositor reports no window of class ${HEADED_WINDOW_CLASS} after the first page opened`;
+  const tiled = windows.filter(client => client.floating !== true);
+  if (tiled.length > 0) return `the compositor reports ${tiled.length} of ${windows.length} windows of class ${HEADED_WINDOW_CLASS} not floating (${tiled.map(client => client.address).join(", ")}), so tiling can resize or hide them mid-run`;
+  return undefined;
+}
+async function confirmFloating(browser: Browser) {
+  // The page stays open until the browser closes: closing a headed Chromium's only window here stalls the next context's page.
+  await browser.newPage();
+  let clients: { class?: string; floating?: boolean; address?: string }[] = [];
+  for (let tries = 0; tries < 50; tries++) {
+    clients = JSON.parse(hyprctl(["clients", "-j"]));
+    if (clients.some(client => client.class === HEADED_WINDOW_CLASS)) break;
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  const refusal = placementRefusal(clients);
+  record("placement", { windowClass: HEADED_WINDOW_CLASS, windows: clients.filter(client => client.class === HEADED_WINDOW_CLASS).map(({ address, floating }) => ({ address, floating })), refusal });
+  if (refusal !== undefined) throw new Error(refusal);
+}
 export async function launch(options: LaunchOptions, cohort: string) {
   if (cohort === "gpu") nonemptyGpu(options);
   record("launch-request", { cohort, options });
-  const browser = await chromium.launch({ headless: cohort !== "gpu" || process.platform !== "linux", ...options });
+  const headless = cohort !== "gpu" || process.platform !== "linux";
+  const placed = (options.headless ?? headless) === false && !!process.env.HYPRLAND_INSTANCE_SIGNATURE;
+  if (placed) hyprctl(["eval", headedRuleScript()]);
+  const browser = await chromium.launch({ headless, ...options, ...(placed ? { args: [...(options.args ?? []), `--class=${HEADED_WINDOW_CLASS}`] } : {}) });
+  if (placed) { try { await confirmFloating(browser); } catch (error) { await browser.close(); throw error; } }
   const session = await browser.newBrowserCDPSession();
   const processes = await session.send("SystemInfo.getProcessInfo");
   const pid = processes.processInfo.find((p) => p.type === "browser")?.id;
