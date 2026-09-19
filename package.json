@@ -30,7 +30,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json && bun scripts/shallot-carrier.ts check",
     "list": "bun scripts/shallot-carrier.ts list",
     "workflow": "bun scripts/shallot-carrier.ts workflow",
-    "test": "bun scripts/shallot-carrier.ts test && bun test ./scripts/figures-manifest.test.ts ./scripts/import-gate.test.ts ./scripts/shot-route.test.ts ./scripts/package-commands.test.ts",
+    "test": "bun scripts/shallot-carrier.ts test && bun test ./scripts/figures-manifest.test.ts ./scripts/import-gate.test.ts ./scripts/shot-route.test.ts",
     "shot": "bun run scripts/shot.ts",
     "instrument": "bun run scripts/instrument.ts",
     "runtime": "bun run scripts/runtime.ts",

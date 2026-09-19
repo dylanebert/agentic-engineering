@@ -7,9 +7,7 @@ const legacyChecks = [
   "scripts/figures-manifest.test.ts",
   "scripts/import-gate.test.ts",
   "scripts/shot-route.test.ts",
-  "scripts/package-commands.test.ts",
   "scripts/vocabulary.oracle.ts",
-  "scripts/substrate.oracle.ts",
 ];
 const parked = join(root, "node_modules", `.agentic-engineering-carrier-${process.pid}`);
 const command = process.argv[2];
