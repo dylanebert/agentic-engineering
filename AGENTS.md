@@ -19,9 +19,11 @@ population. Use these commands; they never reach a host checkout or a private
 "$BUN" run workflow
 ```
 
-The carrier's fixed public-capture row and real-Chromium hero/shot integrations remain
-separate from the application's Svelte, TypeScript, build, Playwright, and product gates.
-Those independent gates include `bun run build`, `bun run hero`, `bun run runtime`,
+The carrier's fixed public-capture row is separate from the application's Svelte,
+TypeScript, build, Playwright, and product gates. `"$BUN" run test -- <args>` forwards its
+arguments to the carrier; while no integration row exists, `--integration --all` is
+refused there with `selector matched no integration rows`, the expected answer. The independent
+gates include `bun run build`, `bun run hero`, `bun run runtime`,
 `bun run instrument`, and `bun run shot`; general Playwright evidence is diagnostic and is
 not a Shallot frame claim.
 
