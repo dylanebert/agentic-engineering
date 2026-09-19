@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { concepts, grammar, pageGround, type Concept } from "../src/lib/vocabulary";
 
 /**
- * Grammar oracle for the page's shared visual vocabulary: one primitive family, at most two
+ * Grammar check over the page's shared visual vocabulary: one primitive family, at most two
  * thickness roles, at most two motion roles, at most five color roles, every color role naming
  * the concept it carries at 4.5:1 against the page ground, and no concept-local novelty.
  *
@@ -147,7 +147,7 @@ function mutant(name: string, change: (copy: Vocabulary) => void, expected: stri
 
 /**
  * Mutation record (2026-09-02): each production-table mutation below was first run as the
- * oracle subject and returned exit 1 on its named predicate; restoring the table returned 0.
+ * check subject and returned exit 1 on its named predicate; restoring the table returned 0.
  * These in-process replays keep the same discriminating mutations durable at every gate run:
  * mixed primitive family, third thickness role, sixth color role, an unnamed role concept, a
  * role under 4.5:1, third motion role, and concept-local color/shape/motion values. A mutant
@@ -194,4 +194,4 @@ bindingMutant("role dropped from the prose", (copy) => { copy.prose.delete("cont
 bindingMutant("role dropped from the figures", (copy) => { copy.figures.delete("vibe"); });
 
 if (process.exitCode) process.exit(process.exitCode);
-console.log("vocabulary oracle: shared grammar, role binding, and 11 mutation arms passed");
+console.log("vocabulary grammar: shared grammar, role binding, and 11 mutation arms passed");
