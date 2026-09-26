@@ -10,7 +10,7 @@ const fault = process.env.CAMPAIGN_FIXTURE_FAULT;
 const fixture = process.env.CAMPAIGN_FIXTURE_CHILD === "1";
 const gpu = cases.some(item => item.cohort === "gpu");
 const REAL_GPU_LAUNCH = fault === "empty-gpu" ? {} : gpu
-  ? (await import("@dylanebert/shallot/harness/browser", { with: { type: "json" } })).default
+  ? (await import("./real-gpu-launch")).REAL_GPU_LAUNCH
   : undefined;
 if (fixture) {
   const { record } = await import("./campaign");

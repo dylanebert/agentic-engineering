@@ -19,7 +19,7 @@
   },
   "private": true,
   "dependencies": {
-    "@dylanebert/shallot": "github:dylanebert/shallot#0664218f465224397b80aeb604b51178ac71cfb2",
+    "@dylanebert/shallot": "github:dylanebert/shallot#69f12a06438d8ce80aa1ab9e4b34de5b58820e15",
     "typegpu": "~0.12.5",
     "unplugin-typegpu": "~0.12.3"
   },
@@ -27,9 +27,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json && bun scripts/shallot-carrier.ts check",
-    "list": "bun scripts/shallot-carrier.ts list",
-    "workflow": "bun scripts/shallot-carrier.ts workflow",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json && bun scripts/shallot-carrier.ts test --list",
+    "list": "bun scripts/shallot-carrier.ts test --list",
     "test": "bun test ./scripts/figures-manifest.test.ts ./scripts/import-gate.test.ts ./scripts/shot-route.test.ts && bun scripts/shallot-carrier.ts test",
     "shot": "bun run scripts/shot.ts",
     "instrument": "bun run scripts/instrument.ts",

@@ -2,7 +2,7 @@ import { cpSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { expect, type Page } from "@playwright/test";
-import REAL_GPU_LAUNCH from "@dylanebert/shallot/harness/browser" with { type: "json" };
+import { REAL_GPU_LAUNCH } from "./real-gpu-launch";
 import { bytes, closeBrowser, launch, serve } from "./campaign";
 import { perceptualDelta } from "./png";
 import { requireDisplay } from "./display";

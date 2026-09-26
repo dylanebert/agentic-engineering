@@ -8,15 +8,15 @@ not admitted until a compatible Shallot release exists.
 
 ## Entry and carrier
 
-The installed `shallot` bin is the carrier for this repository's warranted Shallot
-population. Use these commands; they never reach a host checkout or a private
-`node_modules/@dylanebert/shallot/src` or `scripts` path:
+The installed `shallot` bin carries this repository's warranted Shallot population. The
+`list` script and the Shallot portion of `check` invoke `shallot test --list`. These
+gates never reach a host checkout or a private `node_modules/@dylanebert/shallot/src` or
+`scripts` path. Use:
 
 ```sh
 "$BUN" run list
 "$BUN" run test
 "$BUN" run check
-"$BUN" run workflow
 ```
 
 The carrier's fixed public-capture row is separate from the application's Svelte,

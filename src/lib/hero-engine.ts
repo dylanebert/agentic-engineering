@@ -20,7 +20,7 @@ import {
   TransformsPlugin,
 } from "@dylanebert/shallot";
 import { captureFrame, type Capture } from "@dylanebert/shallot/harness/capture";
-import { attachCanvas } from "@dylanebert/shallot/render";
+import { attachCanvas } from "@dylanebert/shallot/rendering";
 
 export type HeroTreatment = "human" | "agentic" | "vibe";
 export type HeroColors = Record<HeroTreatment, string>;

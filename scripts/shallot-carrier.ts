@@ -11,8 +11,8 @@ const legacyChecks = [
 ];
 const parked = join(root, "node_modules", `.agentic-engineering-carrier-${process.pid}`);
 const command = process.argv[2];
-if (!command || !["list", "check", "test", "workflow"].includes(command)) {
-  throw new Error("carrier usage: list|check|test|workflow [options]");
+if (command !== "test") {
+  throw new Error("carrier usage: test [options]");
 }
 
 // The historical experiment corpus contains intentionally independent Bun evidence tests. The

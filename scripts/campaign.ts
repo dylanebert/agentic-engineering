@@ -252,7 +252,7 @@ export type FixtureDeclaration = { id: string; requirement: "pure" | Cohort };
 export function fixtureCampaign(declarations: FixtureDeclaration[], fault: string) {
   const work = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-runner-fixture-"));
   symlinkSync(join(here, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["arms.ts", "campaign.ts", "instrument.spec.ts", "playwright.config.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
+  for (const file of ["arms.ts", "campaign.ts", "instrument.spec.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   const cases: Case[] = [];
   for (const declaration of declarations) {
@@ -304,7 +304,7 @@ export async function campaign(selection: string, mutations: Mutation[], updateS
   record("owner-start", { selection, repo, work, source: spawnSync('git', ['rev-parse', 'HEAD', 'HEAD^{tree}'], { cwd: repo, encoding: 'utf8' }).stdout.trim().split('\n') });
   // Each run owns a new directory. No inherited capture or staging output is overwritten.
   symlinkSync(join(repo, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["runtime.ts", "runtime.spec.ts", "arms.ts", "campaign.ts", "instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "playwright.config.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
+  for (const file of ["runtime.ts", "runtime.spec.ts", "arms.ts", "campaign.ts", "instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
   cpSync(join(here, "capture.spec.ts-snapshots"), join(work, "capture.spec.ts-snapshots"), { recursive: true });
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
