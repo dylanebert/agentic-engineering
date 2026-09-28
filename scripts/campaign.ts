@@ -8,13 +8,36 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { test as baseTest, expect, chromium, type Browser, type BrowserContext, type LaunchOptions, type TestInfo } from "@playwright/test";
 import { captureArms, figureArms, proseArms, selfArms, selfFixtures, textArms, type Arm, type ArmInput } from "./arms";
 import { requireDisplay } from "./display";
-import { capturePlaywrightArgs } from "./shot-routing";
 
 export type Group = "figure" | "capture" | "text" | "prose" | "self";
 export type Cohort = "plain" | "gpu" | "fresh";
 export type Input = { id: string; root: string; mode: "files" | "fallback" | "self"; omitHostIcon?: boolean; omitRuntimeCors?: boolean; runtimeControl?: "healthy" | "error"; originFault?: "off-base" | "base-icon" | "self-html-icon"; hashes: Record<string, string> };
 export type Case = { id: string; input: Input; group: Group; title: string; cohort: Cohort; red?: string; fixture?: { identity: string; requirement: string }; };
 export type Mutation = { label: string; path?: string; needle?: string | string[]; replacement?: string | string[]; grep?: string; predicate: string; runtime?: boolean; cohort?: Cohort; mode?: "fallback" | "golden"; buildRed?: string };
+
+const playwrightPrefix = ["bunx", "playwright", "test", "--config", "playwright.config.ts"];
+
+export function campaignPlaywrightArgs(
+  selection: string,
+  updateSnapshots = false,
+  forwardedArgs: readonly string[] = [],
+): string[] {
+  const args = [...playwrightPrefix];
+  if (selection === "capture" && updateSnapshots) args.push("--update-snapshots");
+  if (selection === "runtime") args.push(...forwardedArgs);
+  if (selection === "runtime-witnesses") {
+    const forwarded = forwardedArgs.filter(argument => argument !== "--runtime-witnesses");
+    // Playwright matches the project-qualified title; strip only outer anchors so the
+    // documented exact-title selector still reaches the selected test in every project.
+    const grep = forwarded.indexOf("--grep");
+    if (grep >= 0 && forwarded[grep + 1]?.startsWith("^") && forwarded[grep + 1]?.endsWith("$")) {
+      forwarded[grep + 1] = forwarded[grep + 1].slice(1, -1);
+    }
+    args.push(...forwarded);
+  }
+  return args;
+}
+
 const here = dirname(fileURLToPath(import.meta.url));
 const factories = { figure: figureArms, capture: captureArms, text: textArms, prose: proseArms, self: selfArms };
 export const emptyInput: ArmInput = { root: here, dist: join(here, "dist"), url: "", figures: [], grammar: { colors: {} } as ArmInput["grammar"] };
@@ -253,7 +276,7 @@ export type FixtureDeclaration = { id: string; requirement: "pure" | Cohort };
 export function fixtureCampaign(declarations: FixtureDeclaration[], fault: string) {
   const work = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-runner-fixture-"));
   symlinkSync(join(here, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["arms.ts", "campaign.ts", "shot-routing.ts", "instrument.evidence.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
+  for (const file of ["arms.ts", "campaign.ts", "instrument.evidence.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   const cases: Case[] = [];
   for (const declaration of declarations) {
@@ -296,7 +319,7 @@ export function changedClass(paths: string[], beforePackage = {}, afterPackage =
   return result;
 }
 
-export async function campaign(selection: string, mutations: Mutation[], updateSnapshots = false) {
+export async function campaign(selection: string, mutations: Mutation[], updateSnapshots = false, playwrightArgs?: string[]) {
   const pure = selection === "pure" || selection === "runner";
   if (selection !== "pure" && !requireDisplay("campaign")) return;
   const repo = resolve(here, "..");
@@ -305,7 +328,7 @@ export async function campaign(selection: string, mutations: Mutation[], updateS
   record("owner-start", { selection, repo, work, source: spawnSync('git', ['rev-parse', 'HEAD', 'HEAD^{tree}'], { cwd: repo, encoding: 'utf8' }).stdout.trim().split('\n') });
   // Each run owns a new directory. No inherited capture or staging output is overwritten.
   symlinkSync(join(repo, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["runtime.ts", "runtime.evidence.ts", "arms.ts", "campaign.ts", "shot-routing.ts", "instrument.evidence.ts", "figures.evidence.ts", "capture.evidence.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
+  for (const file of ["runtime.ts", "runtime.evidence.ts", "arms.ts", "campaign.ts", "instrument.evidence.ts", "figures.evidence.ts", "capture.evidence.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
   cpSync(join(here, "capture.evidence.ts-snapshots"), join(work, "capture.evidence.ts-snapshots"), { recursive: true });
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
@@ -418,18 +441,7 @@ export async function campaign(selection: string, mutations: Mutation[], updateS
   record("source-before-browser", { files: Object.keys(initial).length, equal: true });
   writeFileSync(join(work, "cases.json"), JSON.stringify(cases, null, 2));
   writeFileSync(join(work, "selection.json"), JSON.stringify({ selection, pure }));
-  const args = selection === "capture"
-    ? capturePlaywrightArgs(updateSnapshots)
-    : ["bunx", "playwright", "test", "--config", "playwright.config.ts"];
-  if (selection === "runtime") args.push(...process.argv.slice(2));
-  if (selection === "runtime-witnesses") {
-    const forwarded = process.argv.slice(2).filter(argument => argument !== "--runtime-witnesses");
-    // Playwright matches the project-qualified title; strip only outer anchors so the
-    // documented exact-title selector still reaches the selected test in every project.
-    const grep = forwarded.indexOf("--grep");
-    if (grep >= 0 && forwarded[grep + 1]?.startsWith("^") && forwarded[grep + 1]?.endsWith("$")) forwarded[grep + 1] = forwarded[grep + 1].slice(1, -1);
-    args.push(...forwarded);
-  }
+  const args = playwrightArgs ?? campaignPlaywrightArgs(selection, updateSnapshots, process.argv.slice(2));
   record("playwright-start", { args, work });
   const child = Bun.spawnSync(args, { cwd: work, stdout: "inherit", stderr: "inherit", env: { ...process.env, DEBUG: "pw:browser", DEBUG_COLORS: "0", CAMPAIGN_SELECTION: selection } });
   record("playwright-end", { exit: child.exitCode });
