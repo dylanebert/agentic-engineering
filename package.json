@@ -19,7 +19,7 @@
   },
   "private": true,
   "dependencies": {
-    "@dylanebert/shallot": "github:dylanebert/shallot#5ceae0633dae262bcd90506a9cd7c1b1ba79b770"
+    "@dylanebert/shallot": "github:dylanebert/shallot#49fbfcbe4b8d00673b2798c96ae25bbefa5f6060"
   },
   "scripts": {
     "dev": "vite",
