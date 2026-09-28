@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
 import { beats, figures, overture, sectionOrder } from "../src/lib/figures";
@@ -12,11 +13,11 @@ import { grammar } from "../src/lib/vocabulary";
 //   2. every beat's anchor is a verbatim line of the manuscript, in the manuscript's order,
 //   3. the manifest holds exactly the surviving loop figure, sited in a real section.
 //
-// The manuscript sits outside this repo when it is checked out standalone, so property 2 skips
-// with a note rather than reddening there.
+// The manuscript is a required premise from the surrounding Kex workspace. A bad path or absent
+// source is a red, never a successful skip.
 
 const repo = join(import.meta.dir, "..");
-const manuscript = join(repo, "../../manuscripts/agentic-engineering/script.txt");
+const manuscript = join(homedir(), "kex", "manuscripts", "agentic-engineering", "script.txt");
 
 function sectionIds(): string[] {
   const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
@@ -104,10 +105,6 @@ describe("figure manifest", () => {
   });
 
   test("every beat anchor is a verbatim manuscript line, in the manuscript's order", () => {
-    if (!existsSync(manuscript)) {
-      console.log(`figure manifest: ${manuscript} absent — skipping the manuscript arm`);
-      return;
-    }
     const lines = readFileSync(manuscript, "utf8").split("\n");
     const at = beats.map((beat) => {
       const index = lines.indexOf(beat.anchor);
