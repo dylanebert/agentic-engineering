@@ -20,12 +20,12 @@ if (gpu && (!REAL_GPU_LAUNCH || Object.keys(REAL_GPU_LAUNCH).length === 0)) thro
 
 export default defineConfig({
   testDir: ".",
-  testMatch: process.env.CAMPAIGN_SELECTION === "runtime" ? ["runtime.spec.ts"] : fixture ? ["instrument.spec.ts"] : ["instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "runtime.spec.ts"],
+  testMatch: process.env.CAMPAIGN_SELECTION === "runtime" ? ["runtime.evidence.ts"] : fixture ? ["instrument.evidence.ts"] : ["instrument.evidence.ts", "figures.evidence.ts", "capture.evidence.ts", "runtime.evidence.ts"],
   timeout: 120_000,
   workers: 1,
   retries: 0,
   reporter: "list",
-  snapshotPathTemplate: "{testDir}/capture.spec.ts-snapshots/{arg}-{projectName}-{platform}{ext}",
+  snapshotPathTemplate: "{testDir}/capture.evidence.ts-snapshots/{arg}-{projectName}-{platform}{ext}",
   use: { headless: true },
   projects: [
     ...(process.env.CAMPAIGN_SELECTION === "runner" ? [] : [{ name: "chromium", grep: fixture ? /@fixture-(plain|pure)\b/ : /@(plain|pure)\b/, use: { browserName: "chromium" as const } }]),

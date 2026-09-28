@@ -7,8 +7,8 @@ import { perceptualDelta } from "./png";
 // animation variants, four byte-identical panels) that all passed every other oracle.
 //
 // The harness is called with a figure selector +
-// axis driver per figure; the self-test in instrument.spec.ts proves it works against synthetic
-// fixtures, and figures.spec.ts drives it against the real page.
+// axis driver per figure; the self-test in instrument.evidence.ts proves it works against synthetic
+// fixtures, and figures.evidence.ts drives it against the real page.
 
 export type AxisDriver = (page: Page, step: number) => Promise<void>;
 

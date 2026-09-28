@@ -252,7 +252,7 @@ export type FixtureDeclaration = { id: string; requirement: "pure" | Cohort };
 export function fixtureCampaign(declarations: FixtureDeclaration[], fault: string) {
   const work = mkdtempSync(join(process.env.CAMPAIGN_OUTPUT ?? tmpdir(), "article-runner-fixture-"));
   symlinkSync(join(here, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["arms.ts", "campaign.ts", "instrument.spec.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
+  for (const file of ["arms.ts", "campaign.ts", "instrument.evidence.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   const cases: Case[] = [];
   for (const declaration of declarations) {
@@ -287,7 +287,7 @@ export function changedClass(paths: string[], beforePackage = {}, afterPackage =
       const a = beforePackage as Record<string, unknown>, b = afterPackage as Record<string, unknown>;
       for (const key of new Set([...Object.keys(a), ...Object.keys(b)])) if (JSON.stringify(a[key]) !== JSON.stringify(b[key])) result = Math.max(result, key === "scripts" ? 2 : 4);
     } else if (/^(src|public|vendor)\/|\.css$|\.html$|bun\.lock$|vite\.config|snapshots\//.test(path)) result = 4;
-    else if (/\.spec\.ts$|\/(arms|png|variance|reduced|shallot-pixels)\.ts$/.test(path)) result = Math.max(result, 3);
+    else if (/\.(?:e2e|evidence)\.ts$|\/(arms|png|variance|reduced|shallot-pixels)\.ts$/.test(path)) result = Math.max(result, 3);
     else if (/\/region\.ts$/.test(path)) result = Math.max(result, 1);
     else if (/^scripts\//.test(path)) result = Math.max(result, 2);
     else throw new Error(`unclassified changed path: ${path}`);
@@ -304,8 +304,8 @@ export async function campaign(selection: string, mutations: Mutation[], updateS
   record("owner-start", { selection, repo, work, source: spawnSync('git', ['rev-parse', 'HEAD', 'HEAD^{tree}'], { cwd: repo, encoding: 'utf8' }).stdout.trim().split('\n') });
   // Each run owns a new directory. No inherited capture or staging output is overwritten.
   symlinkSync(join(repo, "node_modules"), join(work, "node_modules"), "dir");
-  for (const file of ["runtime.ts", "runtime.spec.ts", "arms.ts", "campaign.ts", "instrument.spec.ts", "figures.spec.ts", "capture.spec.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
-  cpSync(join(here, "capture.spec.ts-snapshots"), join(work, "capture.spec.ts-snapshots"), { recursive: true });
+  for (const file of ["runtime.ts", "runtime.evidence.ts", "arms.ts", "campaign.ts", "instrument.evidence.ts", "figures.evidence.ts", "capture.evidence.ts", "playwright.config.ts", "real-gpu-launch.ts", "png.ts", "reduced.ts", "variance.ts", "region.ts", "display.ts"]) cpSync(join(here, file), join(work, file));
+  cpSync(join(here, "capture.evidence.ts-snapshots"), join(work, "capture.evidence.ts-snapshots"), { recursive: true });
   writeFileSync(join(work, "package.json"), JSON.stringify({ type: "module", private: true }));
   cpSync(join(repo, "src/lib/figures.ts"), join(work, "manifest.ts"));
   cpSync(join(repo, "src/lib/vocabulary.ts"), join(work, "vocabulary.ts"));

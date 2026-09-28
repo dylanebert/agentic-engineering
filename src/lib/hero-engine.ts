@@ -19,7 +19,7 @@ import {
   Transform,
   TransformsPlugin,
 } from "@dylanebert/shallot";
-import { captureFrame, type Capture } from "@dylanebert/shallot/harness/capture";
+import { captureFrame, type Capture } from "@dylanebert/shallot/rendering";
 import { attachCanvas } from "@dylanebert/shallot/rendering";
 
 export type HeroTreatment = "human" | "agentic" | "vibe";

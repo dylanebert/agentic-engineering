@@ -103,7 +103,7 @@ function readBinding(): Binding {
   // A figure part's role is often bound through the concept it draws (`data-role={node.role}`
   // over a `concepts.spec`-derived entry), so the read resolves that indirection: the roles a
   // component carries are its literal `data-role` values plus the declared color of every
-  // concept it names. figures.spec.ts asserts the same property against the rendered tree,
+  // concept it names. figures.evidence.ts asserts the same property against the rendered tree,
   // where the binding is a fact rather than a source shape.
   const parts = (source: string): Set<string> => {
     const body = markup(source);

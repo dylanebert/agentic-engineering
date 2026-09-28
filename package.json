@@ -19,17 +19,14 @@
   },
   "private": true,
   "dependencies": {
-    "@dylanebert/shallot": "github:dylanebert/shallot#69f12a06438d8ce80aa1ab9e4b34de5b58820e15",
-    "typegpu": "~0.12.5",
-    "unplugin-typegpu": "~0.12.3"
+    "@dylanebert/shallot": "github:dylanebert/shallot#5ceae0633dae262bcd90506a9cd7c1b1ba79b770"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json && bun scripts/shallot-carrier.ts test --list",
-    "list": "bun scripts/shallot-carrier.ts test --list",
-    "test": "bun test ./scripts/figures-manifest.test.ts ./scripts/import-gate.test.ts ./scripts/shot-route.test.ts && bun scripts/shallot-carrier.ts test",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json",
+    "test": "bun test --timeout=250",
     "shot": "bun run scripts/shot.ts",
     "instrument": "bun run scripts/instrument.ts",
     "runtime": "bun run scripts/runtime.ts",

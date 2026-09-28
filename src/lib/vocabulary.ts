@@ -2,7 +2,7 @@
 // roles, and at most five color roles. Each color role names the concept it carries, and every
 // concept in the article draws its color from a declared role — no concept-local novelty. A
 // concept's label is the word the page's own prose uses for it, lowercased: a figure label is
-// checked as a substring of its section's prose (scripts/figures.spec.ts), so the label and the
+// checked as a substring of its section's prose (scripts/figures.evidence.ts), so the label and the
 // prose cannot drift apart without a gate seeing it.
 // Hex values are the composited page colors, checked against the page ground at 4.5:1 by
 // scripts/vocabulary.unit.ts.

@@ -6,28 +6,23 @@ candidate staging. There is no saved
 link, local directory, short ref, mutable tag, or artifact stage. Stable published exit is
 not admitted until a compatible Shallot release exists.
 
-## Entry and carrier
+## Entry and verification
 
-The installed `shallot` bin carries this repository's warranted Shallot population. The
-`list` script and the Shallot portion of `check` invoke `shallot test --list`. These
-gates never reach a host checkout or a private `node_modules/@dylanebert/shallot/src` or
-`scripts` path. Use:
+The application owns `index.html`, `vite.config.ts`, and its checks. Vite runs and builds the
+site; Bun runs the cheap test population and project checks. Use:
 
 ```sh
-"$BUN" run list
 "$BUN" run test
 "$BUN" run check
+"$BUN" run build
 ```
 
-The carrier's fixed public-capture row is separate from the application's Svelte,
-TypeScript, build, Playwright, and product gates. `"$BUN" run test -- <args>` forwards its
-arguments to the carrier; while no integration row exists, `--integration --all` is
-refused there with `selector matched no integration rows`, the expected answer. The independent
-gates include `bun run build`, `bun run hero`, `bun run runtime`,
-`bun run instrument`, and `bun run shot`; general Playwright evidence is diagnostic and is
-not a Shallot frame claim.
-
-Instrument and display/live-engine gates are explicit evidence producers, not edit-loop defaults. Use `bun run instrument -- --runtime-witnesses --project <project> --grep <exact-title>` for one runtime witness and `bun run shot` for the independent shot gate; run the full `bun run instrument` population only when an active spec names it. They remain separate from `bun run test`.
+`test` runs the cheap `*.test.ts` suite. `check` runs Svelte and TypeScript checks. The
+Playwright-driven `hero`, `runtime`, `instrument`, and `shot` commands are separate evidence
+producers, not part of the default test tier. Use `bun run instrument -- --runtime-witnesses
+--project <project> --grep <exact-title>` for one runtime witness and `bun run shot` for the
+shot gate; run the full `bun run instrument` population only when an active spec names it.
+General Playwright evidence is diagnostic and is not a Shallot frame claim.
 
 Live Shallot claims use only public package exports and the public
 `captureFrame` contract: `final-canvas 1280x720@1 rgba8-tight`. Capture drivers fix that

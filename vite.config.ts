@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import { gzipSync } from "node:zlib";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import typegpu from "unplugin-typegpu/vite";
+import { shallot } from "@dylanebert/shallot/vite";
 import { defineConfig, type Plugin } from "vite";
 
 export const HERO_GZIP_BUDGET = 200_000;
@@ -73,7 +73,7 @@ const siteRumVersion = (): Plugin => {
 
 export default defineConfig({
   base: "/agentic-engineering/",
-  plugins: [typegpu(), svelte(), heroBudget(), siteRumVersion()],
+  plugins: [shallot(), svelte(), heroBudget(), siteRumVersion()],
   // `hidden` emits a `.map` beside every chunk but no `//# sourceMappingURL` comment: the maps go
   // to Datadog from CI and are deleted before the Pages artifact is built, so a visitor never sees
   // them and a scraper never finds a link to them.

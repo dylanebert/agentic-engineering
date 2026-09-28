@@ -5,7 +5,7 @@ import { beats, figures, overture, sectionOrder } from "../src/lib/figures";
 import { grammar } from "../src/lib/vocabulary";
 
 // Structural half of the figure-manifest arm (spec validation 2). The rendered half lives in
-// scripts/oracle-text.spec.ts, which needs a browser to read the built page; these five
+// the text campaign, which reads the rendered page; these five
 // properties are decidable from the source and the manuscript alone:
 //
 //   1. the page declares its sections in the manuscript's beat order,

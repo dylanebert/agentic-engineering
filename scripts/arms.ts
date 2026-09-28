@@ -16,7 +16,7 @@ function collector() {
   return { arms, test };
 }
 
-/** Retained figures.spec.ts assertions, shared by normal cases and named-red witnesses. */
+/** Retained figures.evidence.ts assertions, shared by normal cases and named-red witnesses. */
 export function figureArms(input: ArmInput): Arm[] {
   const { dist, url, figures, grammar } = input;
   const { arms, test } = collector();
@@ -752,7 +752,7 @@ test("figures: every color role is bound to both a prose span and a figure part"
   return arms;
 }
 
-/** Retained capture.spec.ts assertions, shared by normal cases and named-red witnesses. */
+/** Retained capture.evidence.ts assertions, shared by normal cases and named-red witnesses. */
 export function captureArms(input: ArmInput): Arm[] {
   const { root, url } = input;
   const { arms, test } = collector();
@@ -837,7 +837,7 @@ for (const view of views) {
   return arms;
 }
 
-/** Retained oracle-text.spec.ts assertions, shared by normal cases and named-red witnesses. */
+/** Rendered-text oracle assertions shared by normal cases and named-red witnesses. */
 export function textArms(input: ArmInput): Arm[] {
   const { root, url } = input;
   const { arms, test } = collector();
@@ -980,7 +980,7 @@ test("figure manifest: section order is the beat order, each claim sits in its d
   return arms;
 }
 
-/** Retained tripwires.spec.ts assertions, shared by normal cases and named-red witnesses. */
+/** Rendered-prose tripwires shared by normal cases and named-red witnesses. */
 export function proseArms(input: ArmInput): Arm[] {
   const { url } = input;
   const { arms, test } = collector();
@@ -1065,7 +1065,7 @@ test("tripwires: second-person density at or under 16.5 per 1,000 words", async 
   return arms;
 }
 
-/** Retained instrument.spec.ts assertions, shared by normal cases and named-red witnesses. */
+/** Retained instrument.evidence.ts assertions, shared by normal cases and named-red witnesses. */
 export let selfFixtures: Record<string, string> = {};
 export function selfArms(input: ArmInput): Arm[] {
   const { url } = input;

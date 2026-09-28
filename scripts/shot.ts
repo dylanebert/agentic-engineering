@@ -21,5 +21,5 @@ if (work) {
     if (!captures.has(name)) throw new Error(`capture output missing: ${name}`);
     cpSync(captures.get(name)!, join(shots, name));
   }
-  if (update) cpSync(join(work, "capture.spec.ts-snapshots"), join(import.meta.dir, "capture.spec.ts-snapshots"), { recursive: true });
+  if (update) cpSync(join(work, "capture.evidence.ts-snapshots"), join(import.meta.dir, "capture.evidence.ts-snapshots"), { recursive: true });
 }

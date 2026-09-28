@@ -1,12 +1,16 @@
-import { check } from "@dylanebert/shallot/harness/check";
+import { expect, test } from "bun:test";
+import { CAPTURE_CONTRACT } from "@dylanebert/shallot/rendering";
 
-check(
-  "public Shallot frame contract stays fixed",
-  { claim: "public Shallot frame contract stays fixed, so a changed capture geometry cannot pass", subject: ["package.json", "bun.lock", "src/lib/hero-engine.ts", "scripts/hero-startup.ts", "scripts/shot.ts"] },
-  async () => {
-    const { CAPTURE_CONTRACT, captureIdentityLabel } = await import("@dylanebert/shallot/harness/capture");
-    if (captureIdentityLabel(CAPTURE_CONTRACT) !== "final-canvas 1280x720@1 rgba8-tight") {
-      throw new Error("public capture contract changed");
-    }
+test(
+  "public Shallot frame contract stays fixed, so changed capture geometry cannot pass",
+  () => {
+    expect(CAPTURE_CONTRACT).toEqual({
+      width: 1280,
+      height: 720,
+      deviceScale: 1,
+      surface: "final-canvas",
+      encoding: "rgba8-tight",
+    });
   },
+  250,
 );
