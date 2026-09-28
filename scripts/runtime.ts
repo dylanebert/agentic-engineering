@@ -337,7 +337,7 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
     for (const path of origin.fulfilled) fulfilled.add(origin.origin + path);
     const frames: Frame[] = [];
     async function frame(label: string) {
-      const before = await snapshot(page);
+      let before: Read = await snapshot(page);
       const file = join(info.outputDir, label + ".png");
       let image: DecodedPng | undefined;
       let capture = control ? "synthetic-control-diagnostic-screenshot" : "final-canvas 1280x720@1 rgba8-tight";
@@ -356,19 +356,45 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
           type Store = { latest: Record<string, Stored>; first: Record<string, Stored>; pairs: Record<string, Delta> };
           const w = globalThis as typeof globalThis & { __runtimeFrameStore?: Store };
           const store = w.__runtimeFrameStore ??= { latest: {}, first: {}, pairs: {} };
+          type Marker = { state: string | null; treatment: string | null; cells: string | null; drawn: string | null; phase: number };
           const heroNode = document.querySelector('[data-hero-id="spectrum-hero"]')!;
-          const marker = () => JSON.stringify({
+          const marker = (): Marker => ({
             state: heroNode.getAttribute("data-hero-state"),
             treatment: heroNode.getAttribute("data-hero-treatment"),
             cells: heroNode.getAttribute("data-hero-cells"),
             drawn: heroNode.getAttribute("data-hero-gpu"),
+            phase: Number(getComputedStyle(heroNode).getPropertyValue("--phase")),
           });
-          const beforeMarker = marker();
+          const markerKey = (value: Marker) => JSON.stringify({ state: value.state, treatment: value.treatment, cells: value.cells, drawn: value.drawn });
+          const treatmentAt = (phase: number) => {
+            const segment = phase * 4;
+            const landed = Math.floor(segment) + (segment % 1 >= 0.3 ? 1 : 0);
+            return (["agentic", "vibe", "agentic", "human", "agentic"] as const)[landed];
+          };
+          const naturalTransition = (from: Marker, to: Marker) => {
+            const coherent = (value: Marker) => value.state === value.treatment && value.treatment === treatmentAt(value.phase)
+              && value.drawn === "drawn" && (value.treatment === "agentic" ? /^\d+x\d+$/.test(value.cells ?? "") : value.cells === null);
+            return from.state !== to.state && from.phase < to.phase && coherent(from) && coherent(to);
+          };
           const capture = (globalThis as typeof globalThis & { __heroCapture?: () => Promise<{ rgba: Uint8ClampedArray; width: number; height: number }> }).__heroCapture;
           if (typeof capture !== "function") throw new Error("public Shallot capture is required for article evidence");
-          const result = await capture();
-          const afterMarker = marker();
-          if (beforeMarker !== afterMarker) throw new Error("runtime marker changed across public capture");
+          const transitions: { before: Marker; after: Marker; elapsed: number }[] = [];
+          let beforeMarker = marker();
+          let captureStarted = performance.now();
+          let result = await capture();
+          let afterMarker = marker();
+          for (let retries = 0; markerKey(beforeMarker) !== markerKey(afterMarker); retries++) {
+            const elapsed = performance.now() - captureStarted;
+            if (!naturalTransition(beforeMarker, afterMarker)) {
+              throw new Error(`runtime marker changed unexpectedly across public capture (${elapsed.toFixed(1)} ms): ${JSON.stringify(beforeMarker)} -> ${JSON.stringify(afterMarker)}`);
+            }
+            transitions.push({ before: beforeMarker, after: afterMarker, elapsed });
+            if (retries >= 2) throw new Error(`public capture repeatedly crossed runtime transitions: ${JSON.stringify(transitions)}`);
+            beforeMarker = afterMarker;
+            captureStarted = performance.now();
+            result = await capture();
+            afterMarker = marker();
+          }
           const { width, height, rgba } = result;
           if (width !== 1280 || height !== 720 || rgba.length !== width * height * 4) throw new Error("public capture identity is not final-canvas 1280x720@1 rgba8-tight");
           const onPerimeter = (x: number, y: number) => x < 4 || y < 4 || x >= width - 4 || y >= height - 4;
@@ -404,8 +430,8 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
           if (bounds && bounds.height > height * 0.9) failures.push("height > 90%");
           if (perimeter.fraction >= 0.01) failures.push("perimeter outliers >= 1%");
           const currentRegion = { pass: failures.length === 0, failures, background, pixels, bounds, rows: rows.size, columns: columns.size, perimeter };
-          const markerState = JSON.parse(beforeMarker).state ?? "unknown";
-          const current = { width, height, data: new Uint8ClampedArray(rgba), region: currentRegion, marker: beforeMarker };
+          const markerState = beforeMarker.state ?? "unknown";
+          const current = { width, height, data: new Uint8ClampedArray(rgba), region: currentRegion, marker: JSON.stringify(beforeMarker) };
           const compare = (a: Stored, b: Stored): Delta | null => {
             if (!a.region.pass || !b.region.pass || a.width !== b.width || a.height !== b.height || !a.region.bounds || !b.region.bounds) return null;
             const x0 = Math.min(a.region.bounds.x, b.region.bounds.x), y0 = Math.min(a.region.bounds.y, b.region.bounds.y);
@@ -428,8 +454,10 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
             if (value) store.pairs[key] = value;
           }
           store.latest[markerState] = current;
-          return { region: currentRegion, delta: localDelta, marker: beforeMarker, capture: "final-canvas 1280x720@1 rgba8-tight" };
+          return { region: currentRegion, delta: localDelta, marker: beforeMarker, transitions, capture: "final-canvas 1280x720@1 rgba8-tight" };
         });
+        for (const transition of captured.transitions) raw("capture-skipped-runtime-transition", { label, ...transition });
+        before = { ...before, phase: captured.marker.phase, state: captured.marker.state, treatment: captured.marker.treatment, cells: captured.marker.cells, drawn: captured.marker.drawn };
         region = captured.region;
         delta = captured.delta;
         capture = captured.capture;
