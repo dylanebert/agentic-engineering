@@ -1,10 +1,9 @@
 # Agentic Engineering consumer contract
 
-The active
-root is an application: it supports the uncommitted local source override and immutable
-candidate staging. There is no saved
-link, local directory, short ref, mutable tag, or artifact stage. Stable published exit is
-not admitted until a compatible Shallot release exists.
+The active root is an application. It supports an uncommitted local source override
+and immutable candidate staging from a packed tarball. Its committed Shallot dependency
+is a registry pin; stable published exit is not admitted until a compatible Shallot
+release exists.
 
 ## Entry and verification
 
@@ -39,8 +38,9 @@ Record producer and consumer HEAD/dirt, then SHA-256 hashes of `package.json` an
 `bun link @dylanebert/shallot --no-save` here. The installed package realpath must equal
 the producer, while manifest and lock hashes remain unchanged. Exit local state with
 `bun install --force --frozen-lockfile --cache-dir <new-empty-cache>`, prove the realpath
-is no producer path and the manifest, lock, installed metadata, and full SHA agree, then
-rerun the focused gate. Candidate staging uses a newly empty explicit cache and
-`bun install --frozen-lockfile --cache-dir <cache>`; source identity is the complete
-40-hex SHA in both manifest and lock. Temporary caches, packs, captures, and generated
-projects belong under `/tmp`.
+is no producer path and the installed package version matches the registry pin, then
+rerun the focused gate. Candidate staging packs Shallot with `bun pm pack` and installs
+that tarball with `bun add --dev --no-save <tarball>`; record its SHA-256 and verify the
+installed package metadata identifies the packed version. The registry pin remains in
+`package.json` and `bun.lock`. Temporary caches, packs, captures, and generated projects
+belong under `/tmp`.
