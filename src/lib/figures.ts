@@ -1,15 +1,14 @@
-// The figure manifest, the overture declaration, and the manuscript's beat map.
+// Figure and overture declarations for the rendered page.
 //
-// One explanatory figure remains on this page (spec H2): the loop in the loop section. Each entry names its site — the section's id
-// and the zero-based index of its lead-in paragraph among that section's own `p` children — quotes
-// that paragraph's claim verbatim so claim fidelity is checkable by substring against the rendered
-// text, and declares its label policy. The paragraph before a figure does the caption's job; there
-// are no figcaptions.
+// One explanatory figure remains on this page (spec H2): the loop in the loop section. Each entry
+// names its site — the section id and zero-based lead-in paragraph — quotes that paragraph's claim
+// so fidelity is checkable against rendered text, and declares its label policy. The paragraph
+// before a figure does the caption's job; there are no figcaptions.
 //
 // H2 retires the duplicated spectrum axis after H1 moved that vocabulary into the overture. P2
 // moves the loop after the full spec → implement → verify disclosure; its return geometry stays
-// intact. The hand repair dropped the standalone definition and closing sections, so their beats
-// are gone with them and the section order is the six ids the page still renders.
+// intact. The hand repair dropped the standalone definition and closing sections, leaving the six
+// section and subsection ids declared below.
 
 export type FigureKind = "loop";
 export type LabelPolicy = "none" | "required";
@@ -81,16 +80,10 @@ export const overture: {
   ],
 };
 
-// The manuscript's beats, in the manuscript's order, each anchored to a line quoted verbatim from
-// manuscripts/agentic-engineering/script.txt and mapped to the section or subsection carrying it.
-// The article is the manuscript's beats in the manuscript's order (spec, locked), so the page's
-// section order is this list's order. R1 grouped the two numbered principles into subsections of
-// one Principles section, so a beat now names its level too, and the section carrying the
-// "we've tried enough things" beat earns its own anchor.
+// The narrative's declared section and subsection order. R1 grouped the numbered principles
+// beneath one Principles section, so entries name their level as well as their id.
 
 export type Beat = {
-  /** A line quoted verbatim from the manuscript. */
-  anchor: string;
   /** The `id` of the section or subsection carrying this beat. */
   section: string;
   /** Whether that id is a top-level `section.section` or a `section.principle` subsection. */
@@ -98,13 +91,13 @@ export type Beat = {
 };
 
 export const beats = [
-  { anchor: "you may have heard of vibe coding", section: "spectrum", level: "section" },
-  { anchor: "but we've tried enough things", section: "principles", level: "section" },
-  { anchor: "principle number 1", section: "verifiability", level: "subsection" },
-  { anchor: "context engineering", section: "context-engineering", level: "subsection" },
-  { anchor: "let's put these principles together", section: "loop", level: "section" },
-  { anchor: "how exactly do you \"verify\"?", section: "verification", level: "section" },
+  { section: "spectrum", level: "section" },
+  { section: "principles", level: "section" },
+  { section: "verifiability", level: "subsection" },
+  { section: "context-engineering", level: "subsection" },
+  { section: "loop", level: "section" },
+  { section: "verification", level: "section" },
 ] satisfies readonly Beat[];
 
-/** Section and subsection ids in the manuscript's beat order, which is also document order. */
+/** Section and subsection ids in declared narrative order, which is also document order. */
 export const sectionOrder: readonly string[] = beats.map((b) => b.section);

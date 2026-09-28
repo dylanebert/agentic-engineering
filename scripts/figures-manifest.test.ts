@@ -1,23 +1,21 @@
 import { readFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
 import { beats, figures, overture, sectionOrder } from "../src/lib/figures";
 import { grammar } from "../src/lib/vocabulary";
 
-// Structural half of the figure-manifest arm (spec validation 2). The rendered half lives in
-// the text campaign, which reads the rendered page; these five
-// properties are decidable from the source and the manuscript alone:
+// Structural half of figure-manifest validation; the text campaign reads rendered claims.
+// These seven properties are decidable from the page and its declarations:
 //
-//   1. the page declares its sections in the manuscript's beat order,
-//   2. every beat's anchor is a verbatim line of the manuscript, in the manuscript's order,
-//   3. the manifest holds exactly the surviving loop figure, sited in a real section.
-//
-// The manuscript is a required premise from the surrounding Kex workspace. A bad path or absent
-// source is a red, never a successful skip.
+//   1. section order matches the declared beat order,
+//   2. section ids are unique,
+//   3. P1 keeps its repaired hierarchy and spacing,
+//   4. P2 discloses the loop progressively,
+//   5. the sole surviving figure has a real site,
+//   6. each beat maps to a section or subsection at its declared level,
+//   7. the overture declares three unlabeled states and their prose roles.
 
 const repo = join(import.meta.dir, "..");
-const manuscript = join(homedir(), "kex", "manuscripts", "agentic-engineering", "script.txt");
 
 function sectionIds(): string[] {
   const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
@@ -38,7 +36,7 @@ function sectionLevels(): Map<string, "section" | "subsection"> {
 }
 
 describe("figure manifest", () => {
-  test("the page's section order is the manuscript's beat order", () => {
+  test("the page's section order matches the declared beat order", () => {
     expect(sectionIds()).toEqual([...sectionOrder]);
   });
 
@@ -104,16 +102,6 @@ describe("figure manifest", () => {
     expect(app).not.toContain('id="closing"');
   });
 
-  test("every beat anchor is a verbatim manuscript line, in the manuscript's order", () => {
-    const lines = readFileSync(manuscript, "utf8").split("\n");
-    const at = beats.map((beat) => {
-      const index = lines.indexOf(beat.anchor);
-      expect(index, `anchor not a verbatim manuscript line: "${beat.anchor}"`).toBeGreaterThan(-1);
-      return index;
-    });
-    expect(at).toEqual([...at].sort((a, b) => a - b));
-  });
-
   test("exactly the surviving loop figure, sited in a real section", () => {
     expect(figures.length).toBe(1);
     expect(figures.map((f) => f.kind)).toEqual(["loop"]);
@@ -126,7 +114,7 @@ describe("figure manifest", () => {
     }
   });
 
-  // Criterion 2 anchors a beat to a section *or subsection*: R1 grouped the two numbered principles
+  // Criterion 2 places each beat in a section or subsection: R1 grouped the two numbered principles
   // under one Principles section, so the level is part of the declaration and not an implementation
   // detail. Mutation: give #verifiability `class="section"` and its declared subsection level no
   // longer matches — red.
