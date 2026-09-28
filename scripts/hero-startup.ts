@@ -105,7 +105,9 @@ async function main() {
           expect(first.phase).toBe(0);
           expect(first.poster).toBe("visible");
           expect(first.canvas).toBe("0");
-          expect(perceptualDelta(image, await page.locator(`${hero} .canvas-wrap`).screenshot()).maxDelta).toBe(0);
+          const drift = perceptualDelta(image, await page.locator(`${hero} .canvas-wrap`).screenshot());
+          // The shared 3-level JND rejects visible drift without treating a 1–2 level raster delta as animation.
+          expect(drift.extent, `${item.name}: fallback poster changed perceptibly`).toBe(0);
           results.push({ ...item, stable: true });
         } else if (item.mode === "delayed") {
           await page.waitForFunction(() => (window as any).__startup.submissions > 0);
@@ -132,8 +134,23 @@ async function main() {
           expect(ready).toBeDefined(); expect(motion).toBeDefined();
           expect(samples.filter(s => s.gpu !== "drawn").every(s => s.phase === 0 && s.poster === "visible")).toBe(true);
           expect(motion.time - ready.time, "hold the matching pose through the 200ms dissolve").toBeGreaterThanOrEqual(190);
-          await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
-          await page.waitForTimeout(100);
+          await page.evaluate(() => {
+            (window as any).__heroPauseProbe = undefined;
+            scrollTo(0, document.body.scrollHeight);
+          });
+          await page.waitForFunction(selector => {
+            const hero = document.querySelector(selector)!;
+            const box = hero.getBoundingClientRect();
+            const offscreen = box.bottom <= 0 || box.top >= innerHeight || box.right <= 0 || box.left >= innerWidth;
+            const phase = Number(getComputedStyle(hero).getPropertyValue("--phase"));
+            const now = performance.now();
+            const probe = (window as any).__heroPauseProbe as { phase: number; since: number } | undefined;
+            if (!offscreen || !probe || probe.phase !== phase) {
+              (window as any).__heroPauseProbe = { phase, since: now };
+              return false;
+            }
+            return now - probe.since >= 120;
+          }, hero, { timeout: 3000, polling: "raf" });
           const paused = (await read(page)).phase;
           await page.waitForTimeout(200);
           expect((await read(page)).phase).toBe(paused);
