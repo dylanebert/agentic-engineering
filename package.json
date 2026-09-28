@@ -6,11 +6,13 @@
     "bun": ">=1.4.2"
   },
   "devDependencies": {
+    "@dylanebert/shallot": "^0.10.0-next.1",
     "@playwright/test": "^1.62.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tsconfig/svelte": "^5.0.8",
     "@types/bun": "^1.4.0",
     "@types/node": "^24.13.3",
+    "@webgpu/types": "^0.1.74",
     "@typescript/native": "npm:typescript@7",
     "svelte": "^5.56.10",
     "svelte-check": "^4.7.6",
@@ -18,14 +20,11 @@
     "vite": "8.0.16"
   },
   "private": true,
-  "dependencies": {
-    "@dylanebert/shallot": "github:dylanebert/shallot#49fbfcbe4b8d00673b2798c96ae25bbefa5f6060"
-  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json && tsc -p tsconfig.scripts.json",
+    "check": "svelte-check --tsconfig ./tsconfig.json",
     "test": "bun test --timeout=250",
     "shot": "bun run scripts/shot.ts",
     "instrument": "bun run scripts/instrument.ts",

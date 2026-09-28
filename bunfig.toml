@@ -1,2 +1,3 @@
 [test]
 pathIgnorePatterns = ["examples/**"]
+preload = ["./tests/preload.ts"]
