@@ -1,7 +1,8 @@
 import { cpSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { campaign } from "./campaign";
-const update = process.env.UPDATE_SNAPSHOTS === "1" || process.argv.includes("--update-snapshots");
+import { updateSnapshotsRequested } from "./shot-routing";
+const update = updateSnapshotsRequested(process.argv, process.env);
 const work = await campaign("capture", [], update);
 if (work) {
   const repo = join(import.meta.dir, "..");

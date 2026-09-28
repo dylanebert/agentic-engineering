@@ -440,9 +440,11 @@ export async function observeRuntime(browser: Browser, pid: number, item: Case, 
       frames.push(f);
       raw("frame", { before, after, region, file: f.file, capture, delta }); return f;
     }
-    if (!control && !unsupported) {
+    if ((!control && !unsupported) || (control && item.cohort === "gpu")) {
       await page.locator(hero + '[data-hero-gpu="drawn"]').waitFor({ timeout: 5000 });
-      await page.waitForFunction(() => typeof (globalThis as { __heroCapture?: unknown }).__heroCapture === "function", undefined, { timeout: 5000 });
+      if (!control) {
+        await page.waitForFunction(() => typeof (globalThis as { __heroCapture?: unknown }).__heroCapture === "function", undefined, { timeout: 5000 });
+      }
     }
     if (unsupported) {
       await unsupportedRead(page, check, raw, warnings);
