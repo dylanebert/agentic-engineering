@@ -18,12 +18,12 @@ site; Bun runs the cheap test population and project checks. Use:
 ```
 
 `test` runs the cheap `*.test.ts` suite. `bun check` checks TypeScript, and `typecheck` runs
-Svelte diagnostics. The
-Playwright-driven `hero`, `runtime`, `instrument`, and `shot` commands are separate evidence
-producers, not part of the default test tier. Use `bun run instrument -- --runtime-witnesses
---project <project> --grep <exact-title>` for one runtime witness and `bun run shot` for the
-shot gate; run the full `bun run instrument` population only when an active spec names it.
-General Playwright evidence is diagnostic and is not a Shallot frame claim.
+Svelte diagnostics. Playwright-driven `bun scripts/hero-startup.ts`, `bun scripts/runtime.ts`,
+`bun scripts/instrument.ts`, and `bun scripts/shot.ts` runs are separate evidence producers,
+not part of the default test tier. Use `bun scripts/instrument.ts --runtime-witnesses
+--project <project> --grep <exact-title>` for one runtime witness and `bun scripts/shot.ts`
+for the shot gate; run the full `bun scripts/instrument.ts` population only when an active
+spec names it. General Playwright evidence is diagnostic and is not a Shallot frame claim.
 
 Live Shallot claims use only public package exports and the public
 `captureFrame` contract: `final-canvas 1280x720@1 rgba8-tight`. Capture drivers fix that

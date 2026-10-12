@@ -24,11 +24,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "bun test --timeout=250",
-    "shot": "bun run scripts/shot.ts",
-    "instrument": "bun run scripts/instrument.ts",
-    "runtime": "bun run scripts/runtime.ts",
-    "hero": "bun scripts/hero-startup.ts"
+    "test": "bun test --timeout=250"
   },
   "type": "module"
 }
