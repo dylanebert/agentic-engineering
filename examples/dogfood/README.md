@@ -31,7 +31,8 @@ From the article repository:
 bun test ./examples/dogfood/evidence.test.ts
 bun examples/dogfood/mapping.ts
 bun examples/dogfood/mapping.ts --print
-bun run check
+bun check
+bun run typecheck
 bun run build
 ```
 

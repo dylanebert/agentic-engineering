@@ -12,11 +12,13 @@ site; Bun runs the cheap test population and project checks. Use:
 
 ```sh
 "$BUN" run test
-"$BUN" run check
+"$BUN" check
+"$BUN" run typecheck
 "$BUN" run build
 ```
 
-`test` runs the cheap `*.test.ts` suite. `check` runs Svelte and TypeScript checks. The
+`test` runs the cheap `*.test.ts` suite. `bun check` checks TypeScript, and `typecheck` runs
+Svelte diagnostics. The
 Playwright-driven `hero`, `runtime`, `instrument`, and `shot` commands are separate evidence
 producers, not part of the default test tier. Use `bun run instrument -- --runtime-witnesses
 --project <project> --grep <exact-title>` for one runtime witness and `bun run shot` for the

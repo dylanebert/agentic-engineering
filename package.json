@@ -1,16 +1,16 @@
 {
   "name": "agentic-engineering",
   "version": "0.0.0",
-  "packageManager": "bun@1.4.2",
+  "packageManager": "bun@1.4.3",
   "engines": {
-    "bun": ">=1.4.2"
+    "bun": ">=1.4.3"
   },
   "devDependencies": {
     "@dylanebert/shallot": "^0.10.0-next.1",
     "@playwright/test": "^1.62.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tsconfig/svelte": "^5.0.8",
-    "@types/bun": "^1.4.0",
+    "@types/bun": "^1.4.3",
     "@types/node": "^24.13.3",
     "@webgpu/types": "^0.1.74",
     "svelte": "^5.56.10",
@@ -23,7 +23,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json",
+    "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "test": "bun test --timeout=250",
     "shot": "bun run scripts/shot.ts",
     "instrument": "bun run scripts/instrument.ts",
