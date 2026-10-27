@@ -20,10 +20,7 @@
     let raf = 0;
     let last = 0;
     let reveal = 0;
-    let active = false;
     let disposed = false;
-    let initialization: Promise<void> | undefined;
-    let presentation: Promise<void> | undefined;
     let engine: Awaited<ReturnType<typeof import("./hero-engine")["mountHero"]>> | undefined;
     const render = () => {
       root.dataset.heroState = treatment;
@@ -32,7 +29,7 @@
       root.dataset.heroTreatment = treatment;
     };
     const tick = (time: number) => {
-      if (!active || disposed || !drawn) return;
+      if (disposed || !drawn) return;
       const dt = last ? time - last : 0;
       last = time;
       if (!live) {
@@ -58,6 +55,13 @@
         }, getComputedStyle(document.body).backgroundColor);
         if (disposed) { mounted.dispose(); return; }
         engine = mounted;
+        render();
+        await mounted.presented();
+        if (disposed) return;
+        drawn = true;
+        live = reduced;
+        root.dataset.heroGpu = "drawn";
+        if (!reduced) raf = requestAnimationFrame(tick);
       } catch (error) {
         engine?.dispose();
         engine = undefined;
@@ -65,41 +69,10 @@
         console.warn("Hero WebGPU initialization refused:", error);
       }
     };
-    const observer = new IntersectionObserver(([entry]) => {
-      active = entry.isIntersecting;
-      cancelAnimationFrame(raf);
-      last = 0;
-      if (!active) return;
-      initialization ??= initialize();
-      void initialization.then(async () => {
-        if (!active || disposed || !engine) return;
-        // The first draw is also intersection-gated if startup finished while off-screen.
-        presentation ??= (async () => {
-          render();
-          await engine!.presented();
-          if (disposed) return;
-          drawn = true;
-          live = reduced;
-          root.dataset.heroGpu = "drawn";
-        })();
-        await presentation;
-        // Re-entry can attach several continuations to one pending mount. Only one RAF survives.
-        cancelAnimationFrame(raf);
-        if (active && !disposed && drawn && !reduced) raf = requestAnimationFrame(tick);
-      }).catch(error => {
-        engine?.dispose();
-        engine = undefined;
-        if (!disposed) root.dataset.heroGpu = "unsupported";
-        console.warn("Hero first frame refused:", error);
-      });
-    }, { threshold: 0.2 });
-    const observeFrame = requestAnimationFrame(() => observer.observe(root));
+    void initialize();
     return () => {
       disposed = true;
-      active = false;
-      cancelAnimationFrame(observeFrame);
       cancelAnimationFrame(raf);
-      observer.disconnect();
       engine?.dispose();
     };
   });

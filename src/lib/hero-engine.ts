@@ -1,6 +1,6 @@
 import {
   AlphaMode, Camera, component, DirectionalLight, GlobalAmbientLight, lookAtRotation,
-  Materials, MeshInstance, MeshMaterial, type Plugin, createApp, shallotDark,
+  Materials, MeshInstance, MeshMaterial, type Plugin, runApp, shallotDark,
   StandardMaterial, StandardRenderer, Tonemapping, TonemappingMethod, Transform, type World,
 } from "@dylanebert/shallot";
 import { Ascii, AsciiPlugin, AsciiStyle } from "@dylanebert/shallot-ascii";
@@ -14,7 +14,7 @@ function rgb(hex: string): [number, number, number] {
   return [((value >> 16) & 255) / 255, ((value >> 8) & 255) / 255, (value & 255) / 255];
 }
 
-/** Overture supplies the pose and steps only while the hero needs a frame. */
+/** Overture supplies the pose; runApp owns the world clock and submission. */
 export function heroScene(colors: HeroColors, clear: number) {
   let treatment: HeroTreatment = "agentic";
   let phase = 0;
@@ -114,15 +114,7 @@ export async function mountHero(canvas: HTMLCanvasElement, colors: HeroColors, b
     dispose() { disposed = true; },
   };
   try {
-    // createApp has no background loop: Overture owns every step, including the first still frame.
-    const app = await createApp({ plugins: [scene.plugin, reveal], loading, pixelRatio: "auto" });
-    return {
-      render(next: HeroTreatment, phase: number) {
-        scene.render(next, phase);
-        app.world.step(0);
-      },
-      presented: () => presented,
-      dispose: () => app.dispose(),
-    };
+    const app = await runApp({ plugins: [scene.plugin, reveal], loading, pixelRatio: "auto" });
+    return { render: scene.render, presented: () => presented, dispose: () => app.dispose() };
   } catch (error) { fail(error); throw error; }
 }
