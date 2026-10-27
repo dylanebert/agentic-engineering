@@ -59,13 +59,16 @@ test("untonemapped human and vibe faces retain colour below display clipping", a
         // Interior samples avoid the clear and silhouette edges.
         let peak = 0;
         let tint = 255;
+        let luminance = 255;
         for (let y = 32; y < 80; y++) for (let x = 48; x < 80; x++) {
           const rgb = [...rgba.slice((y * 128 + x) * 4, (y * 128 + x) * 4 + 3)];
           peak = Math.max(peak, ...rgb);
+          luminance = Math.min(luminance, 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2]);
           tint = Math.min(tint, Math.max(...rgb) - Math.min(...rgb));
         }
         expect(peak, `${treatment} face at arc ${i}`).toBeLessThan(250);
         expect(tint, `${treatment} face tint`).toBeGreaterThan(treatment === "human" ? 2 : 15);
+        expect(luminance, `${treatment} face brightness at arc ${i}`).toBeGreaterThan(140);
       }
     }
   } finally { app.dispose(); }

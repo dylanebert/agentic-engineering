@@ -45,7 +45,7 @@ export function heroScene(colors: HeroColors, clear: number, reduced = false) {
       cycle.phase = reduced ? 1 : 0;
       const ambient = world.resource(GlobalAmbientLight);
       ambient.color = 0xffffff;
-      ambient.brightness = 120;
+      ambient.brightness = 1100;
       const sun = world.create();
       world.add(sun, Transform, { rotation: lookAtRotation(0, 0, 0, 0.4, -0.8, -0.45) });
       world.add(sun, DirectionalLight, { color: 0xffffff, illuminance: 1200 });
@@ -74,7 +74,7 @@ export function heroScene(colors: HeroColors, clear: number, reduced = false) {
       apply = world => {
         const { treatment, phase } = world.resource(HeroCycle);
         // ASCII derives its glyph density from the lit image; retain its original exposure.
-        ambient.brightness = treatment === "agentic" ? 380 : 120;
+        ambient.brightness = treatment === "agentic" ? 380 : 1100;
         world.storage(DirectionalLight).illuminance.set(sun, treatment === "agentic" ? 6000 : 1200);
         world.storage(Camera).clearColor.set(camera, treatment === "agentic" ? 0 : clear);
         if (treatment === "agentic") {
