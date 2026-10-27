@@ -24,13 +24,11 @@
     let disposed = false;
     let initialization: Promise<void> | undefined;
     let engine: Awaited<ReturnType<typeof import("./hero-engine")["mountHero"]>> | undefined;
-    const render = (dt: number) => {
+    const render = () => {
       root.dataset.heroState = treatment;
       if (!engine) return;
-      const grid = engine.render(treatment, phase, dt);
+      engine.render(treatment, phase);
       root.dataset.heroTreatment = treatment;
-      if (grid) root.dataset.heroCells = grid;
-      else delete root.dataset.heroCells;
     };
     const tick = (time: number) => {
       if (!active || disposed || !drawn) return;
@@ -41,7 +39,7 @@
         if (reveal >= 200) live = true;
       } else {
         clock = (clock + dt) % loop;
-        render(dt);
+        render();
       }
       raf = requestAnimationFrame(tick);
     };
@@ -59,8 +57,7 @@
         }, getComputedStyle(document.body).backgroundColor);
         if (disposed) { mounted.dispose(); return; }
         engine = mounted;
-        (globalThis as typeof globalThis & { __heroCapture?: typeof mounted.capture }).__heroCapture = mounted.capture;
-        render(0);
+        render();
         await mounted.presented();
         if (disposed) return;
         drawn = true;
@@ -93,15 +90,12 @@
       cancelAnimationFrame(observeFrame);
       cancelAnimationFrame(raf);
       observer.disconnect();
-      if (engine && (globalThis as typeof globalThis & { __heroCapture?: typeof engine.capture }).__heroCapture === engine.capture) {
-        delete (globalThis as typeof globalThis & { __heroCapture?: typeof engine.capture }).__heroCapture;
-      }
       engine?.dispose();
     };
   });
 </script>
 <div class="hero" bind:this={root} data-hero-id="spectrum-hero" data-hero-state="agentic" style:--phase={phase} style:--veil={veil} aria-hidden="true">
-  <div class="canvas-wrap"><img src={poster} alt="" width="560" height="560" data-hero-poster class:hidden={live} /><canvas bind:this={canvas} data-hero-canvas class:drawn></canvas></div>
+  <div class="canvas-wrap"><div class="scene-ink"><img src={poster} alt="" width="560" height="560" data-hero-poster class:hidden={live} /><canvas bind:this={canvas} data-hero-canvas class:drawn></canvas></div></div>
   <svg class="spectrum" viewBox="0 0 548 64">
     <path class="rail" d="M82 40H466" />
     <circle class="node" cx="82" cy="40" r="14" data-hero-state="human" data-role="prose" />
@@ -119,5 +113,5 @@
   </div>
 </div>
 <style>
-.hero{width:100%;margin:40px 0 58px}.spectrum{width:100%;display:block;overflow:visible;margin-top:10px}.spectrum .rail{fill:none;stroke:var(--border);stroke-width:2;vector-effect:non-scaling-stroke}.spectrum .node{fill:currentColor;stroke:currentColor;stroke-opacity:.22;stroke-width:0;transform-box:fill-box;transform-origin:center;animation:middle-hit 12s paused both;animation-delay:calc(-12s * var(--phase))}.spectrum [data-role="prose"]{color:var(--role-prose)}.spectrum [data-role="agentic"]{color:var(--role-agentic)}.spectrum [data-role="vibe"]{color:var(--role-vibe)}.spectrum .node[data-role="prose"]{animation-name:human-hit}.spectrum .node[data-role="vibe"]{animation-name:vibe-hit}.spectrum .dot{stroke:none;transform-box:fill-box;transform-origin:center;animation:travel 12s paused both,dot-size 12s paused both,dot-ink 12s steps(1,end) paused both;animation-delay:calc(-12s * var(--phase))}@keyframes dot-ink{0%,24.99%{fill:var(--role-vibe)}25%,49.99%{fill:var(--role-agentic)}50%,74.99%{fill:var(--role-prose)}75%,100%{fill:var(--role-agentic)}}@keyframes travel{0%{translate:274px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}10%,24.99%{translate:466px 0}25%{translate:466px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}35%,49.99%{translate:274px 0}50%{translate:274px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}60%,74.99%{translate:82px 0}75%{translate:82px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}85%,100%{translate:274px 0}}@keyframes dot-size{0%,10%,25%,35%,50%,60%,75%,85%,100%{scale:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}5%,30%,55%,80%{scale:1;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes vibe-hit{0%,35%,100%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}10%,25%{transform:scale(1.2);stroke-width:8;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes human-hit{0%,50%,85%,100%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}60%,75%{transform:scale(1.12);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes middle-hit{10%,25%,60%,75%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}0%,35%,50%,85%,100%{transform:scale(1.12);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@media(prefers-reduced-motion:reduce){.spectrum .dot{animation:none;translate:274px 0;scale:1;fill:var(--role-agentic)}.spectrum .node{animation:none}.spectrum .node[data-role="agentic"]{transform:scale(1.12)}}.canvas-wrap{position:relative;width:280px;height:280px;margin:auto}.hero:global([data-hero-state="agentic"]) .canvas-wrap{filter:url(#hero-ink)}canvas,img{position:absolute;inset:0;width:100%;height:100%;display:block}canvas{opacity:0;transition:opacity 200ms ease-out}canvas.drawn{opacity:calc(1 - .9 * var(--veil));filter:blur(calc(6px * var(--veil)))}img.hidden{visibility:hidden}@media(prefers-reduced-motion:reduce){canvas{transition:none}}.captions{position:relative;height:20px;margin-top:2px;font-family:var(--mono);font-size:13px;letter-spacing:.04em;line-height:20px}.caption{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;color:currentColor;opacity:0}.caption.live{opacity:calc(.8 - .8 * var(--veil))}.caption[data-role="prose"]{left:15%;color:var(--role-prose)}.caption[data-role="agentic"]{left:50%;color:var(--role-agentic)}.caption[data-role="vibe"]{left:85%;color:var(--role-vibe)}@media(max-width:560px){.captions{font-size:12px}}@media(max-width:560px){.hero{margin:28px 0 42px}}
+.hero{width:100%;margin:40px 0 58px}.spectrum{width:100%;display:block;overflow:visible;margin-top:10px}.spectrum .rail{fill:none;stroke:var(--border);stroke-width:2;vector-effect:non-scaling-stroke}.spectrum .node{fill:currentColor;stroke:currentColor;stroke-opacity:.22;stroke-width:0;transform-box:fill-box;transform-origin:center;animation:middle-hit 12s paused both;animation-delay:calc(-12s * var(--phase))}.spectrum [data-role="prose"]{color:var(--role-prose)}.spectrum [data-role="agentic"]{color:var(--role-agentic)}.spectrum [data-role="vibe"]{color:var(--role-vibe)}.spectrum .node[data-role="prose"]{animation-name:human-hit}.spectrum .node[data-role="vibe"]{animation-name:vibe-hit}.spectrum .dot{stroke:none;transform-box:fill-box;transform-origin:center;animation:travel 12s paused both,dot-size 12s paused both,dot-ink 12s steps(1,end) paused both;animation-delay:calc(-12s * var(--phase))}@keyframes dot-ink{0%,24.99%{fill:var(--role-vibe)}25%,49.99%{fill:var(--role-agentic)}50%,74.99%{fill:var(--role-prose)}75%,100%{fill:var(--role-agentic)}}@keyframes travel{0%{translate:274px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}10%,24.99%{translate:466px 0}25%{translate:466px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}35%,49.99%{translate:274px 0}50%{translate:274px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}60%,74.99%{translate:82px 0}75%{translate:82px 0;animation-timing-function:cubic-bezier(.37,0,.63,1)}85%,100%{translate:274px 0}}@keyframes dot-size{0%,10%,25%,35%,50%,60%,75%,85%,100%{scale:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}5%,30%,55%,80%{scale:1;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes vibe-hit{0%,35%,100%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}10%,25%{transform:scale(1.2);stroke-width:8;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes human-hit{0%,50%,85%,100%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}60%,75%{transform:scale(1.12);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@keyframes middle-hit{10%,25%,60%,75%{transform:scale(1);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}0%,35%,50%,85%,100%{transform:scale(1.12);stroke-width:0;animation-timing-function:cubic-bezier(.37,0,.63,1)}}@media(prefers-reduced-motion:reduce){.spectrum .dot{animation:none;translate:274px 0;scale:1;fill:var(--role-agentic)}.spectrum .node{animation:none}.spectrum .node[data-role="agentic"]{transform:scale(1.12)}}.canvas-wrap :global(.frame-error){position:absolute;inset:0;display:grid;place-items:center;background:#141210;color:#f0e6d6;padding:8px;font:13px/20px system-ui;text-align:center}.canvas-wrap{position:relative;width:280px;height:280px;margin:auto}.scene-ink{position:absolute;inset:0}.hero:global([data-hero-state="agentic"]) .scene-ink{filter:url(#hero-ink)}canvas,img{position:absolute;inset:0;width:100%;height:100%;display:block}canvas{opacity:0;transition:opacity 200ms ease-out}canvas.drawn{opacity:calc(1 - .9 * var(--veil));filter:blur(calc(6px * var(--veil)))}img.hidden{visibility:hidden}@media(prefers-reduced-motion:reduce){canvas{transition:none}}.captions{position:relative;height:20px;margin-top:2px;font-family:var(--mono);font-size:13px;letter-spacing:.04em;line-height:20px}.caption{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;color:currentColor;opacity:0}.caption.live{opacity:calc(.8 - .8 * var(--veil))}.caption[data-role="prose"]{left:15%;color:var(--role-prose)}.caption[data-role="agentic"]{left:50%;color:var(--role-agentic)}.caption[data-role="vibe"]{left:85%;color:var(--role-vibe)}@media(max-width:560px){.captions{font-size:12px}}@media(max-width:560px){.hero{margin:28px 0 42px}}
 </style>

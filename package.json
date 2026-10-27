@@ -6,7 +6,8 @@
     "bun": ">=1.4.3"
   },
   "devDependencies": {
-    "@dylanebert/shallot": "^0.10.0-next.1",
+    "@dylanebert/shallot": "0.10.1",
+    "@dylanebert/shallot-ascii": "0.1.0",
     "@playwright/test": "^1.62.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tsconfig/svelte": "^5.0.8",
@@ -15,8 +16,10 @@
     "@webgpu/types": "^0.1.74",
     "svelte": "^5.56.10",
     "svelte-check": "^4.7.6",
+    "typegpu": "~0.12.8",
     "typescript": "~6",
-    "vite": "8.0.16"
+    "vite": "8.0.16",
+    "webgpu": "^0.6.2"
   },
   "private": true,
   "scripts": {
