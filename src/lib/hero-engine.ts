@@ -1,6 +1,6 @@
 import {
   AlphaMode, Camera, component, DirectionalLight, GlobalAmbientLight, lookAtRotation,
-  Materials, MeshInstance, MeshMaterial, type Plugin, runApp, shallotDark,
+  type Loading, Materials, MeshInstance, MeshMaterial, type Plugin, runApp,
   StandardMaterial, StandardRenderer, Tonemapping, TonemappingMethod, Transform, type World,
 } from "@dylanebert/shallot";
 import { Ascii, AsciiPlugin, AsciiStyle } from "@dylanebert/shallot-ascii";
@@ -45,10 +45,10 @@ export function heroScene(colors: HeroColors, clear: number, reduced = false) {
       cycle.phase = reduced ? 1 : 0;
       const ambient = world.resource(GlobalAmbientLight);
       ambient.color = 0xffffff;
-      ambient.brightness = 380;
+      ambient.brightness = 120;
       const sun = world.create();
       world.add(sun, Transform, { rotation: lookAtRotation(0, 0, 0, 0.4, -0.8, -0.45) });
-      world.add(sun, DirectionalLight, { color: 0xffffff, illuminance: 6000 });
+      world.add(sun, DirectionalLight, { color: 0xffffff, illuminance: 1200 });
       camera = world.create();
       world.add(camera, Camera, { clearColor: 0 });
       world.add(camera, StandardRenderer);
@@ -110,21 +110,31 @@ export function heroScene(colors: HeroColors, clear: number, reduced = false) {
   return { plugin };
 }
 
+function heroLoading(frame: HTMLElement): Loading {
+  return {
+    // The page's poster already owns the loading appearance.
+    show() {},
+    update() {},
+    error(error) {
+      frame.closest<HTMLElement>("[data-hero-id]")!.dataset.heroGpu = "unsupported";
+      let line = frame.querySelector<HTMLParagraphElement>(".frame-error");
+      if (!line) {
+        line = document.createElement("p");
+        line.className = "frame-error";
+        line.setAttribute("role", "alert");
+        frame.append(line);
+      }
+      line.textContent = `Something went wrong: ${String(error)}`;
+    },
+  };
+}
+
 export async function mountHero(
   canvas: HTMLCanvasElement, colors: HeroColors, background: string,
   reduced: boolean, present: (state: Readonly<HeroCycleState>) => void,
 ) {
   const frame = canvas.closest<HTMLElement>(".canvas-wrap")!;
-  const loading = shallotDark({ container: frame });
-  const fail = (error: unknown) => {
-    console.error(error);
-    if (frame.querySelector(":scope > [data-shallot-loading]")) return;
-    const line = document.createElement("p");
-    line.className = "frame-error";
-    line.setAttribute("role", "alert");
-    line.textContent = `Something went wrong: ${String(error)}`;
-    frame.append(line);
-  };
+  const loading = heroLoading(frame);
   const channels = background.match(/[\d.]+/g)!.slice(0, 3).map(Number);
   const scene = heroScene(colors, (channels[0] << 16) | (channels[1] << 8) | channels[2], reduced);
   let waiting = false;
@@ -138,7 +148,7 @@ export async function mountHero(
         const fence = world.frameFence ?? Promise.reject(new Error("the first frame had no WebGPU device"));
         void fence.then(() => {
           if (!disposed) world.resource(HeroCycle).presented = true;
-        }).catch(error => { loading.error?.(error); fail(error); });
+        }).catch(error => { loading.error?.(error); });
       });
     } }, {
       name: "Hero/Read", group: "draw",
@@ -149,5 +159,5 @@ export async function mountHero(
   try {
     const app = await runApp({ plugins: [scene.plugin, reveal], loading, pixelRatio: "auto" });
     return { dispose: () => app.dispose() };
-  } catch (error) { fail(error); throw error; }
+  } catch (error) { loading.error?.(error); throw error; }
 }

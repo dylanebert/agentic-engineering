@@ -43,6 +43,39 @@ test("the hero draws into a canvas whose backing size follows its CSS box ratio"
   }
 });
 
+test("while device admission waits the poster is unobscured by loading chrome", async ({ page }) => {
+  await page.addInitScript(() => {
+    GPUAdapter.prototype.requestDevice = () => {
+      document.documentElement.dataset.deviceHeld = "true";
+      return new Promise(() => {});
+    };
+  });
+  await page.goto("/agentic-engineering/");
+  const hero = page.locator('[data-hero-id="spectrum-hero"]');
+  const poster = hero.locator("[data-hero-poster]");
+  await expect(poster).toBeVisible();
+  // Wait for the engine to reach its held device request, not just the initial HTML.
+  await expect(page.locator("html")).toHaveAttribute("data-device-held", "true");
+  const box = (await poster.boundingBox())!;
+  expect(await page.evaluate(({ x, y }) => document.elementsFromPoint(x, y)
+    .filter(element => element.closest(".canvas-wrap"))
+    .map(element => element.tagName), { x: box.x + box.width / 2, y: box.y + box.height / 2 }))
+    .toEqual(["CANVAS", "IMG", "DIV", "DIV"]);
+});
+
+test("runApp device loss reaches the contained error and marks the hero unsupported", async ({ page, browser }) => {
+  await page.goto("/agentic-engineering/");
+  const hero = page.locator('[data-hero-id="spectrum-hero"]');
+  await expect(hero).toHaveAttribute("data-hero-gpu", "drawn");
+  const cdp = await browser.newBrowserCDPSession();
+  try {
+    await cdp.send("Browser.crashGpuProcess");
+    await expect(hero).toHaveAttribute("data-hero-gpu", "unsupported");
+    await expect(hero.locator(".canvas-wrap > .frame-error[role=alert]")).toContainText("GPU device lost");
+    await expect(hero.locator(".frame-error")).toHaveCount(1);
+  } finally { await cdp.detach().catch(() => {}); }
+});
+
 test.describe("world-driven page state", () => {
   test.use({ reducedMotion: "no-preference" });
   test("the draw-group reader updates the spectrum and captions", async ({ page }) => {
