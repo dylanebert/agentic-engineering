@@ -23,4 +23,8 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun check
       - run: bun run typecheck
+      - name: Install software Vulkan device
+        run: sudo apt-get update && sudo apt-get install -y mesa-vulkan-drivers
       - run: bun run test
+        env:
+          SHALLOT_ALLOW_SOFTWARE_GPU: "1"

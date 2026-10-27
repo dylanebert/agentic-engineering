@@ -17,10 +17,11 @@ bun run build
 `test` includes the hero's GPU scene test using `openGpuApp`; it requires WebGPU.
 `bun check` checks TypeScript; `typecheck` runs Svelte diagnostics.
 
-For page appearance, run Chromium against `vite preview` and inspect all three hero
-treatments at desktop and 390 px width. The camera follows the first canvas's client
-box; do not pin a separate rendering resolution. Browser screenshots are page
-appearance evidence, not a GPU scene test. Keep temporary browser drivers and
-screenshots under `/tmp`.
+The browser tier runs separately with `bunx playwright test` (after
+`bunx playwright install chromium`). It runs headless against `vite preview` and
+checks that the hero draws with its canvas backing size in its CSS box's ratio.
+The camera follows the first canvas's client box; do not pin a separate rendering
+resolution. Browser screenshots are page appearance evidence, not a GPU scene
+test. Keep temporary browser drivers and screenshots under `/tmp`.
 
 Frozen records under `examples/**/evidence` are historical post content; retain them.

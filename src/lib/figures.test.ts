@@ -1,21 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "bun:test";
-import { beats, figures, overture, sectionOrder } from "../src/lib/figures";
-import { grammar } from "../src/lib/vocabulary";
+import { beats, figures, overture, sectionOrder } from "./figures";
+import { grammar } from "./vocabulary";
 
-// Structural half of figure-manifest validation; the text campaign reads rendered claims.
-// These seven properties are decidable from the page and its declarations:
-//
-//   1. section order matches the declared beat order,
-//   2. section ids are unique,
-//   3. P1 keeps its repaired hierarchy and spacing,
-//   4. P2 discloses the loop progressively,
-//   5. the sole surviving figure has a real site,
-//   6. each beat maps to a section or subsection at its declared level,
-//   7. the overture declares three unlabeled states and their prose roles.
 
-const repo = join(import.meta.dir, "..");
+const repo = join(import.meta.dir, "../..");
 
 function sectionIds(): string[] {
   const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
@@ -45,11 +35,7 @@ describe("figure manifest", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  // P1's hierarchy and spacing are one structural change: the spectrum has exactly three direct
-  // paragraphs led by its role terms, no setup paragraph or point headings, and its paragraph gap
-  // remains less than 1 / 2.5 of the declared section gap. Mutations: restore a point h3, prepend
-  // the setup paragraph, move a term after prose, or raise the local margin to 21px — red.
-  test("P1 keeps the repaired spectrum, principles, and verification structure", () => {
+  test("the spectrum discloses three roles with subordinate paragraph spacing", () => {
     const app = appSource();
     const spectrum = app.match(/<section class="section" id="spectrum">([\s\S]*?)<\/section>/)?.[1];
     expect(spectrum).toBeDefined();
@@ -58,9 +44,6 @@ describe("figure manifest", () => {
       (match) => match[1],
     );
     expect(paragraphs).toHaveLength(3);
-    // The hand repair opens the third paragraph with "There's a third option.", so the role term
-    // no longer leads its paragraph; the ordered disclosure of the three roles is the surviving
-    // property. Mutation: swap two paragraphs and the order reds.
     expect(paragraphs.map((paragraph) => paragraph.match(/<span class="term" data-role="([^"]+)">/)?.[1]))
       .toEqual(["vibe", "prose", "agentic"]);
     expect(app).toContain('<h2>principles of agentic engineering</h2>');
@@ -76,13 +59,7 @@ describe("figure manifest", () => {
     expect(sectionGap).toBeGreaterThan(2.5 * paragraphGap);
   });
 
-  // P2 discloses the loop one concept at a time and reserves "stage" for the noun. The figure
-  // follows the second paragraph, whose claim names every rendered label plus repeat. The hand
-  // repair retired the standalone closing section, so the closing-heading leg is gone with the
-  // section it read; the surviving footer is read as rendered text by the capture goldens and the
-  // figure-7 prose arm. Mutations: move the figure back to paragraph 0, or restore "do the
-  // stage" — red.
-  test("P2 progressively discloses the loop", () => {
+  test("the loop discloses spec before implement and verify", () => {
     const app = appSource();
     const loop = app.match(/<section class="section" id="loop">([\s\S]*?)<StageLoop \/>/)?.[1];
     expect(loop).toBeDefined();
@@ -114,10 +91,6 @@ describe("figure manifest", () => {
     }
   });
 
-  // Criterion 2 places each beat in a section or subsection: R1 grouped the two numbered principles
-  // under one Principles section, so the level is part of the declaration and not an implementation
-  // detail. Mutation: give #verifiability `class="section"` and its declared subsection level no
-  // longer matches — red.
   test("each beat sits at the level the manifest declares", () => {
     const levels = sectionLevels();
     expect([...levels.keys()]).toEqual([...sectionOrder]);
@@ -127,11 +100,6 @@ describe("figure manifest", () => {
     }
   });
 
-  // The overture's declaration half (criteria 5 and 8). H1 mounts it and replaces the source
-  // substring read below with a rendered read; what is decidable now is the declaration: exactly
-  // three states left to right, each on a declared role and keyed to a term the prose spends, no
-  // labels, no claim, no beat, and a rest state on agentic.
-  // Mutation: add a fourth state, or set `labels: "required"`, and this arm reds.
   test("the overture declares three unlabeled states, each named later in the prose", () => {
     expect(overture.kind).toBe("hero");
     expect(overture.labels).toBe("none");
@@ -146,8 +114,6 @@ describe("figure manifest", () => {
     const app = readFileSync(join(repo, "src/App.svelte"), "utf8");
     for (const state of overture.states) {
       expect(roles, `overture role ${state.role}`).toContain(state.role);
-      // The prose capitalizes a term at the head of a sentence, so the term is matched the way
-      // the page spends it: case-insensitively.
       expect(app.toLowerCase(), `overture term "${state.term}" is not in the prose`).toContain(state.term);
     }
   });

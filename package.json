@@ -27,7 +27,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
-    "test": "bun test --timeout=250"
+    "test": "bun test"
   },
   "type": "module"
 }
