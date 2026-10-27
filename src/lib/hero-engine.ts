@@ -73,6 +73,9 @@ export function heroScene(colors: HeroColors, clear: number, reduced = false) {
       }), { alphaMode: AlphaMode.Blend }));
       apply = world => {
         const { treatment, phase } = world.resource(HeroCycle);
+        // ASCII derives its glyph density from the lit image; retain its original exposure.
+        ambient.brightness = treatment === "agentic" ? 380 : 120;
+        world.storage(DirectionalLight).illuminance.set(sun, treatment === "agentic" ? 6000 : 1200);
         world.storage(Camera).clearColor.set(camera, treatment === "agentic" ? 0 : clear);
         if (treatment === "agentic") {
           if (!world.has(camera, Ascii)) world.add(camera, Ascii, { style: AsciiStyle.Silhouette });
