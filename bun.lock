@@ -6,7 +6,7 @@
       "name": "agentic-engineering",
       "devDependencies": {
         "@dylanebert/shallot": "0.10.1",
-        "@dylanebert/shallot-ascii": "0.1.0",
+        "@dylanebert/shallot-ascii": "0.1.1",
         "@playwright/test": "^1.62.1",
         "@sveltejs/vite-plugin-svelte": "^7.3.0",
         "@tsconfig/svelte": "^5.0.8",
@@ -43,7 +43,7 @@
 
     "@dylanebert/shallot": ["@dylanebert/shallot@0.10.1", "", { "dependencies": { "@types/node": "^26.6.5", "@webgpu/types": "^0.1.74", "am-i-vibing": "0.5.0", "ci-info": "4.4.0", "unplugin-typegpu": "~0.12.6" }, "peerDependencies": { "playwright": "^1.64.1", "typegpu": "~0.12.8", "vite": "^8.0.0", "webgpu": "^0.6.2", "wrangler": "4.151.3" }, "optionalPeers": ["playwright", "webgpu", "wrangler"], "bin": { "shallot": "bin/shallot.ts" } }, "sha512-nibU1r/nNnwrBcvZNtt6RazEONT4UXLVz/JOws0dh02heZsSYAmPr4HARdX++sM02V59zwLBPkulHduD1lrZsg=="],
 
-    "@dylanebert/shallot-ascii": ["@dylanebert/shallot-ascii@0.1.0", "", { "peerDependencies": { "@dylanebert/shallot": "^0.10.0", "typegpu": "~0.12.8" } }, "sha512-kLGpW7j9UklMRcN7QiHyOZOxO4UWcnj+GlTRECjePxbmoxRuypYcSDDP2wGAkpfYpHf861K3wByk8rsaKq7rwg=="],
+    "@dylanebert/shallot-ascii": ["@dylanebert/shallot-ascii@0.1.1", "", { "peerDependencies": { "@dylanebert/shallot": "^0.10.0", "typegpu": "~0.12.8" } }, "sha512-qIFiQjy46JniX4+6eQPeoRaj41Gzx2CnOH2xE4Ysq8HiRbt+oJs2r47TjM8Medg/IuAP13WeZ2mFV/6sgf1nDA=="],
 
     "@emnapi/core": ["@emnapi/core@1.10.0", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.1", "tslib": "^2.4.0" } }, "sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw=="],
 

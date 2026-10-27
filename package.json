@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "@dylanebert/shallot": "0.10.1",
-    "@dylanebert/shallot-ascii": "0.1.0",
+    "@dylanebert/shallot-ascii": "0.1.1",
     "@playwright/test": "^1.62.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
     "@tsconfig/svelte": "^5.0.8",
