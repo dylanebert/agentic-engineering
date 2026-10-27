@@ -23,6 +23,7 @@
     let active = false;
     let disposed = false;
     let initialization: Promise<void> | undefined;
+    let presentation: Promise<void> | undefined;
     let engine: Awaited<ReturnType<typeof import("./hero-engine")["mountHero"]>> | undefined;
     const render = () => {
       root.dataset.heroState = treatment;
@@ -57,12 +58,6 @@
         }, getComputedStyle(document.body).backgroundColor);
         if (disposed) { mounted.dispose(); return; }
         engine = mounted;
-        render();
-        await mounted.presented();
-        if (disposed) return;
-        drawn = true;
-        live = reduced;
-        root.dataset.heroGpu = "drawn";
       } catch (error) {
         engine?.dispose();
         engine = undefined;
@@ -76,11 +71,26 @@
       last = 0;
       if (!active) return;
       initialization ??= initialize();
-      void initialization.then(() => {
+      void initialization.then(async () => {
+        if (!active || disposed || !engine) return;
+        // The first draw is also intersection-gated if startup finished while off-screen.
+        presentation ??= (async () => {
+          render();
+          await engine!.presented();
+          if (disposed) return;
+          drawn = true;
+          live = reduced;
+          root.dataset.heroGpu = "drawn";
+        })();
+        await presentation;
         // Re-entry can attach several continuations to one pending mount. Only one RAF survives.
         cancelAnimationFrame(raf);
-        if (!active || disposed) return;
-        if (drawn && !reduced) raf = requestAnimationFrame(tick);
+        if (active && !disposed && drawn && !reduced) raf = requestAnimationFrame(tick);
+      }).catch(error => {
+        engine?.dispose();
+        engine = undefined;
+        if (!disposed) root.dataset.heroGpu = "unsupported";
+        console.warn("Hero first frame refused:", error);
       });
     }, { threshold: 0.2 });
     const observeFrame = requestAnimationFrame(() => observer.observe(root));

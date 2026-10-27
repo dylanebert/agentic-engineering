@@ -2,10 +2,32 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { spawn } from 'node:child_process';
 import assert from 'node:assert/strict';
-import { launch, closeBrowser } from '../../scripts/campaign';
+import { chromium } from '@playwright/test';
 import { inventory } from './evidence';
 
-/** Observer only. Reuses the article's plain-browser launch/close lifecycle, not its GPU runner. */
+async function launch() {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const session = await browser.newBrowserCDPSession();
+    const processes = await session.send('SystemInfo.getProcessInfo');
+    await session.detach();
+    const pid = processes.processInfo.find(p => p.type === 'browser')?.id;
+    assert(pid, 'browser PID unavailable');
+    return { browser, pid };
+  } catch (error) {
+    await browser.close();
+    throw error;
+  }
+}
+
+async function closeBrowser(handle: Awaited<ReturnType<typeof launch>>) {
+  await handle.browser.close();
+  let alive = false;
+  try { process.kill(handle.pid, 0); alive = true; } catch {}
+  assert(!alive, 'browser must exit after close');
+}
+
+/** Observer only, with its own plain headless Chromium lifecycle. */
 export async function observe(root: string, serverScript: string, output: string, stage: number) {
   mkdirSync(output, { recursive: true });
   const before = inventory(root);
@@ -27,7 +49,7 @@ export async function observe(root: string, serverScript: string, output: string
       if (child.exitCode !== null || Date.now() > until) throw new Error('instrument: static server failed to bind');
       await new Promise(r => setTimeout(r, 50));
     }
-    handle = await launch({}, 'plain');
+    handle = await launch();
     record('browser', { version: handle.browser.version(), pid: handle.pid });
     context = await handle.browser.newContext();
     const page = await context.newPage();

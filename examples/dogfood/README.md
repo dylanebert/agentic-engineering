@@ -38,7 +38,7 @@ bun run build
 
 The tests require nonempty populations, match stock tool calls/results and final usage, bind snapshots/browser observations, and reject missing results, missing terminal events and changed snapshots. Checker-only CLI mutations remove a real repair mapping and change an outcome, producing the intended refusal. They do not rerun subjects or narrate fixtures as model failures.
 
-The browser observer reuses the article's bounded plain-Chromium lifecycle, not its GPU runner. After ordinary http-server installation, use a new output directory:
+The browser observer owns its plain headless Chromium lifecycle; it imports no article runner. After ordinary http-server installation, use a new output directory:
 
 ```sh
 bun examples/dogfood/browser.ts observe /absolute/snapshot /absolute/tools/node_modules/http-server/bin/http-server /absolute/new-observations 2
