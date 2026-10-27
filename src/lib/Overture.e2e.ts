@@ -42,3 +42,31 @@ test("the hero draws into a canvas whose backing size follows its CSS box ratio"
     expect(ink, "the presented canvas contains green hero ink, not just its clear").toBeGreaterThan(100);
   }
 });
+
+test.describe("world-driven page state", () => {
+  test.use({ reducedMotion: "no-preference" });
+  test("the draw-group reader updates the spectrum and captions", async ({ page }) => {
+    await page.goto("/agentic-engineering/");
+    const hero = page.locator('[data-hero-id="spectrum-hero"]');
+    await expect(hero).toHaveAttribute("data-hero-gpu", "drawn");
+    await expect(hero.locator("[data-hero-poster]")).toBeHidden();
+    await expect(hero).toHaveAttribute("data-hero-treatment", "vibe");
+    await expect(hero.locator('.caption[data-role="vibe"]')).toHaveClass(/live/);
+    const phase = await hero.evaluate(element =>
+      parseFloat((element as HTMLElement).style.getPropertyValue("--phase")));
+    expect(phase).toBeGreaterThanOrEqual(0.075);
+    expect(phase).toBeLessThan(0.325);
+  });
+
+  test("without WebGPU the poster and still spectrum remain", async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "gpu", { value: undefined });
+    });
+    await page.goto("/agentic-engineering/");
+    const hero = page.locator('[data-hero-id="spectrum-hero"]');
+    await expect(hero.locator("[data-hero-poster]")).toBeVisible();
+    await expect(hero.locator("canvas")).not.toHaveClass(/drawn/);
+    await expect(hero).toHaveCSS("--phase", "0");
+    await expect(hero.locator('.caption[data-role="agentic"]')).toHaveClass(/live/);
+  });
+});

@@ -1,46 +1,16 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import poster from "./hero-poster.png";
-  const loop = 12000;
+  import type { HeroTreatment } from "./hero-engine";
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let root: HTMLElement; let canvas: HTMLCanvasElement;
-  let clock = $state(0); let drawn = $state(false); let live = $state(false);
-  const phase = $derived(reduced ? 1 : clock / loop);
-  // The dot travels the first 40% of each 3 s segment; the cube switches 75% of the way along.
-  const switchAt = 0.3;
-  const treatment = $derived.by(() => {
-    if (reduced) return "agentic";
-    const segment = phase * 4;
-    const landed = Math.floor(segment) + (segment % 1 >= switchAt ? 1 : 0);
-    return (["agentic", "vibe", "agentic", "human", "agentic"] as const)[landed];
-  });
-  // Veil the canvas around the switch so the treatment change reads as a dissolve, not a cut.
-  const veil = $derived(reduced ? 0 : Math.max(0, 1 - Math.abs(((phase * 4) % 1) - switchAt) / 0.06));
+  let drawn = $state(false); let live = $state(false);
+  let phase = $state(reduced ? 1 : 0);
+  let treatment = $state<HeroTreatment>("agentic");
+  let veil = $state(0);
   onMount(() => {
-    let raf = 0;
-    let last = 0;
-    let reveal = 0;
     let disposed = false;
     let engine: Awaited<ReturnType<typeof import("./hero-engine")["mountHero"]>> | undefined;
-    const render = () => {
-      root.dataset.heroState = treatment;
-      if (!engine) return;
-      engine.render(treatment, phase);
-      root.dataset.heroTreatment = treatment;
-    };
-    const tick = (time: number) => {
-      if (disposed || !drawn) return;
-      const dt = last ? time - last : 0;
-      last = time;
-      if (!live) {
-        reveal += dt;
-        if (reveal >= 200) live = true;
-      } else {
-        clock = (clock + dt) % loop;
-        render();
-      }
-      raf = requestAnimationFrame(tick);
-    };
     const initialize = async () => {
       if (!("gpu" in navigator)) return;
       try {
@@ -52,16 +22,19 @@
           human: style.getPropertyValue("--role-prose").trim(),
           agentic: style.getPropertyValue("--role-agentic").trim(),
           vibe: style.getPropertyValue("--role-vibe").trim(),
-        }, getComputedStyle(document.body).backgroundColor);
+        }, getComputedStyle(document.body).backgroundColor, reduced, state => {
+          if (disposed) return;
+          phase = state.phase;
+          treatment = state.treatment;
+          veil = state.veil;
+          drawn = state.presented;
+          live = state.live;
+          root.dataset.heroState = treatment;
+          root.dataset.heroTreatment = treatment;
+          if (drawn) root.dataset.heroGpu = "drawn";
+        });
         if (disposed) { mounted.dispose(); return; }
         engine = mounted;
-        render();
-        await mounted.presented();
-        if (disposed) return;
-        drawn = true;
-        live = reduced;
-        root.dataset.heroGpu = "drawn";
-        if (!reduced) raf = requestAnimationFrame(tick);
       } catch (error) {
         engine?.dispose();
         engine = undefined;
@@ -72,7 +45,6 @@
     void initialize();
     return () => {
       disposed = true;
-      cancelAnimationFrame(raf);
       engine?.dispose();
     };
   });
