@@ -68,7 +68,7 @@ test("agentic glyph coverage matches the 55a79e6 lighting", async () => {
   }
 });
 
-test("untonemapped human and vibe faces retain colour below display clipping", async () => {
+test("untonemapped human and vibe faces retain color below display clipping", async () => {
   const { world } = solid;
   for (const treatment of ["human", "vibe"] as const) {
     // Sweep each treatment's visible arc, including its top face and both sides.
